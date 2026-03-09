@@ -576,12 +576,12 @@ export default async function LandingPage() {
                 tags, and connections to other entities.
               </p>
               <div className="lore-bento-entity-row">
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-character)', borderColor: 'rgba(200,164,78,0.3)' }}>Characters</span>
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-location)', borderColor: 'rgba(74,154,110,0.3)' }}>Locations</span>
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-faction)', borderColor: 'rgba(154,74,110,0.3)' }}>Factions</span>
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-artifact)', borderColor: 'rgba(74,110,154,0.3)' }}>Artifacts</span>
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-species)', borderColor: 'rgba(138,74,154,0.3)' }}>Species</span>
-                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-event)', borderColor: 'rgba(154,122,74,0.3)' }}>Events</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-character)', borderColor: 'rgba(255,107,44,0.3)' }}>Characters</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-location)', borderColor: 'rgba(54,179,126,0.3)' }}>Locations</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-faction)', borderColor: 'rgba(232,67,147,0.3)' }}>Factions</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-artifact)', borderColor: 'rgba(9,132,227,0.3)' }}>Artifacts</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-species)', borderColor: 'rgba(123,97,255,0.3)' }}>Species</span>
+                <span className="lore-bento-entity-pill" style={{ color: 'var(--color-event)', borderColor: 'rgba(243,156,18,0.3)' }}>Events</span>
               </div>
             </div>
 
@@ -668,21 +668,21 @@ export default async function LandingPage() {
           </div>
 
           <div className="htp-zones">
-            <div className="htp-zone" style={{ borderColor: 'rgba(200,164,78,0.2)', background: 'rgba(200,164,78,0.03)' }}>
+            <div className="htp-zone" style={{ borderColor: 'rgba(240,192,96,0.25)', background: 'rgba(240,192,96,0.04)' }}>
               <h4>Hub Zone</h4>
               <p>
                 Your home base. Merchant, campfire, well, townsfolk.
                 Complete objectives here to unlock other zones.
               </p>
             </div>
-            <div className="htp-zone" style={{ borderColor: 'rgba(74,154,110,0.2)', background: 'rgba(74,154,110,0.03)' }}>
+            <div className="htp-zone" style={{ borderColor: 'rgba(54,179,126,0.25)', background: 'rgba(54,179,126,0.04)' }}>
               <h4>Grassland</h4>
               <p>
                 Wilderness zone. Orc warriors, shrine, vendor camp,
                 8 points of interest. Full combat mission chain.
               </p>
             </div>
-            <div className="htp-zone" style={{ borderColor: 'rgba(74,110,154,0.2)', background: 'rgba(74,110,154,0.03)' }}>
+            <div className="htp-zone" style={{ borderColor: 'rgba(9,132,227,0.25)', background: 'rgba(9,132,227,0.04)' }}>
               <h4>Seaside Village</h4>
               <p>
                 Peaceful zone. 6 named NPCs, Witch Willow, quests,
