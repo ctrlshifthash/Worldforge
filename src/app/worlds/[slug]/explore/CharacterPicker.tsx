@@ -28,30 +28,38 @@ export default function CharacterPicker({
     else canvasRefs.current.delete(idx);
   }, []);
 
+  // Pre-render hue-shifted tilemap once (no per-frame filter)
+  const shiftedTilemapRef = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    const c = document.createElement('canvas');
+    c.width = npcTilemap.naturalWidth;
+    c.height = npcTilemap.naturalHeight;
+    const ctx = c.getContext('2d')!;
+    if (hueShift !== 0) ctx.filter = `hue-rotate(${hueShift}deg)`;
+    ctx.drawImage(npcTilemap, 0, 0);
+    shiftedTilemapRef.current = c;
+  }, [npcTilemap, hueShift]);
+
   // Single shared animation loop for all previews
   useEffect(() => {
     let animId: number;
     let lastTime = 0;
-    const FRAME_INTERVAL = 180; // ms per animation frame
+    const FRAME_INTERVAL = 180;
 
     const draw = (time: number) => {
       if (time - lastTime >= FRAME_INTERVAL) {
         lastTime = time;
         frameRef.current = (frameRef.current + 1) % GK_COLS;
+        const src = shiftedTilemapRef.current;
+        if (!src) { animId = requestAnimationFrame(draw); return; }
 
         for (const [charIndex, canvas] of canvasRefs.current) {
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
-
           ctx.clearRect(0, 0, 48, 48);
-          if (hueShift !== 0) {
-            ctx.filter = `hue-rotate(${hueShift}deg)`;
-          } else {
-            ctx.filter = 'none';
-          }
           const sx = frameRef.current * GK_FRAME;
-          const sy = (charIndex * 4 + 0) * GK_FRAME; // down = facing camera
-          ctx.drawImage(npcTilemap, sx, sy, GK_FRAME, GK_FRAME, 8, 4, 32, 40);
+          const sy = (charIndex * 4 + 0) * GK_FRAME;
+          ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, 8, 4, 32, 40);
         }
       }
 
