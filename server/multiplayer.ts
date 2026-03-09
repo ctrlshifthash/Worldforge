@@ -26,8 +26,6 @@ interface RoomPlayer {
 // worldSlug → Map<playerId, RoomPlayer>
 const rooms = new Map<string, Map<string, RoomPlayer>>();
 
-// Track next char index per room so players get different appearances
-const roomCharCounters = new Map<string, number>();
 
 // ─── HTTP server (health check for Railway/Render) ───
 
@@ -66,14 +64,17 @@ wss.on('connection', (ws) => {
 
           currentRoom = worldSlug;
           if (!rooms.has(currentRoom)) rooms.set(currentRoom, new Map());
-          if (!roomCharCounters.has(currentRoom)) roomCharCounters.set(currentRoom, 0);
+
 
           const room = rooms.get(currentRoom)!;
 
-          // Assign a character appearance (cycle through 17 human characters, skip ShibaInu=17 and Witch=18)
-          const counter = roomCharCounters.get(currentRoom)!;
-          const charIndex = counter % 17;
-          roomCharCounters.set(currentRoom, counter + 1);
+          // Assign a unique character appearance (17 human characters, skip ShibaInu=17 and Witch=18)
+          const usedIndices = new Set<number>();
+          for (const p of room.values()) usedIndices.add(p.state.charIndex);
+          let charIndex = 0;
+          for (let i = 0; i < 17; i++) {
+            if (!usedIndices.has(i)) { charIndex = i; break; }
+          }
 
           const state: PlayerState = {
             id: playerId,
@@ -179,7 +180,6 @@ wss.on('connection', (ws) => {
         broadcast(currentRoom, null, { type: 'player_leave', playerId });
         if (room.size === 0) {
           rooms.delete(currentRoom);
-          roomCharCounters.delete(currentRoom);
         }
       }
     }
