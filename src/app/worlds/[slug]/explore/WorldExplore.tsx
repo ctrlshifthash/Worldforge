@@ -297,8 +297,7 @@ const AMBIENT_SPEECH_MAX_COOLDOWN = 18;
 
 // Fantasy RPG NPC placement data (static chibi sprites)
 const FANTASY_NPC_DATA: Omit<FantasyNpc, never>[] = [
-  // Hub — 3 NPCs
-  { id: 'f_aldric',  name: 'Sir Aldric',     title: 'Gate Guard',     x: 48, y: 42, spriteKey: 'fPaladinGuard', zone: 'hub',       facing: 'right' },
+  // Hub — 2 NPCs
   { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right' },
   { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left'  },
   // Grassland — 1 NPC (+ 2 skeleton enemies handled separately)
@@ -4467,7 +4466,7 @@ export function WorldExplore({
       }
       for (const fnpc of fantasyNpcsRef.current) {
         if (fnpc.zone !== 'hub') continue;
-        const voice = fnpc.id === 'f_aldric' ? 'paladin' : fnpc.id === 'f_cedric' ? 'sage' : 'blacksmith';
+        const voice = fnpc.id === 'f_cedric' ? 'sage' : 'blacksmith';
         speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice });
       }
     } else if (zone === 'grassland') {
@@ -5299,17 +5298,6 @@ export function WorldExplore({
               spokeToNpc = true;
 
               switch (fnpc.id) {
-                case 'f_aldric': {
-                  const doneGL = glCompletionGold.current;
-                  if (doneGL) {
-                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "The orc threat is crushed. I stand guard now out of habit, but for the first time in years this road feels safe. You've earned the respect of every soldier here.", timer: 7 };
-                  } else if (orcsKilledRef.current >= 1) {
-                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: `I can hear the battle echoes from the north. ${7 - orcsKilledRef.current} orcs still hold the stronghold. Press forward \u2014 this land needs you.`, timer: 6 };
-                  } else {
-                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "Halt, traveler. The northern road leads through the pass into orc territory. Seven warriors and a shaman guard the stronghold. If you're heading that way, stock up on potions first.", timer: 7 };
-                  }
-                  break;
-                }
                 case 'f_cedric': {
                   const heal = 20;
                   if (healthRef.current < MAX_HEALTH * 0.8) {
