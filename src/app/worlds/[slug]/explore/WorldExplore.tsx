@@ -6991,12 +6991,12 @@ export function WorldExplore({
             const fh = isTall ? NPC_TALL_FRAME_H : NPC_SMALL_FRAME_H;
             const img = ga[npc.spriteKey];
             const cols = Math.floor(img.width / fw);
-            // Tall spritesheets: row0=right, row1=left, row2=down, row3=up
+            // Tall spritesheets: row0=left, row1=right, row2=down, row3=up
             // Small spritesheets: row0=down, row1=right, row2=up (no left — flip right)
             let facingRow: number;
             let flipX = false;
             if (isTall) {
-              facingRow = npc.facing === 'right' ? 0 : npc.facing === 'left' ? 1 : npc.facing === 'down' ? 2 : 3;
+              facingRow = npc.facing === 'left' ? 0 : npc.facing === 'right' ? 1 : npc.facing === 'down' ? 2 : 3;
             } else {
               if (npc.facing === 'down') { facingRow = 0; }
               else if (npc.facing === 'right') { facingRow = 1; }
@@ -7009,22 +7009,23 @@ export function WorldExplore({
             ctx.beginPath();
             ctx.ellipse(nx + 16, ny + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Sprite — disable smoothing for crisp pixel art
+            // Sprite — integer dest sizes for crisp pixel art
             const prevSmoothing = ctx.imageSmoothingEnabled;
             ctx.imageSmoothingEnabled = false;
-            const scale = isTall ? 1.2 : 1.0;
-            const destW = fw * scale;
-            const destH = fh * scale;
+            const destW = isTall ? 36 : fw;
+            const destH = isTall ? 44 : fh;
+            const dx = Math.round(nx + 16 - destW / 2);
+            const dy = Math.round(ny + TILE_SIZE - destH);
             if (flipX) {
               ctx.save();
-              ctx.translate(nx + 16, 0);
+              ctx.translate(Math.round(nx + 16), 0);
               ctx.scale(-1, 1);
               ctx.drawImage(img, frame * fw, facingRow * fh, fw, fh,
-                -destW / 2, ny + TILE_SIZE - destH, destW, destH);
+                -(destW >> 1), dy, destW, destH);
               ctx.restore();
             } else {
               ctx.drawImage(img, frame * fw, facingRow * fh, fw, fh,
-                nx + 16 - destW / 2, ny + TILE_SIZE - destH, destW, destH);
+                dx, dy, destW, destH);
             }
             ctx.imageSmoothingEnabled = prevSmoothing;
             // Name label — position above sprite
