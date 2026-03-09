@@ -218,6 +218,7 @@ interface AmbientNpc {
   name: string;
   x: number; y: number;
   tx: number; ty: number; // target position
+  homeX: number; homeY: number; // spawn anchor — wander targets relative to this
   charKey: string; // GK_CHAR_INDEX key (e.g. 'FemaleBaker')
   facing: 'down' | 'left' | 'right' | 'up';
   animFrame: number;
@@ -230,6 +231,7 @@ interface AmbientSheep {
   id: string;
   x: number; y: number;
   tx: number; ty: number;
+  homeX: number; homeY: number; // spawn anchor — wander targets relative to this
   variant: 'white' | 'brown';
   facing: 'down' | 'left' | 'right' | 'up';
   animFrame: number;
@@ -303,13 +305,13 @@ const AMBIENT_SPEECH_MAX_COOLDOWN = 18;
 const FANTASY_NPC_DATA: Omit<FantasyNpc, 'tx' | 'ty' | 'homeX' | 'homeY' | 'idleTimer'>[] = [
   // Hub — 3 NPCs
   { id: 'f_aldric',  name: 'Sir Aldric',     title: 'Gate Guard',     x: 48, y: 42, spriteKey: 'fPaladinGuard', zone: 'hub',       facing: 'right', wanders: true  },
-  { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right', wanders: false },
-  { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left',  wanders: false },
+  { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right', wanders: true  },
+  { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left',  wanders: true  },
   // Grassland — 1 NPC (+ 2 skeleton enemies handled separately)
   { id: 'f_sylara',  name: 'Sylara',         title: 'Elf Scout',      x: 25, y: 40, spriteKey: 'fElfScout',     zone: 'grassland', facing: 'right', wanders: true  },
   // Village — 3 NPCs
   { id: 'f_brenna',  name: 'Brenna',         title: 'Village Guard',  x: 20, y: 3,  spriteKey: 'fSwordswoman',  zone: 'village',   facing: 'left',  wanders: true  },
-  { id: 'f_ember',   name: 'Ember',          title: 'Apprentice',     x: 8,  y: 20, spriteKey: 'fFireWitch',    zone: 'village',   facing: 'right', wanders: false },
+  { id: 'f_ember',   name: 'Ember',          title: 'Apprentice',     x: 8,  y: 20, spriteKey: 'fFireWitch',    zone: 'village',   facing: 'right', wanders: true  },
   { id: 'f_sera',    name: 'Sera',           title: 'Herbalist',      x: 32, y: 18, spriteKey: 'fElfHerbalist', zone: 'village',   facing: 'left',  wanders: true  },
 ];
 
@@ -782,12 +784,12 @@ interface VillageNPC {
 
 function initVillageNPCs(): VillageNPC[] {
   return [
-    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'elder', x: 10, y: 8, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'marina', x: 20, y: 10, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 26, y: 9 }, { x: 28, y: 9 }, { x: 28, y: 12 }, { x: 26, y: 12 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 30, y: 9 }, { x: 33, y: 9 }, { x: 33, y: 12 }, { x: 30, y: 12 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'elder', x: 10, y: 8, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 10, y: 8 }, { x: 13, y: 8 }, { x: 13, y: 11 }, { x: 10, y: 11 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'marina', x: 20, y: 10, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 20, y: 10 }, { x: 23, y: 10 }, { x: 23, y: 13 }, { x: 20, y: 13 }], patrolIdx: 0, patrolTimer: 0 },
     { id: 'villager', x: 15, y: 11, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'grandma', x: 8, y: 6, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'grandma', x: 8, y: 6, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 8, y: 6 }, { x: 11, y: 6 }, { x: 11, y: 9 }, { x: 8, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
   ];
 }
 
@@ -6387,33 +6389,53 @@ export function WorldExplore({
             townsfolkRef.current.push({
               id: s.id, name: s.name,
               x: s.x, y: s.y, tx: s.x, ty: s.y,
+              homeX: s.x, homeY: s.y,
               charKey: s.charKey, facing: s.facing,
               idleTimer: 2 + Math.random() * 3, animFrame: 0, zone: 'hub',
             });
           }
         }
-        // Update each townsfolk — wander near their area
-        for (const folk of townsfolkRef.current) {
-          if (folk.idleTimer > 0) {
-            folk.idleTimer -= dt;
-            if (folk.idleTimer <= 0) {
-              folk.tx = folk.x + (Math.random() * 6 - 3);
-              folk.ty = folk.y + (Math.random() * 4 - 2);
-            }
-          } else {
-            const fdx = folk.tx - folk.x;
-            const fdy = folk.ty - folk.y;
-            const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
-            if (fdist < 0.2) {
-              folk.x = folk.tx; folk.y = folk.ty;
-              folk.idleTimer = 2 + Math.random() * 4;
+        // Update each townsfolk — wander near their home position with per-character personality
+        const hubMap = mapRef.current;
+        if (hubMap) {
+          for (const folk of townsfolkRef.current) {
+            // Per-character wander radius and speed — roamers go farther, shopkeeps stay close
+            const isRoamer = folk.id === 'hub_rook' || folk.id === 'hub_finn' || folk.id === 'hub_lina';
+            const wanderR = isRoamer ? 6 : 3;
+            const walkSpd = isRoamer ? 1.8 : 1.2;
+            const idleMin = isRoamer ? 1.5 : 3;
+            const idleMax = isRoamer ? 3.5 : 6;
+            if (folk.idleTimer > 0) {
+              folk.idleTimer -= dt;
+              if (folk.idleTimer <= 0) {
+                for (let tries = 0; tries < 5; tries++) {
+                  const cx = folk.homeX + (Math.random() * wanderR * 2 - wanderR);
+                  const cy = folk.homeY + (Math.random() * wanderR * 1.5 - wanderR * 0.75);
+                  const ti = Math.floor(cx), tj = Math.floor(cy);
+                  if (ti >= 1 && ti < W - 1 && tj >= 1 && tj < H - 1 && hubMap[tj] && WALKABLE.has(hubMap[tj][ti])) {
+                    folk.tx = cx; folk.ty = cy; break;
+                  }
+                  if (tries === 4) { folk.tx = folk.homeX; folk.ty = folk.homeY; }
+                }
+              }
             } else {
-              const spd = 1.5 * dt;
-              folk.x += (fdx / fdist) * spd;
-              folk.y += (fdy / fdist) * spd;
-              if (Math.abs(fdx) > Math.abs(fdy)) folk.facing = fdx > 0 ? 'right' : 'left';
-              else folk.facing = fdy > 0 ? 'down' : 'up';
-              folk.animFrame += dt * 6;
+              const fdx = folk.tx - folk.x;
+              const fdy = folk.ty - folk.y;
+              const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
+              if (fdist < 0.2) {
+                folk.x = folk.tx; folk.y = folk.ty;
+                folk.idleTimer = idleMin + Math.random() * (idleMax - idleMin);
+              } else {
+                const spd = walkSpd * dt;
+                const nx = folk.x + (fdx / fdist) * spd;
+                const ny = folk.y + (fdy / fdist) * spd;
+                const nxi = Math.floor(nx), nyi = Math.floor(ny);
+                if (nxi >= 0 && nxi < W && hubMap[Math.floor(folk.y)] && WALKABLE.has(hubMap[Math.floor(folk.y)][nxi])) folk.x = nx;
+                if (nyi >= 0 && nyi < H && hubMap[nyi] && WALKABLE.has(hubMap[nyi][Math.floor(folk.x)])) folk.y = ny;
+                if (Math.abs(fdx) > Math.abs(fdy)) folk.facing = fdx > 0 ? 'right' : 'left';
+                else folk.facing = fdy > 0 ? 'down' : 'up';
+                folk.animFrame += dt * 6;
+              }
             }
           }
         }
@@ -6438,39 +6460,57 @@ export function WorldExplore({
         sheepSpawned.current = true;
         // Hub sheep — spread across grassy areas
         ambientSheepRef.current = [
-          { id: 'sh1', x: 25, y: 50, tx: 25, ty: 50, variant: 'white', facing: 'down', animFrame: 0, idleTimer: 3, zone: 'hub' },
-          { id: 'sh2', x: 28, y: 53, tx: 28, ty: 53, variant: 'white', facing: 'right', animFrame: 0, idleTimer: 5, zone: 'hub' },
-          { id: 'sh3', x: 75, y: 35, tx: 75, ty: 35, variant: 'white', facing: 'left', animFrame: 0, idleTimer: 4, zone: 'hub' },
-          { id: 'sh4', x: 90, y: 55, tx: 90, ty: 55, variant: 'white', facing: 'down', animFrame: 0, idleTimer: 7, zone: 'hub' },
+          { id: 'sh1', x: 25, y: 50, tx: 25, ty: 50, homeX: 25, homeY: 50, variant: 'white', facing: 'down', animFrame: 0, idleTimer: 3, zone: 'hub' },
+          { id: 'sh2', x: 28, y: 53, tx: 28, ty: 53, homeX: 28, homeY: 53, variant: 'white', facing: 'right', animFrame: 0, idleTimer: 5, zone: 'hub' },
+          { id: 'sh3', x: 75, y: 35, tx: 75, ty: 35, homeX: 75, homeY: 35, variant: 'white', facing: 'left', animFrame: 0, idleTimer: 4, zone: 'hub' },
+          { id: 'sh4', x: 90, y: 55, tx: 90, ty: 55, homeX: 90, homeY: 55, variant: 'white', facing: 'down', animFrame: 0, idleTimer: 7, zone: 'hub' },
           // Grassland sheep — in safe meadow areas
-          { id: 'sh5', x: 15, y: 20, tx: 15, ty: 20, variant: 'brown', facing: 'down', animFrame: 0, idleTimer: 4, zone: 'grassland' },
-          { id: 'sh6', x: 60, y: 15, tx: 60, ty: 15, variant: 'brown', facing: 'left', animFrame: 0, idleTimer: 2, zone: 'grassland' },
-          { id: 'sh7', x: 70, y: 50, tx: 70, ty: 50, variant: 'white', facing: 'right', animFrame: 0, idleTimer: 6, zone: 'grassland' },
+          { id: 'sh5', x: 15, y: 20, tx: 15, ty: 20, homeX: 15, homeY: 20, variant: 'brown', facing: 'down', animFrame: 0, idleTimer: 4, zone: 'grassland' },
+          { id: 'sh6', x: 60, y: 15, tx: 60, ty: 15, homeX: 60, homeY: 15, variant: 'brown', facing: 'left', animFrame: 0, idleTimer: 2, zone: 'grassland' },
+          { id: 'sh7', x: 70, y: 50, tx: 70, ty: 50, homeX: 70, homeY: 50, variant: 'white', facing: 'right', animFrame: 0, idleTimer: 6, zone: 'grassland' },
         ];
       }
-      // Update sheep in current zone
-      for (const sheep of ambientSheepRef.current) {
-        if (sheep.zone !== zoneRef.current) continue;
-        if (sheep.idleTimer > 0) {
-          sheep.idleTimer -= dt;
-          if (sheep.idleTimer <= 0) {
-            sheep.tx = sheep.x + (Math.random() * 6 - 3);
-            sheep.ty = sheep.y + (Math.random() * 4 - 2);
-          }
-        } else {
-          const sdx = sheep.tx - sheep.x;
-          const sdy = sheep.ty - sheep.y;
-          const sdist = Math.sqrt(sdx * sdx + sdy * sdy);
-          if (sdist < 0.15) {
-            sheep.x = sheep.tx; sheep.y = sheep.ty;
-            sheep.idleTimer = 3 + Math.random() * 5;
-          } else {
-            const spd = 0.8 * dt;
-            sheep.x += (sdx / sdist) * spd;
-            sheep.y += (sdy / sdist) * spd;
-            if (Math.abs(sdx) > Math.abs(sdy)) sheep.facing = sdx > 0 ? 'right' : 'left';
-            else sheep.facing = sdy > 0 ? 'down' : 'up';
-            sheep.animFrame += dt * 4;
+      // Update sheep in current zone — home-anchored with walkability
+      {
+        const sheepMap = zoneRef.current === 'hub' ? mapRef.current : glMapRef.current;
+        const sheepMapW = zoneRef.current === 'hub' ? W : GL_W;
+        const sheepMapH = zoneRef.current === 'hub' ? H : GL_H;
+        if (sheepMap) {
+          for (const sheep of ambientSheepRef.current) {
+            if (sheep.zone !== zoneRef.current) continue;
+            if (sheep.idleTimer > 0) {
+              sheep.idleTimer -= dt;
+              if (sheep.idleTimer <= 0) {
+                // Pick target relative to HOME, not current position
+                for (let tries = 0; tries < 5; tries++) {
+                  const cx = sheep.homeX + (Math.random() * 6 - 3);
+                  const cy = sheep.homeY + (Math.random() * 4 - 2);
+                  const ti = Math.floor(cx), tj = Math.floor(cy);
+                  if (ti >= 1 && ti < sheepMapW - 1 && tj >= 1 && tj < sheepMapH - 1 && sheepMap[tj] && WALKABLE.has(sheepMap[tj][ti])) {
+                    sheep.tx = cx; sheep.ty = cy; break;
+                  }
+                  if (tries === 4) { sheep.tx = sheep.homeX; sheep.ty = sheep.homeY; }
+                }
+              }
+            } else {
+              const sdx = sheep.tx - sheep.x;
+              const sdy = sheep.ty - sheep.y;
+              const sdist = Math.sqrt(sdx * sdx + sdy * sdy);
+              if (sdist < 0.15) {
+                sheep.x = sheep.tx; sheep.y = sheep.ty;
+                sheep.idleTimer = 3 + Math.random() * 5;
+              } else {
+                const spd = 0.8 * dt;
+                const nx = sheep.x + (sdx / sdist) * spd;
+                const ny = sheep.y + (sdy / sdist) * spd;
+                const nxi = Math.floor(nx), nyi = Math.floor(ny);
+                if (nxi >= 0 && nxi < sheepMapW && sheepMap[Math.floor(sheep.y)] && WALKABLE.has(sheepMap[Math.floor(sheep.y)][nxi])) sheep.x = nx;
+                if (nyi >= 0 && nyi < sheepMapH && sheepMap[nyi] && WALKABLE.has(sheepMap[nyi][Math.floor(sheep.x)])) sheep.y = ny;
+                if (Math.abs(sdx) > Math.abs(sdy)) sheep.facing = sdx > 0 ? 'right' : 'left';
+                else sheep.facing = sdy > 0 ? 'down' : 'up';
+                sheep.animFrame += dt * 4;
+              }
+            }
           }
         }
       }
@@ -6492,14 +6532,31 @@ export function WorldExplore({
         }));
       }
 
-      // ── Fantasy NPC wandering AI ──
+      // ── Fantasy NPC wandering AI — walkability-checked, per-character personality ──
       for (const fnpc of fantasyNpcsRef.current) {
         if (fnpc.zone !== zoneRef.current || !fnpc.wanders) continue;
+        const fMap = fnpc.zone === 'hub' ? mapRef.current : fnpc.zone === 'grassland' ? glMapRef.current : svMapRef.current;
+        if (!fMap) continue;
+        const fMapW = fnpc.zone === 'hub' ? W : fnpc.zone === 'grassland' ? GL_W : SV_W;
+        const fMapH = fnpc.zone === 'hub' ? H : fnpc.zone === 'grassland' ? GL_H : SV_H;
+        // Guards/scouts roam wider, crafters stay near workstation
+        const isPatroller = fnpc.id === 'f_aldric' || fnpc.id === 'f_sylara' || fnpc.id === 'f_brenna';
+        const fRadius = isPatroller ? 5 : 2.5;
+        const fSpd = isPatroller ? 1.5 : 1.0;
+        const fIdleMin = isPatroller ? 2 : 4;
+        const fIdleMax = isPatroller ? 4 : 7;
         if (fnpc.idleTimer > 0) {
           fnpc.idleTimer -= dt;
           if (fnpc.idleTimer <= 0) {
-            fnpc.tx = fnpc.homeX + (Math.random() * 6 - 3);
-            fnpc.ty = fnpc.homeY + (Math.random() * 4 - 2);
+            for (let tries = 0; tries < 5; tries++) {
+              const cx = fnpc.homeX + (Math.random() * fRadius * 2 - fRadius);
+              const cy = fnpc.homeY + (Math.random() * fRadius * 1.5 - fRadius * 0.75);
+              const ti = Math.floor(cx), tj = Math.floor(cy);
+              if (ti >= 1 && ti < fMapW - 1 && tj >= 1 && tj < fMapH - 1 && fMap[tj] && WALKABLE.has(fMap[tj][ti])) {
+                fnpc.tx = cx; fnpc.ty = cy; break;
+              }
+              if (tries === 4) { fnpc.tx = fnpc.homeX; fnpc.ty = fnpc.homeY; }
+            }
           }
         } else {
           const fdx = fnpc.tx - fnpc.x;
@@ -6507,11 +6564,14 @@ export function WorldExplore({
           const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
           if (fdist < 0.2) {
             fnpc.x = fnpc.tx; fnpc.y = fnpc.ty;
-            fnpc.idleTimer = 3 + Math.random() * 5;
+            fnpc.idleTimer = fIdleMin + Math.random() * (fIdleMax - fIdleMin);
           } else {
-            const spd = 1.2 * dt;
-            fnpc.x += (fdx / fdist) * spd;
-            fnpc.y += (fdy / fdist) * spd;
+            const spd = fSpd * dt;
+            const nx = fnpc.x + (fdx / fdist) * spd;
+            const ny = fnpc.y + (fdy / fdist) * spd;
+            const nxi = Math.floor(nx), nyi = Math.floor(ny);
+            if (nxi >= 0 && nxi < fMapW && fMap[Math.floor(fnpc.y)] && WALKABLE.has(fMap[Math.floor(fnpc.y)][nxi])) fnpc.x = nx;
+            if (nyi >= 0 && nyi < fMapH && fMap[nyi] && WALKABLE.has(fMap[nyi][Math.floor(fnpc.x)])) fnpc.y = ny;
             fnpc.facing = fdx > 0 ? 'right' : 'left';
           }
         }
@@ -6563,22 +6623,35 @@ export function WorldExplore({
       if (zoneRef.current === 'village' && !villageWandererSpawned.current) {
         villageWandererSpawned.current = true;
         villageWanderersRef.current = [
-          { id: 'sv_ivy',  name: 'Ivy',   x: 12, y: 15, tx: 12, ty: 15, charKey: 'FemaleStudent', facing: 'down',  animFrame: 0, idleTimer: 3, zone: 'village', label: 'Ivy' },
-          { id: 'sv_cole', name: 'Cole',  x: 25, y: 10, tx: 25, ty: 10, charKey: 'MaleYouth',     facing: 'left',  animFrame: 0, idleTimer: 5, zone: 'village', label: 'Cole' },
-          { id: 'sv_haru', name: 'Haru',  x: 18, y: 20, tx: 18, ty: 20, charKey: 'ShibaInu',      facing: 'right', animFrame: 0, idleTimer: 2, zone: 'village', label: 'Haru' },
+          { id: 'sv_ivy',  name: 'Ivy',   x: 12, y: 15, tx: 12, ty: 15, homeX: 12, homeY: 15, charKey: 'FemaleStudent', facing: 'down',  animFrame: 0, idleTimer: 3, zone: 'village', label: 'Ivy' },
+          { id: 'sv_cole', name: 'Cole',  x: 25, y: 10, tx: 25, ty: 10, homeX: 25, homeY: 10, charKey: 'MaleYouth',     facing: 'left',  animFrame: 0, idleTimer: 5, zone: 'village', label: 'Cole' },
+          { id: 'sv_haru', name: 'Haru',  x: 18, y: 20, tx: 18, ty: 20, homeX: 18, homeY: 20, charKey: 'ShibaInu',      facing: 'right', animFrame: 0, idleTimer: 2, zone: 'village', label: 'Haru' },
         ];
       }
-      // Update village wanderers
+      // Update village wanderers — home-anchored with walkability + per-character personality
       if (zoneRef.current === 'village') {
-        for (const vw of villageWanderersRef.current) {
+        const vwMap = svMapRef.current;
+        if (vwMap) for (const vw of villageWanderersRef.current) {
+          const isDog = vw.charKey === 'ShibaInu';
+          const vwRadius = isDog ? 5 : 3;
+          const vwSpd = isDog ? 2.0 : 1.2;
+          const vwIdleMin = isDog ? 1.0 : 2.5;
+          const vwIdleMax = isDog ? 2.5 : 5.0;
           if (vw.idleTimer > 0) {
             vw.idleTimer -= dt;
             if (vw.idleTimer <= 0) {
-              vw.tx = vw.x + (Math.random() * 6 - 3);
-              vw.ty = vw.y + (Math.random() * 4 - 2);
-              // Clamp to village bounds
-              vw.tx = Math.max(2, Math.min(37, vw.tx));
-              vw.ty = Math.max(2, Math.min(27, vw.ty));
+              for (let tries = 0; tries < 5; tries++) {
+                const cx = vw.homeX + (Math.random() * vwRadius * 2 - vwRadius);
+                const cy = vw.homeY + (Math.random() * vwRadius * 1.5 - vwRadius * 0.75);
+                const ti = Math.floor(Math.max(2, Math.min(37, cx)));
+                const tj = Math.floor(Math.max(2, Math.min(20, cy)));
+                if (vwMap[tj] && WALKABLE.has(vwMap[tj][ti])) {
+                  vw.tx = Math.max(2, Math.min(37, cx));
+                  vw.ty = Math.max(2, Math.min(20, cy));
+                  break;
+                }
+                if (tries === 4) { vw.tx = vw.homeX; vw.ty = vw.homeY; }
+              }
             }
           } else {
             const vdx = vw.tx - vw.x;
@@ -6586,14 +6659,17 @@ export function WorldExplore({
             const vdist = Math.sqrt(vdx * vdx + vdy * vdy);
             if (vdist < 0.15) {
               vw.x = vw.tx; vw.y = vw.ty;
-              vw.idleTimer = 2 + Math.random() * 4;
+              vw.idleTimer = vwIdleMin + Math.random() * (vwIdleMax - vwIdleMin);
             } else {
-              const spd = 1.2 * dt;
-              vw.x += (vdx / vdist) * spd;
-              vw.y += (vdy / vdist) * spd;
+              const spd = vwSpd * dt;
+              const nx = vw.x + (vdx / vdist) * spd;
+              const ny = vw.y + (vdy / vdist) * spd;
+              const nxi = Math.floor(nx), nyi = Math.floor(ny);
+              if (nxi >= 1 && nxi < SV_W - 1 && vwMap[Math.floor(vw.y)] && WALKABLE.has(vwMap[Math.floor(vw.y)][nxi])) vw.x = nx;
+              if (nyi >= 1 && nyi < SV_H - 1 && vwMap[nyi] && WALKABLE.has(vwMap[nyi][Math.floor(vw.x)])) vw.y = ny;
               if (Math.abs(vdx) > Math.abs(vdy)) vw.facing = vdx > 0 ? 'right' : 'left';
               else vw.facing = vdy > 0 ? 'down' : 'up';
-              vw.animFrame += dt * 6;
+              vw.animFrame += dt * (isDog ? 8 : 6);
             }
           }
         }
@@ -6898,25 +6974,33 @@ export function WorldExplore({
 
       // ── Village NPC animation + patrol ──
       if (inVillage) {
+        const vPatrolMap = svMapRef.current!;
         for (const npc of svNpcsRef.current) {
           npc.animFrame += dt * 4;
-          // Patrol movement
+          // Patrol movement — timer only advances once NPC reaches waypoint
           if (npc.patrolPath && npc.patrolPath.length > 1) {
-            npc.patrolTimer += dt;
-            if (npc.patrolTimer >= 3) { // wait 3s at each waypoint
-              npc.patrolTimer = 0;
-              npc.patrolIdx = (npc.patrolIdx + 1) % npc.patrolPath.length;
-            }
             const target = npc.patrolPath[npc.patrolIdx];
             const pdx = target.x - npc.x;
             const pdy = target.y - npc.y;
             const pd = Math.sqrt(pdx * pdx + pdy * pdy);
-            if (pd > 0.1) {
+            if (pd > 0.15) {
+              // Moving toward waypoint — check walkability
               const spd = 1.5 * dt;
-              npc.x += (pdx / pd) * spd;
-              npc.y += (pdy / pd) * spd;
+              const nx = npc.x + (pdx / pd) * spd;
+              const ny = npc.y + (pdy / pd) * spd;
+              const nxi = Math.floor(nx), nyi = Math.floor(ny);
+              if (nxi >= 0 && nxi < SV_W && vPatrolMap[Math.floor(npc.y)] && WALKABLE.has(vPatrolMap[Math.floor(npc.y)][nxi])) npc.x = nx;
+              if (nyi >= 0 && nyi < SV_H && vPatrolMap[nyi] && WALKABLE.has(vPatrolMap[nyi][Math.floor(npc.x)])) npc.y = ny;
               if (Math.abs(pdx) > Math.abs(pdy)) npc.facing = pdx > 0 ? 'right' : 'left';
               else npc.facing = pdy > 0 ? 'down' : 'up';
+            } else {
+              // Arrived at waypoint — wait, then advance
+              npc.x = target.x; npc.y = target.y;
+              npc.patrolTimer += dt;
+              if (npc.patrolTimer >= 3) {
+                npc.patrolTimer = 0;
+                npc.patrolIdx = (npc.patrolIdx + 1) % npc.patrolPath.length;
+              }
             }
           }
         }
@@ -6986,7 +7070,7 @@ export function WorldExplore({
                 const fy = a.y - (ady / aDist) * fs;
                 const fxi = Math.floor(fx), fyi = Math.floor(fy);
                 if (fx >= 1 && fx < SV_W - 1 && svMap && svMap[fyi] && WALKABLE.has(svMap[fyi][fxi])) a.x = fx;
-                if (fy >= 1 && fy < SV_H - 1 && svMap && svMap[Math.floor(a.y)]?.[Math.floor(fx)] !== undefined) a.y = fy;
+                if (fy >= 1 && fy < SV_H - 1 && svMap && svMap[fyi] && WALKABLE.has(svMap[fyi][Math.floor(a.x)])) a.y = fy;
                 a.facing = adx > 0 ? 'left' : 'right'; // face away from player
               }
               break;
