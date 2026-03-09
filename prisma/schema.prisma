@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  username          String             @unique
+  name              String
+  passwordHash      String
+  avatar            String?
+  createdAt         DateTime           @default(now())
+  worlds            World[]            @relation("WorldOwner")
+  members           WorldMember[]
+  activity          ActivityLog[]
+  characterSessions CharacterSession[]
+  placedObjects     PlacedObject[]
+}
+
+model World {
+  id                String             @id @default(cuid())
+  ownerId           String
+  slug              String             @unique
+  title             String
+  tagline           String
+  description       String
+  visibility        Visibility         @default(PRIVATE)
+  coverGradient     String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  owner             User               @relation("WorldOwner", fields: [ownerId], references: [id])
+  members           WorldMember[]
+  entities          Entity[]
+  relations         EntityRelation[]
+  events            Event[]
+  eras              Era[]
+  activityLogs      ActivityLog[]
+  mapRegions        MapRegion[]
+  characterSessions CharacterSession[]
+  placedObjects     PlacedObject[]
+}
+
+model WorldMember {
+  id        String   @id @default(cuid())
+  worldId   String
+  userId    String
+  role      Role
+  createdAt DateTime @default(now())
+  world     World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([worldId, userId])
+}
+
+model Entity {
+  id                String             @id @default(cuid())
+  worldId           String
+  slug              String
+  type              EntityType
+  title             String
+  summary           String
+  accent            String
+  contentJson       String
+  factsJson         String
+  tagsJson          String
+  graphX            Int                @default(0)
+  graphY            Int                @default(0)
+  mapX              Float              @default(50)
+  mapY              Float              @default(50)
+  introducedEraId   String?
+  retiredEraId      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  world             World              @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  introducedEra     Era?               @relation("EntityIntroduced", fields: [introducedEraId], references: [id], onDelete: SetNull)
+  retiredEra        Era?               @relation("EntityRetired", fields: [retiredEraId], references: [id], onDelete: SetNull)
+  relationsFrom     EntityRelation[]   @relation("RelationFrom")
+  relationsTo       EntityRelation[]   @relation("RelationTo")
+  events            Event[]            @relation("EventEntity")
+  eventLinks        EventEntityLink[]
+  territories       TerritoryRecord[]
+  characterSessions CharacterSession[]
+
+  @@unique([worldId, slug])
+}
+
+model EntityRelation {
+  id             String   @id @default(cuid())
+  worldId        String
+  fromEntityId   String
+  toEntityId     String
+  label          String
+  formedEraId    String?
+  dissolvedEraId String?
+  createdAt      DateTime @default(now())
+  world          World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  fromEntity     Entity   @relation("RelationFrom", fields: [fromEntityId], references: [id], onDelete: Cascade)
+  toEntity       Entity   @relation("RelationTo", fields: [toEntityId], references: [id], onDelete: Cascade)
+  formedEra      Era?     @relation("RelationFormed", fields: [formedEraId], references: [id], onDelete: SetNull)
+  dissolvedEra   Era?     @relation("RelationDissolved", fields: [dissolvedEraId], references: [id], onDelete: SetNull)
+}
+
+model Era {
+  id                  String            @id @default(cuid())
+  worldId             String
+  slug                String
+  title               String
+  description         String            @default("")
+  sortOrder           Int               @default(0)
+  startLabel          String            @default("")
+  endLabel            String            @default("")
+  color               String            @default("#c8a44e")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  world               World             @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  events              Event[]           @relation("EraEvents")
+  territories         TerritoryRecord[]
+  developments        Development[]
+  introducedEntities  Entity[]          @relation("EntityIntroduced")
+  retiredEntities     Entity[]          @relation("EntityRetired")
+  formedRelations     EntityRelation[]  @relation("RelationFormed")
+  dissolvedRelations  EntityRelation[]  @relation("RelationDissolved")
+
+  @@unique([worldId, slug])
+}
+
+model EventEntityLink {
+  id       String @id @default(cuid())
+  eventId  String
+  entityId String
+  role     String @default("involved")
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, entityId])
+}
+
+model Event {
+  id                String            @id @default(cuid())
+  worldId           String
+  title             String
+  dateLabel         String
+  era               String
+  eraId             String?
+  summary           String
+  impact            String
+  sortOrder         Int               @default(0)
+  linkedEntitySlugs String
+  source            String            @default("manual")
+  createdAt         DateTime          @default(now())
+  world             World             @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  linkedEntity      Entity?           @relation("EventEntity", fields: [linkedEntityId], references: [id], onDelete: SetNull)
+  linkedEntityId    String?
+  eraRef            Era?              @relation("EraEvents", fields: [eraId], references: [id], onDelete: SetNull)
+  entityLinks       EventEntityLink[]
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  worldId   String
+  userId    String
+  action    String
+  target    String
+  detail    String?
+  createdAt DateTime @default(now())
+  world     World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Phase A: Map Regions & Territory ───
+
+model MapRegion {
+  id          String            @id @default(cuid())
+  worldId     String
+  slug        String
+  title       String
+  description String            @default("")
+  pointsJson  String            @default("[]")
+  color       String            @default("#4a6e9a")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  world       World             @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  territories TerritoryRecord[]
+
+  @@unique([worldId, slug])
+}
+
+model TerritoryRecord {
+  id       String    @id @default(cuid())
+  regionId String
+  eraId    String
+  entityId String
+  region   MapRegion @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  era      Era       @relation(fields: [eraId], references: [id], onDelete: Cascade)
+  entity   Entity    @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@unique([regionId, eraId])
+}
+
+// ─── Phase D: World Building / Placed Objects ───
+
+model PlacedObject {
+  id        String   @id @default(cuid())
+  worldId   String
+  zone      String   @default("hub")
+  tileX     Int
+  tileY     Int
+  itemType  String
+  rotation  Int      @default(0)
+  placedBy        String
+  createdAt       DateTime  @default(now())
+  lastCollectedAt DateTime?
+  world           World     @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [placedBy], references: [id], onDelete: Cascade)
+
+  @@unique([worldId, zone, tileX, tileY])
+}
+
+// ─── Phase C: AI Away-Mode ───
+
+model CharacterSession {
+  id                String          @id @default(cuid())
+  worldId           String
+  entityId          String
+  userId            String
+  status            SessionStatus   @default(ACTIVE)
+  scope             SessionScope    @default(SAFE)
+  personalityPrompt String          @default("")
+  constraints       String          @default("")
+  contextSummary    String          @default("")
+  frequency         String          @default("manual")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  lastGeneratedAt   DateTime?
+  world             World           @relation(fields: [worldId], references: [id], onDelete: Cascade)
+  entity            Entity          @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  developments      Development[]
+}
+
+model Development {
+  id                  String            @id @default(cuid())
+  sessionId           String
+  type                DevelopmentType
+  title               String
+  content             String
+  dateLabel           String            @default("")
+  eraId               String?
+  status              DevelopmentStatus @default(PENDING)
+  proposedChangesJson String            @default("{}")
+  reviewNote          String?
+  createdAt           DateTime          @default(now())
+  reviewedAt          DateTime?
+  canonizedAt         DateTime?
+  session             CharacterSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  era                 Era?              @relation(fields: [eraId], references: [id], onDelete: SetNull)
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum EntityType {
+  CHARACTER
+  LOCATION
+  FACTION
+  EVENT
+  ARTIFACT
+  SPECIES
+}
+
+enum SessionScope {
+  SAFE
+  EXPANDED
+  ADVANCED
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum DevelopmentType {
+  JOURNAL
+  ENCOUNTER
+  TRAVEL
+  CONVERSATION
+  DISCOVERY
+  RUMOR
+  RELATIONSHIP_SHIFT
+  MINOR_EVENT
+}
+
+enum DevelopmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EDITED
+}

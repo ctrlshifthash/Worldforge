@@ -1,0 +1,40 @@
+# dependencies
+node_modules
+
+# next.js
+.next
+dist
+
+# environment
+.env
+.env.local
+.env.production.local
+
+# database
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.db-journal
+
+# os/editor
+.DS_Store
+Thumbs.db
+nul
+
+# claude code
+.claude/
+
+# internal planning docs
+NEXT-SLICE.md
+PLAN-LIVING-WORLD.md
+
+# unused asset pack files (mockups, long-name animations that break git)
+**/Mockups/
+**/Animated props/Cabin/
+**/*Copia*/
+
+# testing
+coverage
+
+# vercel
+.vercel
