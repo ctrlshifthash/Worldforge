@@ -7,7 +7,8 @@ interface CharacterPickerProps {
   npcTilemap: HTMLImageElement;
   currentCharIndex: number;
   currentHueShift: number;
-  onSelect: (charIndex: number, hueShift: number) => void;
+  currentName: string;
+  onSelect: (charIndex: number, hueShift: number, displayName: string) => void;
   onClose: () => void;
 }
 
@@ -15,11 +16,13 @@ export default function CharacterPicker({
   npcTilemap,
   currentCharIndex,
   currentHueShift,
+  currentName,
   onSelect,
   onClose,
 }: CharacterPickerProps) {
   const [selectedIndex, setSelectedIndex] = useState(currentCharIndex >= 0 ? currentCharIndex : 0);
   const [hueShift, setHueShift] = useState(currentHueShift);
+  const [displayName, setDisplayName] = useState(currentName || '');
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const frameRef = useRef(0);
 
@@ -110,6 +113,43 @@ export default function CharacterPicker({
           </h2>
           <div style={{ fontSize: 10, color: '#666', marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
             Press C anytime to change
+          </div>
+        </div>
+
+        {/* Name input */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{
+            fontSize: 10,
+            color: '#888',
+            marginBottom: 6,
+            fontFamily: '"Press Start 2P", monospace',
+          }}>
+            Name
+          </div>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value.slice(0, 20))}
+            placeholder="Enter your name..."
+            maxLength={20}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: 13,
+              fontFamily: 'Inter, sans-serif',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid #3a3a5c',
+              borderRadius: 6,
+              color: '#eee',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = '#ffd700')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = '#3a3a5c')}
+            onKeyDown={(e) => e.stopPropagation()}
+          />
+          <div style={{ fontSize: 9, color: '#444', marginTop: 4, textAlign: 'right', fontFamily: 'Inter, sans-serif' }}>
+            {displayName.length}/20
           </div>
         </div>
 
@@ -249,7 +289,7 @@ export default function CharacterPicker({
             </button>
           )}
           <button
-            onClick={() => onSelect(selectedIndex, hueShift)}
+            onClick={() => onSelect(selectedIndex, hueShift, displayName.trim() || 'Adventurer')}
             style={{
               padding: '8px 28px',
               fontSize: 10,

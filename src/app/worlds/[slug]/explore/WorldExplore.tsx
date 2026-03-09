@@ -358,6 +358,10 @@ const AMBIENT_SPEECH_LINES: Record<string, string[]> = {
     'Northern Pass stays watched.',
     'Bandits hate a ready guard.',
     'Stay sharp beyond the gate.',
+    'Seven orcs. Two of us. Bad odds.',
+    'The shaman is the dangerous one.',
+    'Shrine power could turn the tide.',
+    'No one passes without our say.',
   ],
   sheep: ['Baa.', '*soft bleat*', 'Maa.'],
 };
@@ -577,6 +581,14 @@ const GOLD_COINS: { id: string; zone: string; x: number; y: number; gold: number
   { id: 'sv_c2', zone: 'village', x: 20, y: 20, gold: 4, label: 'Left on a windowsill.' },
   { id: 'sv_c3', zone: 'village', x: 30, y: 8, gold: 5, label: 'A merchant\'s loose coins.' },
   { id: 'sv_c4', zone: 'village', x: 15, y: 25, gold: 3, label: 'Shining between cobblestones.' },
+  // Hidden coins — reward off-path exploration in empty areas
+  { id: 'hub_c9',  zone: 'hub', x: 22, y: 60, gold: 5, label: 'Hidden in the lakeside reeds.' },
+  { id: 'hub_c10', zone: 'hub', x: 100, y: 50, gold: 4, label: 'Wedged between dock planks.' },
+  { id: 'hub_c11', zone: 'hub', x: 57, y: 29, gold: 3, label: 'Left by a traveler at the waystation.' },
+  { id: 'gl_c6', zone: 'grassland', x: 19, y: 37, gold: 5, label: 'Shining at the pond\'s edge.' },
+  { id: 'gl_c7', zone: 'grassland', x: 61, y: 29, gold: 4, label: 'Tucked under an overlook boulder.' },
+  { id: 'sv_c5', zone: 'village', x: 35, y: 14, gold: 5, label: 'Hidden behind the eastern trees.' },
+  { id: 'sv_c6', zone: 'village', x: 3,  y: 24, gold: 4, label: 'Washed up on the shore.' },
 ];
 
 const FORAGE_SPOTS: { id: string; zone: string; x: number; y: number; resource: 'wood' | 'stone'; amount: number; label: string }[] = [
@@ -597,6 +609,10 @@ const FORAGE_SPOTS: { id: string; zone: string; x: number; y: number; resource: 
   { id: 'sv_shells', zone: 'village', x: 32, y: 22, resource: 'stone', amount: 2, label: 'Gathered shells and pebbles.' },
   { id: 'sv_crates', zone: 'village', x: 25, y: 5, resource: 'wood', amount: 3, label: 'Salvaged planks from old crates.' },
   { id: 'sv_rocks', zone: 'village', x: 12, y: 15, resource: 'stone', amount: 3, label: 'Chipped stone from the village wall.' },
+  // Near new interactable structures
+  { id: 'hub_hermit_wood', zone: 'hub', x: 37, y: 60, resource: 'wood', amount: 3, label: 'Gathered firewood from the hermit\'s woodpile.' },
+  { id: 'hub_waystation_stone', zone: 'hub', x: 58, y: 29, resource: 'stone', amount: 2, label: 'Chipped stone from the waystation wall.' },
+  { id: 'hub_coast_wood', zone: 'hub', x: 84, y: 42, resource: 'wood', amount: 2, label: 'Salvaged driftwood near the cottage.' },
 ];
 
 interface PlacedWorldObject {
@@ -715,13 +731,13 @@ const SV_GEN_SHOP_ITEMS: ShopItem[] = [
 const SV_WITCH_POS = { x: 5, y: 22 };
 const SV_WITCH_RANGE = 2.5;
 const SV_WITCH_FORTUNES = [
-  "I see gold in your future... but only if you build wisely.",
-  "The orcs stir again in the grasslands. Be ready.",
-  "A great settlement will rise here. I can feel it in the wind.",
-  "The ancient shrine holds more power than you know.",
-  "Beware the dark cave. Something watches from within.",
-  "The sheep know more than they let on. Trust them.",
-  "Your journey is far from over. Greater challenges await.",
+  "I see a hermit's dwelling west of the hub lake... a jar of gold sits untouched on the shelf.",
+  "The grassland stream hides smooth stones of value. Walk its banks and look carefully.",
+  "A ruined cart in the northern grasslands holds a coin pouch. The previous owner won't be needing it.",
+  "The dark cave entrance... something glints just inside. An explorer's stash, long forgotten.",
+  "Search near the village well for something that sparkles. Marina might know more.",
+  "Build beyond twenty structures and the land itself will celebrate your name with bounty.",
+  "The ancient ruins drain life from the reckless \u2014 but the scholar Oswald knows their true purpose.",
 ];
 const SV_WITCH_SHOP: ShopItem[] = [
   { id: 'witch_shield', name: 'Barrier Hex', price: 30, description: '-30% damage taken for 60s.', color: '#9060c0', effect: 'defense', duration: 60, effectLabel: '-30% Dmg Taken' },
@@ -3988,12 +4004,13 @@ export function WorldExplore({
     try {
       if (typeof window === 'undefined') return null;
       const raw = localStorage.getItem(CHAR_SAVE_KEY);
-      if (raw) return JSON.parse(raw) as { charIndex: number; hueShift: number };
+      if (raw) return JSON.parse(raw) as { charIndex: number; hueShift: number; displayName?: string };
     } catch { /* ignore */ }
     return null;
   })();
   const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? -1);
   const [chosenHueShift, setChosenHueShift] = useState<number>(savedChar?.hueShift ?? 0);
+  const [chosenDisplayName, setChosenDisplayName] = useState<string>(savedChar?.displayName || playerName);
   const chosenCharRef = useRef({ charIndex: chosenCharIndex, hueShift: chosenHueShift });
   chosenCharRef.current = { charIndex: chosenCharIndex, hueShift: chosenHueShift };
   const [charPickerOpen, setCharPickerOpen] = useState(false);
@@ -4005,7 +4022,7 @@ export function WorldExplore({
   const hueCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // ── Multiplayer ──
-  const mp = useMultiplayer(slug, playerName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
+  const mp = useMultiplayer(slug, chosenDisplayName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
   const [chatInput, setChatInput] = useState('');
   const [chatVisible, setChatVisible] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -4307,12 +4324,13 @@ export function WorldExplore({
     }
   }, [ga, chosenCharIndex, chosenHueShift]);
 
-  const handleCharSelect = useCallback((charIdx: number, hue: number) => {
+  const handleCharSelect = useCallback((charIdx: number, hue: number, name: string) => {
     setChosenCharIndex(charIdx);
     setChosenHueShift(hue);
+    setChosenDisplayName(name);
     chosenCharRef.current = { charIndex: charIdx, hueShift: hue };
     setCharPickerOpen(false);
-    localStorage.setItem(CHAR_SAVE_KEY, JSON.stringify({ charIndex: charIdx, hueShift: hue }));
+    localStorage.setItem(CHAR_SAVE_KEY, JSON.stringify({ charIndex: charIdx, hueShift: hue, displayName: name }));
     if (ga) {
       hueCanvasRef.current = createHueShiftedCanvas(ga.npcTilemap, hue);
     }
@@ -4418,6 +4436,18 @@ export function WorldExplore({
     }
 
     const speaker = readySpeakers[Math.floor(Math.random() * readySpeakers.length)];
+    // 30% chance for growth-aware lines when hub has 10+ buildings
+    const growthLines = [
+      'The town looks bigger every day.',
+      'So many new buildings!',
+      'I barely recognize this place.',
+      'Feels like a real settlement now.',
+      'More neighbors means more safety.',
+    ];
+    if (buildingCountRef.current >= 10 && zoneRef.current === 'hub' && Math.random() < 0.3) {
+      triggerAmbientSpeech(speaker.id, growthLines[Math.floor(Math.random() * growthLines.length)]);
+      return;
+    }
     const pool = AMBIENT_SPEECH_LINES[speaker.voice] ?? AMBIENT_SPEECH_LINES.villager;
     triggerAmbientSpeech(speaker.id, pool[Math.floor(Math.random() * pool.length)]);
   }, [getCurrentAmbientSpeakers, triggerAmbientSpeech]);
@@ -4950,6 +4980,11 @@ export function WorldExplore({
                 setPlayerStone(playerStoneRef.current);
                 damageNumbersRef.current.push({ x: bandit.x * TILE_SIZE, y: bandit.y * TILE_SIZE - 20, text: `+${stoneDrop} Stone`, color: '#808078', timer: 1.5 });
               }
+              // Check if all bandits cleared
+              if (svBanditsRef.current.every(b => b.state === 'dead')) {
+                zoneBannerRef.current = 'Village Bandits Cleared! The roads are safe.';
+                zoneBannerTimer.current = 4;
+              }
             }
           }
         }
@@ -4995,6 +5030,10 @@ export function WorldExplore({
               case 'hub_marta': // Baker — gossip + sell food
                 if (doneGL && doneSV) {
                   glDialogRef.current = { speaker: 'Marta — Baker', text: "Peace at last! Business is booming. I baked extra today — the whole town smells like fresh bread.", timer: 6 };
+                } else if (bCount >= 20) {
+                  glDialogRef.current = { speaker: 'Marta — Baker', text: `${bCount} buildings! I need a bigger oven. Travelers keep stopping to ask 'who built this place?' and I just point at you.`, timer: 6 };
+                } else if (bCount >= 10) {
+                  glDialogRef.current = { speaker: 'Marta — Baker', text: "This is starting to feel like a real town! I've got regular customers now. Even the guards stop by for bread on their shifts.", timer: 6 };
                 } else if (bCount >= 5) {
                   glDialogRef.current = { speaker: 'Marta — Baker', text: "The town's growing! I can barely keep up with orders. Have you tried the bread at the shop? Best this side of the pass.", timer: 6 };
                 } else {
@@ -5003,7 +5042,9 @@ export function WorldExplore({
                 break;
 
               case 'hub_finn': // Dockhand — clues about village + sea
-                if (doneSV) {
+                if (doneSV && (svQuestRef.current.stage === 'returned' || svQuestRef.current.stage === 'complete')) {
+                  glDialogRef.current = { speaker: 'Finn — Dockhand', text: "Bandits gone, necklace found — you're the talk of the coast! Trade ships are coming back. These docks will be busy again in no time.", timer: 7 };
+                } else if (doneSV) {
                   glDialogRef.current = { speaker: 'Finn — Dockhand', text: "I heard the village is safe again. Maybe the trade ships will come back. These docks could use some life.", timer: 6 };
                 } else {
                   glDialogRef.current = { speaker: 'Finn — Dockhand', text: "Used to be a busy port here. Now the docks are half rotten. There's a village through the South Gate — heard they've got trouble of their own.", timer: 6 };
@@ -5067,7 +5108,9 @@ export function WorldExplore({
               }
 
               case 'hub_edith': // Elder — guidance and world story
-                if (doneGL && doneSV) {
+                if (doneGL && doneSV && bCount >= 10) {
+                  glDialogRef.current = { speaker: 'Edith — Village Elder', text: `Peace in the grasslands, safety in the village, and ${bCount} structures standing tall. I've never seen this land flourish like this. You're building something that will outlast us all.`, timer: 8 };
+                } else if (doneGL && doneSV) {
                   glDialogRef.current = { speaker: 'Edith — Village Elder', text: "You've brought peace to both the grasslands and the village. This settlement has a real future now. Keep building — every structure you place brings new life here.", timer: 7 };
                 } else if (doneGL) {
                   glDialogRef.current = { speaker: 'Edith — Village Elder', text: "The grasslands are safe, but I've heard troubling news from the seaside village. Bandits, they say. The South Gate at the docks leads there — they could use someone like you.", timer: 7 };
@@ -5102,6 +5145,11 @@ export function WorldExplore({
               { id: 'hub_well', x: 55, y: 45, r: 2, speaker: 'Town Well', text: 'Fresh water from deep underground. The settlement\'s lifeblood. It has served this land for generations.' },
               { id: 'hub_docks', x: 90, y: 45, r: 4, speaker: 'The Docks', text: 'Worn wooden planks stretch over the water. Trade ships once docked here. The South Gate leads to the Seaside Village.' },
               { id: 'hub_forest', x: 22, y: 30, r: 4, speaker: 'Forest Edge', text: 'Ancient trees form a dense canopy. The air smells of pine and damp earth. Small creatures rustle in the undergrowth.' },
+              { id: 'hub_hermit', x: 38, y: 59, r: 3, speaker: 'Hermit\'s Hut', text: 'A reclusive dwelling by the lake. Dried herbs hang from the eaves. A note on the door reads: "Gone fishing. Leave coin if you take anything."' },
+              { id: 'hub_waystation', x: 57, y: 28, r: 3, speaker: 'Northern Waystation', text: 'A rest stop for travelers heading to the Northern Pass. A weathered journal records names of those who ventured north. Most entries have no return date. The sign reads: "Grasslands ahead \u2014 bring a weapon."' },
+              { id: 'hub_cottage', x: 83, y: 41, r: 3, speaker: 'Coast Cottage', text: 'A fisherman\'s home overlooking the eastern waters. Nets hang from hooks, dried by sea wind. The hearth is still warm \u2014 someone lives here. A faded map on the wall shows old trade routes.' },
+              { id: 'hub_farm', x: 35, y: 72, r: 3, speaker: 'Southern Farmstead', text: 'Abandoned farm plots, half-overgrown. Rusted tools lie in the dirt. Whoever farmed here left in a hurry. The nearby ruins may hold the answer.' },
+              { id: 'hub_coast_road', x: 75, y: 35, r: 4, speaker: 'Coast Road', text: 'A worn trade road connecting the docks to the northern highlands. Cart tracks still mark the stone. In better times, merchants filled this path daily.' },
             ];
             for (const lm of landmarks) {
               const ld = Math.sqrt((hpx - lm.x) ** 2 + (hpy - lm.y) ** 2);
@@ -5116,6 +5164,13 @@ export function WorldExplore({
                   healthRef.current = Math.min(MAX_HEALTH, healthRef.current + lm.heal);
                   damageNumbersRef.current.push({ x: hpx * TILE_SIZE + 16, y: hpy * TILE_SIZE - 16, text: `+${lm.heal} HP`, color: '#60c060', timer: 1.5 });
                 }
+                // Hermit hut one-time loot
+                if (lm.id === 'hub_hermit' && !coinsCollectedRef.current.has('hub_hermit_loot')) {
+                  coinsCollectedRef.current.add('hub_hermit_loot');
+                  playerGoldRef.current = Math.min(playerGoldRef.current + 8, resourceCapRef.current.gold);
+                  setPlayerGold(playerGoldRef.current);
+                  damageNumbersRef.current.push({ x: 38 * TILE_SIZE + 16, y: 59 * TILE_SIZE - 24, text: '+8G', color: '#e8c86a', timer: 1.5 });
+                }
                 break;
               }
             }
@@ -5125,6 +5180,33 @@ export function WorldExplore({
         // Grassland E-key interactions
         else if (zoneRef.current === 'grassland') {
           const px = playerRef.current.x, py = playerRef.current.y;
+
+          // Guard dialogue
+          let spokeToGuard = false;
+          for (const guard of warriorGuardsRef.current) {
+            const gd = Math.sqrt((px - guard.x) ** 2 + (py - guard.y) ** 2);
+            if (gd < 2.5 && !glDialogRef.current) {
+              spokeToGuard = true;
+              const killed = orcsKilledRef.current;
+              const cleared = glRewardGivenRef.current;
+              let guardText: string;
+              if (cleared) {
+                guardText = guard.id === 'guard_l'
+                  ? 'The stronghold has fallen. You fight like a champion. Safe travels back south.'
+                  : 'I saw the smoke clear from the stronghold. You did what a dozen soldiers couldn\'t.';
+              } else if (killed >= 3) {
+                guardText = guard.id === 'guard_l'
+                  ? `${7 - killed} orcs remain. Keep pushing. The shrine chest won't open until they're all gone.`
+                  : 'I can hear the fighting from here. Give them no mercy \u2014 they showed us none.';
+              } else {
+                guardText = guard.id === 'guard_l'
+                  ? 'Seven orcs hold the stronghold to the north. Clear them all and the ancient shrine unlocks a reward. SPACE to swing your weapon.'
+                  : 'We guard this pass day and night. The vendor camp to the south has supplies if you need healing potions.';
+              }
+              glDialogRef.current = { speaker: guard.name || 'Guard', text: guardText, timer: 6 };
+              break;
+            }
+          }
 
           // Vendor dialogue choices
           const vd = Math.sqrt((px - GL_VENDOR_POS.x) ** 2 + (py - GL_VENDOR_POS.y) ** 2);
@@ -5204,13 +5286,13 @@ export function WorldExplore({
               shrineBuffRef.current = { active: true, timer: 45 };
               glDialogRef.current = {
                 speaker: 'Ancient Shrine',
-                text: 'The shrine pulses with energy! +50% damage, -20% damage taken for 45s.',
+                text: 'Ancient power stirs! The spirits of fallen warriors lend their strength to the one who freed them. +50% damage, -20% damage taken for 45s.',
                 timer: 4,
               };
             } else {
               glDialogRef.current = {
                 speaker: 'Ancient Shrine',
-                text: 'The shrine is guarded. Defeat the nearby orcs first.',
+                text: 'The shrine sleeps beneath orc corruption. Their presence suppresses its power. Clear the nearby orcs to awaken it.',
                 timer: 3,
               };
             }
@@ -5224,6 +5306,12 @@ export function WorldExplore({
               text: 'From here you can see the entire grassland. The orc stronghold looms to the north, smoke rising from their fires. The vendor camp sits safely to the south.',
               timer: 6,
             };
+            if (!coinsCollectedRef.current.has('gl_overlook_hp')) {
+              coinsCollectedRef.current.add('gl_overlook_hp');
+              healthRef.current = Math.min(MAX_HEALTH, healthRef.current + 10);
+              damageNumbersRef.current.push({ x: 60 * TILE_SIZE + 16, y: 28 * TILE_SIZE - 24, text: '+10 HP', color: '#60c060', timer: 1.5 });
+              glDialogRef.current.text += ' The clear mountain air revitalizes you.';
+            }
           }
 
           // POI inspect: Forest Clearing
@@ -5234,6 +5322,13 @@ export function WorldExplore({
               text: 'Ancient trees form a natural cathedral. It\'s peaceful here — the orc invasion hasn\'t reached this grove. Birds sing in the canopy above.',
               timer: 6,
             };
+            if (!coinsCollectedRef.current.has('gl_clearing_wood')) {
+              coinsCollectedRef.current.add('gl_clearing_wood');
+              playerWoodRef.current = Math.min(playerWoodRef.current + 5, resourceCapRef.current.wood);
+              setPlayerWood(playerWoodRef.current);
+              damageNumbersRef.current.push({ x: 20 * TILE_SIZE + 16, y: 32 * TILE_SIZE - 24, text: '+5 Wood', color: '#8bc34a', timer: 1.5 });
+              glDialogRef.current.text += ' You gather fallen branches from the grove floor.';
+            }
           }
 
           // POI inspect: Frog Pond
@@ -5244,6 +5339,13 @@ export function WorldExplore({
               text: 'A tranquil pond teeming with life. The frogs seem unbothered by the orc war. Dragonflies dart across the surface.',
               timer: 5,
             };
+            if (!coinsCollectedRef.current.has('gl_pond_gold')) {
+              coinsCollectedRef.current.add('gl_pond_gold');
+              playerGoldRef.current = Math.min(playerGoldRef.current + 5, resourceCapRef.current.gold);
+              setPlayerGold(playerGoldRef.current);
+              damageNumbersRef.current.push({ x: 18 * TILE_SIZE + 16, y: 38 * TILE_SIZE - 24, text: '+5G', color: '#e8c86a', timer: 1.5 });
+              glDialogRef.current.text += ' A shiny pebble glints in the mud — gold!';
+            }
           }
 
           // POI inspect: Stream Crossing
@@ -5255,6 +5357,12 @@ export function WorldExplore({
               text: 'Clear water flows over smooth stones. Fish dart beneath the surface. The water is clean enough to drink.',
               timer: 4,
             };
+            if (!coinsCollectedRef.current.has('gl_stream_hp')) {
+              coinsCollectedRef.current.add('gl_stream_hp');
+              healthRef.current = Math.min(MAX_HEALTH, healthRef.current + 15);
+              damageNumbersRef.current.push({ x: px * TILE_SIZE + 16, y: py * TILE_SIZE - 24, text: '+15 HP', color: '#60c060', timer: 1.5 });
+              glDialogRef.current.text += ' You drink deeply — the fresh water restores you.';
+            }
           }
 
           // Reward chest interaction — unlocked by killing all 7 orcs
@@ -5286,7 +5394,8 @@ export function WorldExplore({
                   { label: "What's fresh today?", action: 'sv_food_chat' },
                 ],
               };
-              glDialogRef.current = { speaker: 'Fiona — Food Merchant', text: 'Welcome! Fresh food, best in the village!', timer: 999 };
+              const allBanditsClear = svBanditsRef.current.every(b => b.state === 'dead');
+              glDialogRef.current = { speaker: 'Fiona — Food Merchant', text: allBanditsClear ? 'Our hero returns! Fresh food for the village champion — on the house! Well, almost.' : 'Welcome! Fresh food, best in the village!', timer: 999 };
               break;
             }
             if (npc.id === 'gen_merchant' && !svGenShopOpen && !svDialogChoicesRef.current.active) {
@@ -5616,13 +5725,18 @@ export function WorldExplore({
               glDialogRef.current = { speaker: 'Elder Rowan', text: elderText, timer: 7 };
               break;
             }
-            case 'sv_elder_quest':
-              glDialogRef.current = {
-                speaker: 'Elder Rowan',
-                text: "Hmm, young Marina's been looking upset lately. Something about a lost necklace. Perhaps you could help her? She's usually near the village square.",
-                timer: 6,
-              };
+            case 'sv_elder_quest': {
+              const allBanditsDead = svBanditsRef.current.every(b => b.state === 'dead');
+              const questStage = svQuestRef.current.stage;
+              if (allBanditsDead && (questStage === 'returned' || questStage === 'complete')) {
+                glDialogRef.current = { speaker: 'Elder Rowan', text: "You've cleared the bandits AND helped Marina. You are a true friend of this village. When you return to your settlement, know that we stand with you.", timer: 7 };
+              } else if (allBanditsDead) {
+                glDialogRef.current = { speaker: 'Elder Rowan', text: "The bandits are gone \u2014 I can hardly believe it. Marina could still use help, though. She lost something dear to her.", timer: 6 };
+              } else {
+                glDialogRef.current = { speaker: 'Elder Rowan', text: "Hmm, young Marina's been looking upset lately. Something about a lost necklace. Perhaps you could help her? She's usually near the village square.", timer: 6 };
+              }
               break;
+            }
             // Tom actions
             case 'sv_tom_area': {
               const qs = svQuestRef.current.stage;
@@ -5635,14 +5749,20 @@ export function WorldExplore({
               break;
             }
             case 'sv_tom_rumors': {
-              const rumors = [
-                "I heard placing lumber yards near forests makes them 25% more productive. Same for quarries near rocky terrain.",
-                "A throne boosts all your income buildings by 15%. If you can afford one, it pays for itself quickly.",
-                "Some say building houses attracts townsfolk. More people means more passive gold from the local economy.",
-                "The shrine in the grassland stronghold grants a powerful combat buff — but only after you clear the orcs guarding it.",
-              ];
-              const rumorIdx = Math.floor(Math.random() * rumors.length);
-              glDialogRef.current = { speaker: 'Tom', text: rumors[rumorIdx], timer: 7 };
+              const allBanditsDead = svBanditsRef.current.every(b => b.state === 'dead');
+              if (allBanditsDead) {
+                glDialogRef.current = { speaker: 'Tom', text: "You cleared the bandits! The whole village is talking about it. Fiona baked a pie in your honor. The roads feel safe again.", timer: 6 };
+              } else {
+                const rumors = [
+                  "I heard placing lumber yards near forests makes them 25% more productive. Same for quarries near rocky terrain.",
+                  "A throne boosts all your income buildings by 15%. If you can afford one, it pays for itself quickly.",
+                  "Some say building houses attracts townsfolk. More people means more passive gold from the local economy.",
+                  "The shrine in the grassland stronghold grants a powerful combat buff \u2014 but only after you clear the orcs guarding it.",
+                  "Watch your step in the eastern woods. Bandits have been spotted. They're dangerous but they carry coin.",
+                ];
+                const rumorIdx = Math.floor(Math.random() * rumors.length);
+                glDialogRef.current = { speaker: 'Tom', text: rumors[rumorIdx], timer: 7 };
+              }
               break;
             }
             // Nana Rose actions
@@ -5936,11 +6056,29 @@ export function WorldExplore({
       buildingCountRef.current = bCount;
       const milestones = [5, 10, 20, 30];
       const milestoneLabels: Record<number, string> = { 5: 'Settlement Founded', 10: 'Growing Town', 20: 'Thriving Settlement', 30: "Master Builder's Domain" };
+      const milestoneRewards: Record<number, { gold: number; wood: number; stone: number }> = {
+        5: { gold: 10, wood: 5, stone: 5 },
+        10: { gold: 25, wood: 10, stone: 10 },
+        20: { gold: 50, wood: 20, stone: 15 },
+        30: { gold: 100, wood: 30, stone: 25 },
+      };
       for (const ms of milestones) {
         if (bCount >= ms && !buildingMilestonesRef.current.has(ms)) {
           buildingMilestonesRef.current.add(ms);
-          zoneBannerRef.current = milestoneLabels[ms];
-          zoneBannerTimer.current = 3.5;
+          const reward = milestoneRewards[ms];
+          zoneBannerRef.current = `${milestoneLabels[ms]} — +${reward.gold}G +${reward.wood}W +${reward.stone}S`;
+          zoneBannerTimer.current = 4;
+          playerGoldRef.current = Math.min(playerGoldRef.current + reward.gold, resourceCapRef.current.gold);
+          playerWoodRef.current = Math.min(playerWoodRef.current + reward.wood, resourceCapRef.current.wood);
+          playerStoneRef.current = Math.min(playerStoneRef.current + reward.stone, resourceCapRef.current.stone);
+          setPlayerGold(playerGoldRef.current);
+          setPlayerWood(playerWoodRef.current);
+          setPlayerStone(playerStoneRef.current);
+          const px = playerRef.current.x * TILE_SIZE + 16;
+          const py = playerRef.current.y * TILE_SIZE - 16;
+          damageNumbersRef.current.push({ x: px - 30, y: py, text: `+${reward.gold}G`, color: '#e8c86a', timer: 2.5 });
+          damageNumbersRef.current.push({ x: px, y: py - 14, text: `+${reward.wood}W`, color: '#8bc34a', timer: 2.5 });
+          damageNumbersRef.current.push({ x: px + 30, y: py, text: `+${reward.stone}S`, color: '#9e9e9e', timer: 2.5 });
         }
       }
       // Townsfolk AI (hub — always-present GuttyKreum NPCs at fixed locations)
@@ -6629,11 +6767,16 @@ export function WorldExplore({
       // Objectives: track exploration milestones
       if (inHub) {
         const vis = visitedRef.current;
-        if (merchantDist < MERCHANT_RANGE && !vis.has('merchant')) { vis.add('merchant'); discoveriesRef.current.add('hub_merchant'); }
-        if (ellipseDist(ptx, pty, 22, 30, 5, 4) < 0.8 && !vis.has('forest')) { vis.add('forest'); discoveriesRef.current.add('hub_forest_area'); }
-        if (ellipseDist(ptx, pty, 42, 78, 10, 8) < 0.6 && !vis.has('ruins')) { vis.add('ruins'); discoveriesRef.current.add('hub_ruins'); }
-        if (ellipseDist(ptx, pty, 28, 62, 3, 2) < 1.0 && !vis.has('shrine')) { vis.add('shrine'); discoveriesRef.current.add('hub_shrine'); }
-        if (ellipseDist(ptx, pty, 96, 42, 5, 4) < 1.0 && !vis.has('docks')) { vis.add('docks'); discoveriesRef.current.add('hub_docks'); }
+        if (merchantDist < MERCHANT_RANGE && !vis.has('merchant')) { vis.add('merchant'); discoveriesRef.current.add('hub_merchant'); zoneBannerRef.current = 'Discovered: Town Merchant'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 22, 30, 5, 4) < 0.8 && !vis.has('forest')) { vis.add('forest'); discoveriesRef.current.add('hub_forest_area'); zoneBannerRef.current = 'Discovered: Western Forest'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 42, 78, 10, 8) < 0.6 && !vis.has('ruins')) { vis.add('ruins'); discoveriesRef.current.add('hub_ruins'); zoneBannerRef.current = 'Discovered: Ancient Ruins'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 28, 62, 3, 2) < 1.0 && !vis.has('shrine')) { vis.add('shrine'); discoveriesRef.current.add('hub_shrine'); zoneBannerRef.current = 'Discovered: Lakeside Shrine'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 96, 42, 5, 4) < 1.0 && !vis.has('docks')) { vis.add('docks'); discoveriesRef.current.add('hub_docks'); zoneBannerRef.current = 'Discovered: The Docks'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 38, 59, 3, 2) < 1.0 && !vis.has('hermit')) { vis.add('hermit'); discoveriesRef.current.add('hub_hermit'); zoneBannerRef.current = 'Discovered: Hermit\'s Hut'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 57, 28, 3, 2) < 1.0 && !vis.has('waystation')) { vis.add('waystation'); discoveriesRef.current.add('hub_waystation'); zoneBannerRef.current = 'Discovered: Northern Waystation'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 83, 41, 3, 2) < 1.0 && !vis.has('cottage')) { vis.add('cottage'); discoveriesRef.current.add('hub_cottage'); zoneBannerRef.current = 'Discovered: Coast Cottage'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 35, 72, 3, 2) < 1.0 && !vis.has('farm')) { vis.add('farm'); discoveriesRef.current.add('hub_farm'); zoneBannerRef.current = 'Discovered: Southern Farmstead'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 75, 35, 4, 3) < 0.8 && !vis.has('coast_road')) { vis.add('coast_road'); discoveriesRef.current.add('hub_coast_road'); zoneBannerRef.current = 'Discovered: Coast Road'; zoneBannerTimer.current = 2; }
         if (!vis.has('merchant')) objectiveRef.current = 'Visit the Merchant at Town Square \u2192';
         else if (!vis.has('forest')) objectiveRef.current = 'Explore the Forest to the west \u2190';
         else if (!vis.has('ruins')) objectiveRef.current = 'Find the Ancient Ruins to the south \u2193';
@@ -8095,18 +8238,41 @@ export function WorldExplore({
         const pulse = 0.6 + Math.sin(Date.now() / 400) * 0.3;
 
         if (wellDist < 3 && healthRef.current < MAX_HEALTH) {
+          const healPulse = 0.15 + Math.sin(Date.now() / 300) * 0.1;
+          const wellPx = 55 * TILE_SIZE + 16;
+          const wellPy = 42 * TILE_SIZE + 16;
+          ctx.strokeStyle = `rgba(80,200,80,${healPulse})`;
+          ctx.lineWidth = 2;
+          const healRadius = 36 + Math.sin(Date.now() / 500) * 4;
+          ctx.beginPath(); ctx.arc(wellPx, wellPy, healRadius, 0, Math.PI * 2); ctx.stroke();
           ctx.font = '600 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillStyle = `rgba(80,200,80,${pulse})`;
-          ctx.fillText('+5 HP/s', 55 * TILE_SIZE + 16, 42 * TILE_SIZE - 6);
+          ctx.fillText('+5 HP/s', wellPx, 42 * TILE_SIZE - 6);
         } else if (nearCampfire && healthRef.current < MAX_HEALTH) {
           const [cx, cy] = nearCampfire;
+          const healPulse = 0.15 + Math.sin(Date.now() / 300) * 0.1;
+          const cfPx = cx * TILE_SIZE + 16;
+          const cfPy = cy * TILE_SIZE + 16;
+          ctx.strokeStyle = `rgba(80,200,80,${healPulse})`;
+          ctx.lineWidth = 2;
+          const healRadius = 28 + Math.sin(Date.now() / 500) * 3;
+          ctx.beginPath(); ctx.arc(cfPx, cfPy, healRadius, 0, Math.PI * 2); ctx.stroke();
           ctx.font = '600 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillStyle = `rgba(80,200,80,${pulse})`;
-          ctx.fillText('+3 HP/s', cx * TILE_SIZE + 16, cy * TILE_SIZE - 6);
+          ctx.fillText('+3 HP/s', cfPx, cy * TILE_SIZE - 6);
         }
         if (inRuins) {
+          // Red vignette overlay
+          const vigAlpha = 0.08 + Math.sin(Date.now() / 600) * 0.04;
+          const cw = canvas.width;
+          const ch = canvas.height;
+          const vigGrad = ctx.createRadialGradient(cw / 2, ch / 2, cw * 0.25, cw / 2, ch / 2, cw * 0.7);
+          vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+          vigGrad.addColorStop(1, `rgba(180,30,30,${vigAlpha})`);
+          ctx.fillStyle = vigGrad;
+          ctx.fillRect(0, 0, cw, ch);
           ctx.font = '600 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillStyle = `rgba(220,60,60,${pulse})`;
@@ -8915,6 +9081,7 @@ export function WorldExplore({
           npcTilemap={ga.npcTilemap}
           currentCharIndex={chosenCharIndex}
           currentHueShift={chosenHueShift}
+          currentName={chosenDisplayName}
           onSelect={handleCharSelect}
           onClose={() => { if (!needsCharPick) setCharPickerOpen(false); }}
         />
