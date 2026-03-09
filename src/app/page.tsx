@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
+import { DemoButton } from '@/components/DemoButton';
 
 export default async function LandingPage() {
   const worlds = await prisma.world.findMany({
@@ -50,9 +51,7 @@ export default async function LandingPage() {
               <p className="hero-cta-desc">Create an account, build your own world, and get a full dashboard to manage everything.</p>
             </div>
             <div className="hero-cta-option">
-              <Link href="/play/everhold" className="btn btn-secondary btn-lg">
-                Enter Demo World
-              </Link>
+              <DemoButton />
               <p className="hero-cta-desc">Jump straight in and explore a pre-built world. No account needed.</p>
             </div>
           </div>

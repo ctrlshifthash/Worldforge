@@ -3023,11 +3023,11 @@ h1, h2, h3, h4, h5, h6 {
   max-height: calc(100% - 48px);
   overflow-y: auto;
   padding: var(--space-lg);
-  background: rgba(255,255,255,0.95);
+  background: rgba(14,18,25,0.94);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  border: 2px solid rgba(139,108,62,0.3);
+  border-radius: 0;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.2);
   animation: panelSlideIn 0.25s var(--ease-out);
 }
 
@@ -3058,7 +3058,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--text);
+  color: #e8e0d4;
 }
 
 .explore-panel-close {
@@ -3067,10 +3067,10 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   width: 36px;
   height: 24px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.04);
-  color: var(--text-muted);
+  border-radius: 0;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.5);
   font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
@@ -3079,17 +3079,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .explore-panel-close:hover {
-  background: rgba(0,0,0,0.06);
-  color: var(--text);
+  background: rgba(255,255,255,0.1);
+  color: #e8e0d4;
 }
 
 .explore-panel-summary {
   font-size: 0.88rem;
-  color: var(--text-soft);
+  color: rgba(255,255,255,0.6);
   line-height: 1.6;
   margin-bottom: var(--space-md);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--border-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .explore-panel-facts {
@@ -3103,7 +3103,8 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: var(--space-xs) 0;
   font-size: 0.82rem;
-  border-bottom: 1px solid var(--border-dim);
+  color: rgba(255,255,255,0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .explore-panel-fact:last-child { border-bottom: none; }
@@ -3123,12 +3124,12 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(-50%);
   z-index: 15;
   padding: var(--space-sm) var(--space-lg);
-  background: rgba(255,255,255,0.92);
+  background: rgba(14,18,25,0.92);
   backdrop-filter: blur(12px);
-  border: 1px solid var(--gold-dim);
-  border-radius: var(--radius-full);
+  border: 2px solid rgba(139,108,62,0.3);
+  border-radius: 0;
   font-size: 0.82rem;
-  color: var(--text-soft);
+  color: rgba(255,255,255,0.6);
   white-space: nowrap;
   animation: tooltipIn 0.15s var(--ease-out);
 }

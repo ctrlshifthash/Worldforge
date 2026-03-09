@@ -16,7 +16,7 @@ export default async function PlayPage({
   if (!world) notFound();
 
   const session = await getSession();
-  const isOwner = session ? world.ownerId === session.sub : false;
+  const isOwner = world.ownerId === null ? true : (session ? world.ownerId === session.sub : false);
 
   const [allEntities, eras] = await Promise.all([
     getEntities(world.id),
