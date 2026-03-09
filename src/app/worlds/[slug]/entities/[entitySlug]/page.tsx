@@ -58,7 +58,7 @@ export default async function EntityDetailPage({
         id: link.event.eraRef?.id || null,
         slug: link.event.eraRef?.slug || null,
         title: link.event.eraRef?.title || link.event.era || 'Unknown Era',
-        color: link.event.eraRef?.color || '#c8a44e',
+        color: link.event.eraRef?.color || '#FF6B2C',
         events: [],
       };
       historyEraMap.set(eraKey, group);

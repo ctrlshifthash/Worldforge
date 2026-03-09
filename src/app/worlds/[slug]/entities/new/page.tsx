@@ -73,7 +73,7 @@ export default function NewEntityPage() {
         type,
         summary,
         content,
-        accent: ENTITY_COLORS[type] || '#c8a44e',
+        accent: ENTITY_COLORS[type] || '#FF6B2C',
         facts: parsedFacts,
         tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       }),

@@ -46,7 +46,7 @@ export async function POST(
     title: body.title || 'Untitled',
     summary: body.summary || '',
     content: body.content || '',
-    accent: body.accent || ENTITY_COLORS[type] || '#c8a44e',
+    accent: body.accent || ENTITY_COLORS[type] || '#FF6B2C',
     facts: body.facts || [],
     tags: Array.isArray(body.tags)
       ? body.tags

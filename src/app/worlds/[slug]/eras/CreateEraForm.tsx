@@ -14,7 +14,7 @@ export function CreateEraForm() {
   const [startLabel, setStartLabel] = useState('');
   const [endLabel, setEndLabel] = useState('');
   const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#c8a44e');
+  const [color, setColor] = useState('#FF6B2C');
   const [aiHint, setAiHint] = useState('');
 
   async function handleAiGenerate() {
@@ -54,7 +54,7 @@ export function CreateEraForm() {
     setStartLabel('');
     setEndLabel('');
     setDescription('');
-    setColor('#c8a44e');
+    setColor('#FF6B2C');
     router.refresh();
   }
 

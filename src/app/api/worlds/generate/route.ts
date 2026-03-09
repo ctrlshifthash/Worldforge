@@ -102,7 +102,7 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
         sortOrder: eraSortOrder++,
         startLabel: era.startLabel || '',
         endLabel: era.endLabel || '',
-        color: era.color || '#c8a44e',
+        color: era.color || '#FF6B2C',
       });
       eraMap[era.title] = created.id;
       erasCreated++;
@@ -124,7 +124,7 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
         title: e.title,
         summary: e.summary || '',
         content: e.content || '',
-        accent: ENTITY_COLORS[type] || '#c8a44e',
+        accent: ENTITY_COLORS[type] || '#FF6B2C',
         facts: Array.isArray(e.facts) ? e.facts : [],
         tags: Array.isArray(e.tags) ? e.tags : [],
         userId: session.sub,

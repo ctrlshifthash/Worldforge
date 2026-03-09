@@ -355,8 +355,8 @@ export function WorldMap({
         // Glow
         const glowSize = isHighlighted ? markerSize * 5 : markerSize * 3;
         const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, glowSize);
-        glow.addColorStop(0, (isHighlighted ? '#c8a44e' : color) + '40');
-        glow.addColorStop(1, (isHighlighted ? '#c8a44e' : color) + '00');
+        glow.addColorStop(0, (isHighlighted ? '#FF6B2C' : color) + '40');
+        glow.addColorStop(1, (isHighlighted ? '#FF6B2C' : color) + '00');
         ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(lx, ly, glowSize, 0, Math.PI * 2);
@@ -378,7 +378,7 @@ export function WorldMap({
         ctx.fill();
 
         // Pin body
-        ctx.fillStyle = isHighlighted ? '#c8a44e' : color;
+        ctx.fillStyle = isHighlighted ? '#FF6B2C' : color;
         ctx.strokeStyle = isHovered || isHighlighted ? '#fff' : 'rgba(255,255,255,0.3)';
         ctx.lineWidth = isHovered || isHighlighted ? 2 : 1;
         ctx.beginPath();
@@ -416,7 +416,7 @@ export function WorldMap({
         );
         ctx.fill();
 
-        ctx.strokeStyle = isHovered || isHighlighted ? (isHighlighted ? '#c8a44e80' : color + '80') : 'rgba(255,255,255,0.1)';
+        ctx.strokeStyle = isHovered || isHighlighted ? (isHighlighted ? '#FF6B2C80' : color + '80') : 'rgba(255,255,255,0.1)';
         ctx.lineWidth = 0.5;
         ctx.stroke();
 
@@ -425,7 +425,7 @@ export function WorldMap({
 
         const typeLabel = ENTITY_LABELS[loc.type] || loc.type;
         ctx.font = `500 ${Math.max(8, 9 / camera.zoom)}px Inter, sans-serif`;
-        ctx.fillStyle = (isHighlighted ? '#c8a44e' : color) + 'aa';
+        ctx.fillStyle = (isHighlighted ? '#FF6B2C' : color) + 'aa';
         ctx.fillText(typeLabel, lx, labelY + labelSize + 4);
 
         ctx.restore();
@@ -785,7 +785,7 @@ export function WorldMap({
               cx={(loc.mapX / 100) * MAP_W}
               cy={(loc.mapY / 100) * MAP_H}
               r={8}
-              fill={highlightedEntityIds.includes(loc.id) ? '#c8a44e' : (ENTITY_COLORS[loc.type] || loc.accent)}
+              fill={highlightedEntityIds.includes(loc.id) ? '#FF6B2C' : (ENTITY_COLORS[loc.type] || loc.accent)}
               opacity={isHighlightMode && !highlightedEntityIds.includes(loc.id) ? 0.2 : 1}
             />
           ))}

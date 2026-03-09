@@ -46,7 +46,7 @@ export async function POST(
     sortOrder: body.sortOrder ?? maxSort + 1,
     startLabel: body.startLabel || '',
     endLabel: body.endLabel || '',
-    color: body.color || '#c8a44e',
+    color: body.color || '#FF6B2C',
   });
 
   return NextResponse.json({ era }, { status: 201 });

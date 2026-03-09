@@ -154,8 +154,8 @@ export function RelationshipGraph({
             </radialGradient>
           ))}
           <radialGradient id="glow-event">
-            <stop offset="0%" stopColor="#c8a44e" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#c8a44e" stopOpacity="0" />
+            <stop offset="0%" stopColor="#FF6B2C" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#FF6B2C" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -268,7 +268,7 @@ export function RelationshipGraph({
                 cx={node.x}
                 cy={node.y}
                 r={nodeRadius}
-                fill={eventHighlighted ? '#c8a44e' : color}
+                fill={eventHighlighted ? '#FF6B2C' : color}
                 stroke={isHovered || eventHighlighted ? '#fff' : 'rgba(255,255,255,0.2)'}
                 strokeWidth={isHovered || eventHighlighted ? 2.5 : 1}
                 style={{ transition: 'r 0.2s, stroke 0.2s, fill 0.3s' }}

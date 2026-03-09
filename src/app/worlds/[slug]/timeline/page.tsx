@@ -43,7 +43,7 @@ export default async function TimelinePage({
         id: event.eraRef?.id || null,
         slug: event.eraRef?.slug || null,
         title: event.eraRef?.title || event.era || 'Unknown Era',
-        color: event.eraRef?.color || '#c8a44e',
+        color: event.eraRef?.color || '#FF6B2C',
         startLabel: event.eraRef?.startLabel || '',
         endLabel: event.eraRef?.endLabel || '',
         events: [],

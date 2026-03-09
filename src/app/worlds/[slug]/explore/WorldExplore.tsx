@@ -3815,12 +3815,12 @@ function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: G
 
   // Interaction ring
   if (isNearby) {
-    ctx.strokeStyle = '#c8a44e';
+    ctx.strokeStyle = '#FF6B2C';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2, TILE_SIZE / 2 + 6, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.fillStyle = '#c8a44e';
+    ctx.fillStyle = '#FF6B2C';
     ctx.font = 'bold 10px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('[E]', px + TILE_SIZE / 2, py - 10);
@@ -3837,7 +3837,7 @@ function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: G
   ctx.beginPath();
   ctx.roundRect(lx - m.width / 2 - 5, ly - 9, m.width + 10, 14, 3);
   ctx.fill();
-  ctx.fillStyle = isNearby ? '#c8a44e' : 'rgba(255,255,255,0.85)';
+  ctx.fillStyle = isNearby ? '#FF6B2C' : 'rgba(255,255,255,0.85)';
   ctx.fillText(label, lx, ly);
 }
 
@@ -9152,7 +9152,7 @@ export function WorldExplore({
               }} disabled={playerGold < 3 || playerWood >= resourceCapRef.current.wood} style={{
                 padding: '3px 10px', fontSize: 10, fontWeight: 600, border: 'none', borderRadius: 4, cursor: playerGold >= 3 ? 'pointer' : 'not-allowed',
                 background: playerGold >= 3 ? 'rgba(139,108,62,0.25)' : 'rgba(255,255,255,0.05)',
-                color: playerGold >= 3 ? '#c8a44e' : 'rgba(255,255,255,0.2)',
+                color: playerGold >= 3 ? '#FF6B2C' : 'rgba(255,255,255,0.2)',
               }}>Buy</button>
             </div>
             {/* Buy Stone */}
@@ -9196,7 +9196,7 @@ export function WorldExplore({
               }} disabled={playerWood < 1 || playerGold >= resourceCapRef.current.gold} style={{
                 padding: '3px 10px', fontSize: 10, fontWeight: 600, border: 'none', borderRadius: 4, cursor: playerWood >= 1 ? 'pointer' : 'not-allowed',
                 background: playerWood >= 1 ? 'rgba(139,108,62,0.25)' : 'rgba(255,255,255,0.05)',
-                color: playerWood >= 1 ? '#c8a44e' : 'rgba(255,255,255,0.2)',
+                color: playerWood >= 1 ? '#FF6B2C' : 'rgba(255,255,255,0.2)',
               }}>Sell</button>
             </div>
             {/* Sell Stone */}
@@ -9796,7 +9796,7 @@ export function WorldExplore({
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>{discoveriesRef.current.size} <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)' }}>found</span></div>
                 </div>
                 <div style={{ flex: 1, padding: '6px 8px', borderRadius: 5, background: 'rgba(200,164,78,0.06)', border: '1px solid rgba(200,164,78,0.12)' }}>
-                  <div style={{ fontSize: 9, fontWeight: 600, color: '#c8a44e', marginBottom: 2 }}>Buildings</div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: '#FF6B2C', marginBottom: 2 }}>Buildings</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>{buildingCountRef.current} <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)' }}>placed</span></div>
                 </div>
                 <div style={{ flex: 1, padding: '6px 8px', borderRadius: 5, background: 'rgba(112,184,104,0.06)', border: '1px solid rgba(112,184,104,0.12)' }}>

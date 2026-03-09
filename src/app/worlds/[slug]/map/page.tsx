@@ -56,7 +56,7 @@ export default async function MapPage({
         dateLabel: event.dateLabel,
         summary: event.summary,
         eraTitle: event.eraRef?.title || event.era,
-        eraColor: event.eraRef?.color || '#c8a44e',
+        eraColor: event.eraRef?.color || '#FF6B2C',
         linkedEntities: event.entityLinks.map((link) => ({
           id: link.entity.id,
           title: link.entity.title,

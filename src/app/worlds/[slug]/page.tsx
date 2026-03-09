@@ -192,7 +192,7 @@ export default async function WorldOverviewPage({
           </p>
           <div className="overview-hub-grid">
             <Link href={`/worlds/${slug}/explore`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#8a4a9a' }}>
+              <div className="overview-hub-icon" style={{ color: '#7B61FF' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 12h18M12 3v18"/></svg>
               </div>
               <div>
@@ -202,7 +202,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/map`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#9a4a6e' }}>
+              <div className="overview-hub-icon" style={{ color: '#E84393' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               </div>
               <div>
@@ -212,7 +212,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/graph`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#4a6e9a' }}>
+              <div className="overview-hub-icon" style={{ color: '#0984E3' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5l3 8M16 7.5l-3 8M8.5 6h7"/></svg>
               </div>
               <div>
@@ -222,7 +222,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/entities`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#c8a44e' }}>
+              <div className="overview-hub-icon" style={{ color: '#FF6B2C' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
               </div>
               <div>
@@ -232,7 +232,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/timeline`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#4a9a6e' }}>
+              <div className="overview-hub-icon" style={{ color: '#36B37E' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
               </div>
               <div>
@@ -242,7 +242,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/eras`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#9a7a4a' }}>
+              <div className="overview-hub-icon" style={{ color: '#F39C12' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
               </div>
               <div>
@@ -252,7 +252,7 @@ export default async function WorldOverviewPage({
             </Link>
 
             <Link href={`/worlds/${slug}/developments`} className="overview-hub-card">
-              <div className="overview-hub-icon" style={{ color: '#6e9a4a' }}>
+              <div className="overview-hub-icon" style={{ color: '#36B37E' }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </div>
               <div>

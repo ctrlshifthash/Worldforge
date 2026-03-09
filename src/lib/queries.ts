@@ -309,7 +309,7 @@ export async function createEra(data: {
       sortOrder: data.sortOrder ?? 0,
       startLabel: data.startLabel || '',
       endLabel: data.endLabel || '',
-      color: data.color || '#c8a44e',
+      color: data.color || '#FF6B2C',
     },
   });
 }
@@ -518,7 +518,7 @@ export async function createMapRegion(data: {
       title: data.title,
       description: data.description || '',
       pointsJson: data.pointsJson,
-      color: data.color || '#4a6e9a',
+      color: data.color || '#0984E3',
     },
   });
 }

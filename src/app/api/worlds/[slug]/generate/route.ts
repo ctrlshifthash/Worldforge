@@ -141,7 +141,7 @@ Generate 3-5 eras, 6-10 entities (mix of types), 4-6 timeline events (each assig
           sortOrder: ++eraSortOrder,
           startLabel: era.startLabel || '',
           endLabel: era.endLabel || '',
-          color: era.color || '#c8a44e',
+          color: era.color || '#FF6B2C',
         });
         eraMap[era.title] = created.id;
         erasCreated++;
@@ -164,7 +164,7 @@ Generate 3-5 eras, 6-10 entities (mix of types), 4-6 timeline events (each assig
         title: e.title,
         summary: e.summary || '',
         content: e.content || '',
-        accent: ENTITY_COLORS[type] || '#c8a44e',
+        accent: ENTITY_COLORS[type] || '#FF6B2C',
         facts: Array.isArray(e.facts) ? e.facts : [],
         tags: Array.isArray(e.tags) ? e.tags : [],
         userId: session.sub,

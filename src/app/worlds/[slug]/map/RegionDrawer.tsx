@@ -39,7 +39,7 @@ export function RegionDrawer({
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
-  const [color, setColor] = useState('#4a6e9a');
+  const [color, setColor] = useState('#0984E3');
   const [loading, setLoading] = useState(false);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
 

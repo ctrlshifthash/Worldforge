@@ -61,7 +61,7 @@ export default async function GraphPage({
         title: event.title,
         dateLabel: event.dateLabel,
         eraTitle: event.eraRef?.title || event.era,
-        eraColor: event.eraRef?.color || '#c8a44e',
+        eraColor: event.eraRef?.color || '#FF6B2C',
       }
     : null;
 

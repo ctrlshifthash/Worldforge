@@ -29,12 +29,12 @@ export function timeAgo(date: Date | string): string {
 }
 
 export const ENTITY_COLORS: Record<string, string> = {
-  CHARACTER: '#c8a44e',
-  LOCATION: '#4a9a6e',
-  FACTION: '#9a4a6e',
-  ARTIFACT: '#4a6e9a',
-  SPECIES: '#8a4a9a',
-  EVENT: '#9a7a4a',
+  CHARACTER: '#FF6B2C',
+  LOCATION: '#36B37E',
+  FACTION: '#E84393',
+  ARTIFACT: '#0984E3',
+  SPECIES: '#7B61FF',
+  EVENT: '#F39C12',
 };
 
 export const ENTITY_LABELS: Record<string, string> = {

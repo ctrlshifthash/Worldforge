@@ -2,15 +2,6 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
 
-const STARS = Array.from({ length: 24 }, (_, i) => ({
-  id: i,
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-  delay: `${Math.random() * 4}s`,
-  size: Math.random() > 0.7 ? 3 : 2,
-  opacity: Math.random() * 0.35 + 0.1,
-}));
-
 export default async function LandingPage() {
   const worlds = await prisma.world.findMany({
     where: { visibility: 'PUBLIC' },
@@ -31,16 +22,7 @@ export default async function LandingPage() {
           HUD strip below proves this is a real game immediately
           ═══════════════════════════════════════════════════════ */}
       <section className="hero-v2">
-        <div className="hero-bg">
-          <div className="hero-stars">
-            {STARS.map((s) => (
-              <span key={s.id} className="hero-star" style={{
-                left: s.left, top: s.top, animationDelay: s.delay,
-                width: s.size, height: s.size, opacity: s.opacity,
-              }} />
-            ))}
-          </div>
-        </div>
+        <div className="hero-bg" />
         <div className="hero-v2-glow" />
 
         <div className="hero-v2-content">
@@ -466,7 +448,7 @@ export default async function LandingPage() {
         {/* Building */}
         <div className="system-spread">
           <div className="system-text">
-            <div className="system-label" style={{ color: '#4a9a6e' }}>Building</div>
+            <div className="system-label" style={{ color: '#36B37E' }}>Building</div>
             <h3>Place, rotate, and persist structures</h3>
             <p>
               Press B to open the build menu. 22 items across structures, props,
