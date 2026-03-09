@@ -35,56 +35,12 @@ export async function POST(request: Request) {
       messages: [
         {
           role: 'user',
-          content: `You are a worldbuilding assistant. Generate a complete fictional world based on this concept:
+          content: `Generate a fictional world based on: "${concept}"
 
-"${concept}"
+Return ONLY a JSON object (no markdown, no code fences):
+{"world":{"title":"2-4 word name","tagline":"One sentence","description":"2 sentences"},"eras":[{"title":"Era name","description":"Brief desc","startLabel":"Year 0","endLabel":"Year 50","color":"#hex"}],"entities":[{"type":"CHARACTER|LOCATION|FACTION|ARTIFACT|SPECIES","title":"Name","summary":"One line","content":"1 paragraph of lore","facts":[{"label":"Key","value":"Val"}],"tags":["tag1"]}],"events":[{"title":"Event","dateLabel":"Year X","era":"Era name (exact match)","summary":"What happened","impact":"Effect","involvedEntities":["Entity name (exact match)"]}],"relations":[{"fromTitle":"Entity (exact)","toTitle":"Entity (exact)","label":"relationship"}]}
 
-Return a JSON object with this exact structure (no markdown, no code fences, just raw JSON):
-{
-  "world": {
-    "title": "World name (2-4 words, creative and evocative)",
-    "tagline": "One sentence hook",
-    "description": "2-3 sentence description of the world"
-  },
-  "eras": [
-    {
-      "title": "Era name",
-      "description": "Brief description of this historical period",
-      "startLabel": "When it starts (e.g. Year 0)",
-      "endLabel": "When it ends (e.g. Year 50)",
-      "color": "hex color (e.g. #9a4a4a)"
-    }
-  ],
-  "entities": [
-    {
-      "type": "CHARACTER" | "LOCATION" | "FACTION" | "ARTIFACT" | "SPECIES",
-      "title": "Name",
-      "summary": "One line description",
-      "content": "2-3 paragraphs of lore",
-      "facts": [{"label": "Key", "value": "Value"}],
-      "tags": ["tag1", "tag2"]
-    }
-  ],
-  "events": [
-    {
-      "title": "Event name",
-      "dateLabel": "When (e.g. Year 312)",
-      "era": "Era name (must match an era title exactly)",
-      "summary": "What happened",
-      "impact": "How it changed the world",
-      "involvedEntities": ["Entity name (must match entity titles)"]
-    }
-  ],
-  "relations": [
-    {
-      "fromTitle": "Entity name (must match an entity title exactly)",
-      "toTitle": "Entity name (must match an entity title exactly)",
-      "label": "relationship (e.g. allied with, rules over)"
-    }
-  ]
-}
-
-Generate 3-5 eras, 6-10 entities (mix of types), 4-6 timeline events (each assigned to an era), and 4-8 relations. Events should reference entities in involvedEntities. Make everything interconnected and rich with lore. All title references must match exactly.`,
+Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep lore concise. All title references must match exactly.`,
         },
       ],
     }),

@@ -23,13 +23,30 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
       const concept = form.get('concept') as string;
       const visibility = form.get('visibility') as string;
 
-      setStatus('AI is building your world — generating name, lore, entities, events, and relations... This may take 20-40 seconds.');
+      const steps = [
+        'Imagining your world...',
+        'Creating characters & locations...',
+        'Writing history...',
+        'Forging connections...',
+        'Building timeline...',
+        'Saving to database...',
+      ];
+      let stepIndex = 0;
+      setStatus(steps[0]);
+      const stepTimer = setInterval(() => {
+        stepIndex++;
+        if (stepIndex < steps.length) {
+          setStatus(steps[stepIndex]);
+        }
+      }, 1500);
 
       const res = await fetch('/api/worlds/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ concept, visibility }),
       });
+
+      clearInterval(stepTimer);
 
       if (!res.ok) {
         const data = await res.json();
