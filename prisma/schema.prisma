@@ -24,7 +24,7 @@ model User {
 
 model World {
   id                String             @id @default(cuid())
-  ownerId           String
+  ownerId           String?
   slug              String             @unique
   title             String
   tagline           String
@@ -33,7 +33,7 @@ model World {
   coverGradient     String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  owner             User               @relation("WorldOwner", fields: [ownerId], references: [id])
+  owner             User?              @relation("WorldOwner", fields: [ownerId], references: [id])
   members           WorldMember[]
   entities          Entity[]
   relations         EntityRelation[]

@@ -45,7 +45,7 @@ export async function createWorld(data: {
   tagline: string;
   description: string;
   visibility: Visibility;
-  ownerId: string;
+  ownerId?: string | null;
   coverGradient?: string;
 }) {
   const slug = slugify(data.title);
@@ -59,14 +59,14 @@ export async function createWorld(data: {
       coverGradient:
         data.coverGradient ||
         'radial-gradient(circle at 30% 20%, rgba(200,164,78,0.3), transparent 50%), linear-gradient(135deg, #0f1019 0%, #1a1520 50%, #1c1428 100%)',
-      ownerId: data.ownerId,
-      members: {
-        create: { userId: data.ownerId, role: 'OWNER' },
-      },
+      ownerId: data.ownerId ?? null,
+      ...(data.ownerId ? { members: { create: { userId: data.ownerId, role: 'OWNER' } } } : {}),
     },
   });
 
-  await logActivity(world.id, data.ownerId, 'created', `world "${data.title}"`);
+  if (data.ownerId) {
+    await logActivity(world.id, data.ownerId, 'created', `world "${data.title}"`);
+  }
   return world;
 }
 
@@ -120,7 +120,7 @@ export async function createEntity(data: {
   accent: string;
   facts: { label: string; value: string }[];
   tags: string[];
-  userId: string;
+  userId?: string | null;
 }) {
   const slug = slugify(data.title);
   const entity = await prisma.entity.create({
@@ -142,7 +142,9 @@ export async function createEntity(data: {
     },
   });
 
-  await logActivity(data.worldId, data.userId, 'created', `${data.type.toLowerCase()} "${data.title}"`);
+  if (data.userId) {
+    await logActivity(data.worldId, data.userId, 'created', `${data.type.toLowerCase()} "${data.title}"`);
+  }
   return entity;
 }
 

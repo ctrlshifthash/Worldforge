@@ -48,9 +48,9 @@ export default async function DiscoverPage() {
                   <div className="discover-card-meta">
                     <div className="discover-card-author">
                       <div className="discover-card-avatar">
-                        {world.owner.name?.charAt(0)?.toUpperCase()}
+                        {world.owner?.name?.charAt(0)?.toUpperCase() ?? '?'}
                       </div>
-                      <span>{world.owner.name}</span>
+                      <span>{world.owner?.name ?? 'Anonymous Creator'}</span>
                     </div>
                     <div className="discover-card-stats">
                       <span><strong>{world._count.entities}</strong> entities</span>

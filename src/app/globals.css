@@ -5966,6 +5966,81 @@ body::before {
   margin-bottom: 56px;
 }
 
+/* Hero Generate — inline world generator */
+.hero-generate {
+  max-width: 600px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
+.hero-generate-form {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.hero-generate-input {
+  flex: 1;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hero-generate-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,164,78,0.15);
+}
+.hero-generate-input::placeholder {
+  color: var(--text-muted);
+}
+.hero-generate-input:disabled {
+  opacity: 0.5;
+}
+.hero-generate-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+.hero-generate-error {
+  margin-top: 12px;
+  color: #e06060;
+  font-size: 0.85rem;
+}
+.hero-generate-hint {
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* Claim world banner */
+.claim-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  background: rgba(200,164,78,0.08);
+  border: 1px solid rgba(200,164,78,0.25);
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.claim-banner.claimed {
+  background: rgba(74,154,110,0.08);
+  border-color: rgba(74,154,110,0.25);
+  color: var(--color-location);
+  justify-content: center;
+  text-align: center;
+}
+
 /* Hero HUD strip — proves this is a real game */
 
 .hero-hud-strip {
@@ -6627,6 +6702,8 @@ body::before {
 @media (max-width: 768px) {
   .hero-v2 { padding-top: 100px; padding-bottom: 60px; }
   .hero-v2-title { font-size: clamp(2.8rem, 12vw, 4rem); }
+  .hero-generate-form { flex-direction: column; }
+  .hero-generate-input { width: 100%; }
   .hero-v2-cta { flex-direction: column; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
   .hero-v2-cta .btn { width: 100%; }
   .hero-v2-stats { flex-direction: column; gap: 8px; }

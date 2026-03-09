@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
+import { HeroGenerate } from '@/components/HeroGenerate';
 
 const STARS = Array.from({ length: 24 }, (_, i) => ({
   id: i,
@@ -60,12 +61,11 @@ export default async function LandingPage() {
             Grow your world from a concept into a place.
           </p>
 
+          <HeroGenerate />
+
           <div className="hero-v2-cta">
-            <Link href="/play/everhold" className="btn btn-primary btn-lg">
-              Enter a World
-            </Link>
-            <Link href="/register" className="btn btn-secondary btn-lg">
-              Create Your Own
+            <Link href="/play/everhold" className="btn btn-secondary btn-lg">
+              Or enter a demo world
             </Link>
           </div>
         </div>
@@ -732,9 +732,9 @@ export default async function LandingPage() {
                     <div className="discover-card-meta">
                       <div className="discover-card-author">
                         <div className="discover-card-avatar">
-                          {world.owner.name?.charAt(0)?.toUpperCase()}
+                          {world.owner?.name?.charAt(0)?.toUpperCase() ?? '?'}
                         </div>
-                        <span>{world.owner.name}</span>
+                        <span>{world.owner?.name ?? 'Anonymous Creator'}</span>
                       </div>
                       <div className="discover-card-stats">
                         <span><strong>{world._count.entities}</strong> entities</span>
