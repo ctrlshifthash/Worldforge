@@ -6988,8 +6988,12 @@ export function WorldExplore({
             const ny = npc.y * TILE_SIZE;
             const isTall = npc.kind === 'tall';
             const fw = isTall ? NPC_TALL_FRAME_W : NPC_SMALL_FRAME_W;
-            const fh = isTall ? NPC_TALL_FRAME_H : NPC_SMALL_FRAME_H;
             const img = ga[npc.spriteKey];
+            // Tall sprites: old_man/young_man are 240×288 (30×36, 8 rows),
+            // old_woman/young_woman are 240×300 (30×30, 10 rows)
+            const fh = isTall
+              ? (img.naturalHeight % NPC_TALL_FRAME_H === 0 ? NPC_TALL_FRAME_H : fw)
+              : NPC_SMALL_FRAME_H;
             const cols = Math.floor(img.width / fw);
             // Tall spritesheets: row0=left, row1=right, row2=down, row3=up
             // Small spritesheets: row0=down, row1=right, row2=up (no left — flip right)
@@ -7012,8 +7016,8 @@ export function WorldExplore({
             // Sprite — integer dest sizes for crisp pixel art
             const prevSmoothing = ctx.imageSmoothingEnabled;
             ctx.imageSmoothingEnabled = false;
-            const destW = isTall ? 36 : fw;
-            const destH = isTall ? 44 : fh;
+            const destW = 36;
+            const destH = Math.round(fh * 1.2);
             const dx = Math.round(nx + 16 - destW / 2);
             const dy = Math.round(ny + TILE_SIZE - destH);
             if (flipX) {
