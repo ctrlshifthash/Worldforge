@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:mp": "tsx server/multiplayer.ts",
     "build": "prisma generate && prisma db push --accept-data-loss && next build",
     "postinstall": "prisma generate",
     "start": "next start",
@@ -28,6 +29,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "simplex-noise": "^4.0.3",
+    "ws": "^8.19.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
@@ -36,6 +38,7 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.39.3",
     "eslint-config-next": "^16.1.6",
     "tsx": "^4.20.5",

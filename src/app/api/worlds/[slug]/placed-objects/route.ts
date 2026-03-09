@@ -24,17 +24,16 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const { slug } = await params;
   const world = await getWorldBySlug(slug);
   if (!world) {
     return NextResponse.json({ error: 'World not found' }, { status: 404 });
   }
-  if (world.ownerId !== session.sub) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  // Demo worlds (ownerId null) allow anyone to build; owned worlds require owner auth
+  if (world.ownerId !== null) {
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (world.ownerId !== session.sub) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { zone, tileX, tileY, itemType, rotation } = await request.json();
@@ -50,7 +49,7 @@ export async function POST(
       tileY,
       itemType,
       rotation: typeof rotation === 'number' ? rotation : 0,
-      placedBy: session.sub,
+      placedBy: session?.sub || 'demo',
     });
     return NextResponse.json({ object: obj }, { status: 201 });
   } catch (err: unknown) {
@@ -67,17 +66,15 @@ export async function DELETE(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const { slug } = await params;
   const world = await getWorldBySlug(slug);
   if (!world) {
     return NextResponse.json({ error: 'World not found' }, { status: 404 });
   }
-  if (world.ownerId !== session.sub) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (world.ownerId !== null) {
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (world.ownerId !== session.sub) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id } = await request.json();
@@ -98,17 +95,15 @@ export async function PATCH(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const { slug } = await params;
   const world = await getWorldBySlug(slug);
   if (!world) {
     return NextResponse.json({ error: 'World not found' }, { status: 404 });
   }
-  if (world.ownerId !== session.sub) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (world.ownerId !== null) {
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (world.ownerId !== session.sub) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id } = await request.json();

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { ENTITY_COLORS } from '@/lib/utils';
 import { useGameAssets, GameAssets } from './useGameAssets';
+import { useMultiplayer } from '@/lib/useMultiplayer';
 import {
   TERRAIN_COLORS,
   COBBLESTONE_TILE,
@@ -3961,6 +3962,7 @@ export function WorldExplore({
   fullscreen = false,
   isOwner = false,
   worldId,
+  playerName = 'Adventurer',
 }: {
   entities: WorldEntity[];
   slug: string;
@@ -3969,6 +3971,7 @@ export function WorldExplore({
   fullscreen?: boolean;
   isOwner?: boolean;
   worldId?: string;
+  playerName?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapRef = useRef<TileId[][] | null>(null);
@@ -3976,6 +3979,15 @@ export function WorldExplore({
     x: 55, y: 45, facing: 'down', moving: false, animFrame: 0, animTimer: 0,
   });
   const keysRef = useRef<Set<string>>(new Set());
+
+  // ── Multiplayer ──
+  const mp = useMultiplayer(slug, playerName);
+  const [chatInput, setChatInput] = useState('');
+  const [chatVisible, setChatVisible] = useState(false);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const chatVisibleRef = useRef(false);
+  chatVisibleRef.current = chatVisible;
+
   const [nearbyEntity, setNearbyEntity] = useState<WorldEntity | null>(null);
   const [inspecting, setInspecting] = useState<WorldEntity | null>(null);
   const [canvasSize, setCanvasSize] = useState({ w: 900, h: 600 });
@@ -4598,6 +4610,16 @@ export function WorldExplore({
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
+
+      // ── Chat toggle (Enter key) ──
+      if (k === 'enter' && !chatVisibleRef.current && !inspecting && !shopOpen && !buildMenuOpen && !helpOpen && !unifiedShopOpen) {
+        e.preventDefault();
+        setChatVisible(true);
+        setTimeout(() => chatInputRef.current?.focus(), 50);
+        return;
+      }
+      if (chatVisibleRef.current) return; // Don't process game keys while chatting
+
       if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','b','r','m'].includes(k)) {
         e.preventDefault();
         keysRef.current.add(k);
@@ -6114,7 +6136,7 @@ export function WorldExplore({
       if (hasSpeed) speed *= 1.4;
       if (staminaRef.current < 10) speed *= 0.6;
       let moving = false;
-      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current) {
+      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current && !chatVisibleRef.current) {
         let dx = 0, dy = 0;
         if (keys.has('w') || keys.has('arrowup')) { dy = -1; p.facing = 'up'; }
         if (keys.has('s') || keys.has('arrowdown')) { dy = 1; p.facing = 'down'; }
@@ -6156,6 +6178,11 @@ export function WorldExplore({
         p.animTimer += dt;
         if (p.animTimer >= ANIM_FRAME_DURATION) { p.animFrame = (p.animFrame + 1) % PLAYER_WALK_FRAMES; p.animTimer = 0; }
       } else { p.animFrame = 0; p.animTimer = 0; }
+
+      // ── Multiplayer: send position + interpolate remote players ──
+      const facingToDir: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+      mp.sendMove(p.x * TILE_SIZE, p.y * TILE_SIZE, facingToDir[p.facing] ?? 0, p.animFrame, zoneRef.current);
+      mp.interpolatePlayers(dt);
 
       // Nearby entity (hub only)
       if (inHub) {
@@ -7739,6 +7766,40 @@ export function WorldExplore({
               ctx.fillText('+HP', hx, hy);
             }
           }
+        }});
+      }
+
+      // ── Multiplayer: render remote players ──
+      for (const rp of mp.playersRef.current.values()) {
+        if (rp.zone !== zoneRef.current) continue;
+        const rpTileY = rp.y / TILE_SIZE;
+        allDrawables.push({ y: rpTileY, fn: () => {
+          const rpx = rp.x;
+          const rpy = rp.y;
+          const charIdx = rp.charIndex % 17;
+          const dirRow = rp.dir; // 0=down,1=left,2=right,3=up
+          const frame = rp.frame % GK_COLS;
+          const sx = frame * GK_FRAME;
+          const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+          // Shadow
+          ctx.fillStyle = 'rgba(0,0,0,0.15)';
+          ctx.beginPath();
+          ctx.ellipse(rpx + 16, rpy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Sprite
+          ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, rpx + 2, rpy - 4, 28, 32);
+          // Name label
+          ctx.font = '600 7px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          const nameWidth = ctx.measureText(rp.name).width;
+          const nlx = rpx + 16;
+          const nly = rpy - 12;
+          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          ctx.beginPath();
+          ctx.roundRect(nlx - nameWidth / 2 - 4, nly - 7, nameWidth + 8, 12, 3);
+          ctx.fill();
+          ctx.fillStyle = '#80d0ff';
+          ctx.fillText(rp.name, nlx, nly);
         }});
       }
 
@@ -9902,6 +9963,85 @@ export function WorldExplore({
           </div>
         );
       })()}
+
+      {/* ── Multiplayer: Online count ── */}
+      {mp.connectedRef.current && (
+        <div style={{
+          position: 'absolute', top: 12, left: 16, zIndex: 20,
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '4px 10px', borderRadius: 0,
+          background: 'rgba(6,6,8,0.78)', border: '1px solid rgba(255,255,255,0.08)',
+          fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.55)',
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#36B37E', flexShrink: 0 }} />
+          {mp.onlineCountRef.current} online
+        </div>
+      )}
+
+      {/* ── Multiplayer: Chat ── */}
+      <div style={{
+        position: 'absolute', bottom: 60, left: 16, zIndex: 20,
+        width: 280, display: 'flex', flexDirection: 'column', gap: 4,
+      }}>
+        {/* Chat messages */}
+        {mp.chatRef.current.length > 0 && (
+          <div style={{
+            maxHeight: 120, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2,
+            padding: '4px 8px', background: 'rgba(6,6,8,0.7)', borderRadius: 0,
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            {mp.chatRef.current.slice(-8).map((msg, i) => (
+              <div key={i} style={{ fontSize: 10, lineHeight: '14px', color: 'rgba(255,255,255,0.7)' }}>
+                <span style={{ color: '#80d0ff', fontWeight: 600 }}>{msg.playerName}: </span>
+                {msg.message}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Chat input */}
+        {chatVisible ? (
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (chatInput.trim()) {
+              mp.sendChat(chatInput.trim());
+              setChatInput('');
+            }
+            setChatVisible(false);
+            canvasRef.current?.focus();
+          }} style={{ display: 'flex', gap: 4 }}>
+            <input
+              ref={chatInputRef}
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') { setChatVisible(false); canvasRef.current?.focus(); } }}
+              placeholder="Type a message..."
+              maxLength={200}
+              autoFocus
+              style={{
+                flex: 1, padding: '5px 8px', fontSize: 11, fontWeight: 500,
+                background: 'rgba(6,6,8,0.85)', color: '#e8e0d4',
+                border: '1px solid rgba(139,108,62,0.3)', borderRadius: 0, outline: 'none',
+              }}
+            />
+            <button type="submit" style={{
+              padding: '5px 10px', fontSize: 10, fontWeight: 600,
+              background: 'rgba(139,108,62,0.3)', color: '#e8c86a',
+              border: '1px solid rgba(139,108,62,0.3)', borderRadius: 0, cursor: 'pointer',
+            }}>Send</button>
+          </form>
+        ) : mp.connectedRef.current && (
+          <div
+            onClick={() => { setChatVisible(true); setTimeout(() => chatInputRef.current?.focus(), 50); }}
+            style={{
+              padding: '4px 8px', fontSize: 9, color: 'rgba(255,255,255,0.3)',
+              cursor: 'pointer', userSelect: 'none',
+            }}
+          >
+            Press Enter to chat
+          </div>
+        )}
+      </div>
 
       {loading && <div className="map-loading"><div className="spinner" /><p>{assetsLoading ? 'Loading assets...' : 'Generating world...'}</p></div>}
       {assetsError && <div className="map-loading"><p style={{ color: '#ff6b6b' }}>Failed to load assets: {assetsError}</p></div>}

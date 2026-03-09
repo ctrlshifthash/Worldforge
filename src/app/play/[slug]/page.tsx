@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getWorldBySlug, getEntities, getEras } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { WorldExplore } from '@/app/worlds/[slug]/explore/WorldExplore';
 
 export default async function PlayPage({
@@ -58,6 +59,14 @@ export default async function PlayPage({
     })(),
   }));
 
+  // Determine player name for multiplayer
+  let playerName = 'Adventurer';
+  if (session) {
+    // Try to get username from session
+    const user = await prisma.user.findUnique({ where: { id: session.sub }, select: { username: true, name: true } });
+    if (user) playerName = user.username || user.name || 'Adventurer';
+  }
+
   return (
     <WorldExplore
       entities={mappedEntities}
@@ -67,6 +76,7 @@ export default async function PlayPage({
       fullscreen
       isOwner={isOwner}
       worldId={world.id}
+      playerName={playerName}
     />
   );
 }

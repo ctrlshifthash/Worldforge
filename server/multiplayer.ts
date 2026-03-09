@@ -1,0 +1,205 @@
+import { WebSocketServer, WebSocket } from 'ws';
+
+const PORT = Number(process.env.WS_PORT) || 3001;
+
+// ─── Types ───
+
+interface PlayerState {
+  id: string;
+  name: string;
+  zone: string;
+  x: number;
+  y: number;
+  dir: number;   // 0=down,1=left,2=right,3=up
+  frame: number;
+  charIndex: number; // GuttyKreum character index (0-18)
+}
+
+interface RoomPlayer {
+  ws: WebSocket;
+  state: PlayerState;
+}
+
+// ─── State ───
+
+// worldSlug → Map<playerId, RoomPlayer>
+const rooms = new Map<string, Map<string, RoomPlayer>>();
+
+// Track next char index per room so players get different appearances
+const roomCharCounters = new Map<string, number>();
+
+// ─── Server ───
+
+const wss = new WebSocketServer({ port: PORT });
+
+wss.on('connection', (ws) => {
+  let playerId = crypto.randomUUID();
+  let currentRoom: string | null = null;
+
+  ws.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+
+      switch (msg.type) {
+        case 'join': {
+          const worldSlug = msg.worldSlug;
+          if (!worldSlug || typeof worldSlug !== 'string') return;
+
+          currentRoom = worldSlug;
+          if (!rooms.has(currentRoom)) rooms.set(currentRoom, new Map());
+          if (!roomCharCounters.has(currentRoom)) roomCharCounters.set(currentRoom, 0);
+
+          const room = rooms.get(currentRoom)!;
+
+          // Assign a character appearance (cycle through 17 human characters, skip ShibaInu=17 and Witch=18)
+          const counter = roomCharCounters.get(currentRoom)!;
+          const charIndex = counter % 17;
+          roomCharCounters.set(currentRoom, counter + 1);
+
+          const state: PlayerState = {
+            id: playerId,
+            name: (msg.playerName || 'Adventurer').slice(0, 20),
+            zone: msg.zone || 'hub',
+            x: 50 * 16 + 8,
+            y: 25 * 16 + 8,
+            dir: 0,
+            frame: 0,
+            charIndex,
+          };
+
+          room.set(playerId, { ws, state });
+
+          // Send welcome with all current players in this room
+          const players = Array.from(room.values())
+            .filter((p) => p.state.id !== playerId)
+            .map((p) => p.state);
+
+          send(ws, { type: 'welcome', playerId, charIndex, players });
+
+          // Tell others someone joined
+          broadcast(currentRoom, playerId, { type: 'player_join', player: state });
+
+          console.log(`[${worldSlug}] ${state.name} joined (${room.size} players)`);
+          break;
+        }
+
+        case 'move': {
+          if (!currentRoom) return;
+          const room = rooms.get(currentRoom);
+          if (!room) return;
+          const player = room.get(playerId);
+          if (!player) return;
+
+          player.state.x = msg.x;
+          player.state.y = msg.y;
+          player.state.dir = msg.dir ?? 0;
+          player.state.frame = msg.frame ?? 0;
+          if (msg.zone) player.state.zone = msg.zone;
+
+          broadcast(currentRoom, playerId, {
+            type: 'player_move',
+            playerId,
+            x: msg.x,
+            y: msg.y,
+            dir: msg.dir ?? 0,
+            frame: msg.frame ?? 0,
+            zone: player.state.zone,
+          });
+          break;
+        }
+
+        case 'chat': {
+          if (!currentRoom) return;
+          const room = rooms.get(currentRoom);
+          const player = room?.get(playerId);
+          if (!player) return;
+
+          const message = (msg.message || '').slice(0, 200).trim();
+          if (!message) return;
+
+          // Broadcast to everyone including sender
+          broadcast(currentRoom, null, {
+            type: 'chat',
+            playerId,
+            playerName: player.state.name,
+            message,
+            zone: player.state.zone,
+          });
+          break;
+        }
+
+        case 'emote': {
+          if (!currentRoom) return;
+          const room = rooms.get(currentRoom);
+          const player = room?.get(playerId);
+          if (!player) return;
+
+          broadcast(currentRoom, null, {
+            type: 'emote',
+            playerId,
+            emote: (msg.emote || '').slice(0, 20),
+            zone: player.state.zone,
+          });
+          break;
+        }
+      }
+    } catch {
+      // Ignore malformed messages
+    }
+  });
+
+  ws.on('close', () => {
+    if (currentRoom) {
+      const room = rooms.get(currentRoom);
+      if (room) {
+        const player = room.get(playerId);
+        if (player) {
+          console.log(`[${currentRoom}] ${player.state.name} left (${room.size - 1} players)`);
+        }
+        room.delete(playerId);
+        broadcast(currentRoom, null, { type: 'player_leave', playerId });
+        if (room.size === 0) {
+          rooms.delete(currentRoom);
+          roomCharCounters.delete(currentRoom);
+        }
+      }
+    }
+  });
+
+  ws.on('error', () => {
+    // Handled by close event
+  });
+});
+
+// ─── Helpers ───
+
+function send(ws: WebSocket, msg: unknown) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(msg));
+  }
+}
+
+function broadcast(roomId: string, excludeId: string | null, msg: unknown) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+  const data = JSON.stringify(msg);
+  for (const [id, { ws }] of room) {
+    if (id !== excludeId && ws.readyState === WebSocket.OPEN) {
+      ws.send(data);
+    }
+  }
+}
+
+// ─── Status ───
+
+console.log(`Multiplayer server running on ws://localhost:${PORT}`);
+console.log(`Rooms: 0 | Players: 0`);
+
+// Log stats every 30 seconds
+setInterval(() => {
+  let totalPlayers = 0;
+  for (const room of rooms.values()) totalPlayers += room.size;
+  if (totalPlayers > 0) {
+    console.log(`Rooms: ${rooms.size} | Players: ${totalPlayers}`);
+  }
+}, 30000);
