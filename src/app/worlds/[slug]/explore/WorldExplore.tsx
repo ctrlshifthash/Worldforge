@@ -251,9 +251,13 @@ interface FantasyNpc {
   name: string;
   title: string;
   x: number; y: number;
+  tx: number; ty: number;
+  homeX: number; homeY: number;
   spriteKey: string;
   zone: 'hub' | 'grassland' | 'village';
   facing: 'left' | 'right';
+  idleTimer: number;
+  wanders: boolean;
 }
 
 interface SkeletonEnemy {
@@ -296,16 +300,17 @@ const AMBIENT_SPEECH_MIN_COOLDOWN = 10;
 const AMBIENT_SPEECH_MAX_COOLDOWN = 18;
 
 // Fantasy RPG NPC placement data (static chibi sprites)
-const FANTASY_NPC_DATA: Omit<FantasyNpc, never>[] = [
-  // Hub — 2 NPCs
-  { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right' },
-  { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left'  },
+const FANTASY_NPC_DATA: Omit<FantasyNpc, 'tx' | 'ty' | 'homeX' | 'homeY' | 'idleTimer'>[] = [
+  // Hub — 3 NPCs
+  { id: 'f_aldric',  name: 'Sir Aldric',     title: 'Gate Guard',     x: 48, y: 42, spriteKey: 'fPaladinGuard', zone: 'hub',       facing: 'right', wanders: true  },
+  { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right', wanders: false },
+  { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left',  wanders: false },
   // Grassland — 1 NPC (+ 2 skeleton enemies handled separately)
-  { id: 'f_sylara',  name: 'Sylara',         title: 'Elf Scout',      x: 25, y: 40, spriteKey: 'fElfScout',     zone: 'grassland', facing: 'right' },
+  { id: 'f_sylara',  name: 'Sylara',         title: 'Elf Scout',      x: 25, y: 40, spriteKey: 'fElfScout',     zone: 'grassland', facing: 'right', wanders: true  },
   // Village — 3 NPCs
-  { id: 'f_brenna',  name: 'Brenna',         title: 'Village Guard',  x: 20, y: 3,  spriteKey: 'fSwordswoman',  zone: 'village',   facing: 'left'  },
-  { id: 'f_ember',   name: 'Ember',          title: 'Apprentice',     x: 8,  y: 20, spriteKey: 'fFireWitch',    zone: 'village',   facing: 'right' },
-  { id: 'f_sera',    name: 'Sera',           title: 'Herbalist',      x: 32, y: 18, spriteKey: 'fElfHerbalist', zone: 'village',   facing: 'left'  },
+  { id: 'f_brenna',  name: 'Brenna',         title: 'Village Guard',  x: 20, y: 3,  spriteKey: 'fSwordswoman',  zone: 'village',   facing: 'left',  wanders: true  },
+  { id: 'f_ember',   name: 'Ember',          title: 'Apprentice',     x: 8,  y: 20, spriteKey: 'fFireWitch',    zone: 'village',   facing: 'right', wanders: false },
+  { id: 'f_sera',    name: 'Sera',           title: 'Herbalist',      x: 32, y: 18, spriteKey: 'fElfHerbalist', zone: 'village',   facing: 'left',  wanders: true  },
 ];
 
 const AMBIENT_SPEECH_LINES: Record<string, string[]> = {
@@ -4184,6 +4189,7 @@ export function WorldExplore({
   const glRewardGivenRef = useRef(false);
   // Grassland interaction state
   const glDialogRef = useRef<{ text: string; speaker: string; timer: number } | null>(null);
+  const dlgCloseRect = useRef<{ x: number; y: number; w: number; h: number } | null>(null);
   const glLootCollected = useRef<Set<string>>(new Set());
   const coinsCollectedRef = useRef<Set<string>>(new Set());
   const glCaveInspected = useRef(false);
@@ -4457,7 +4463,7 @@ export function WorldExplore({
       }
       for (const fnpc of fantasyNpcsRef.current) {
         if (fnpc.zone !== 'hub') continue;
-        const voice = fnpc.id === 'f_cedric' ? 'sage' : 'blacksmith';
+        const voice = fnpc.id === 'f_aldric' ? 'paladin' : fnpc.id === 'f_cedric' ? 'sage' : 'blacksmith';
         speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice });
       }
     } else if (zone === 'grassland') {
@@ -5289,6 +5295,17 @@ export function WorldExplore({
               spokeToNpc = true;
 
               switch (fnpc.id) {
+                case 'f_aldric': {
+                  const doneGL = glCompletionGold.current;
+                  if (doneGL) {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "The orc threat is crushed. I stand guard now out of habit, but for the first time in years this road feels safe. You've earned the respect of every soldier here.", timer: 7 };
+                  } else if (orcsKilledRef.current >= 1) {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: `I can hear the battle echoes from the north. ${7 - orcsKilledRef.current} orcs still hold the stronghold. Press forward \u2014 this land needs you.`, timer: 6 };
+                  } else {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "Halt, traveler. The northern road leads through the pass into orc territory. Seven warriors and a shaman guard the stronghold. If you're heading that way, stock up on potions first.", timer: 7 };
+                  }
+                  break;
+                }
                 case 'f_cedric': {
                   const heal = 20;
                   if (healthRef.current < MAX_HEALTH * 0.8) {
@@ -6113,6 +6130,28 @@ export function WorldExplore({
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', onBlur); document.removeEventListener('visibilitychange', onVisChange); };
   }, [nearbyEntity, nearMerchant, inspecting, shopOpen, glShopOpen, svFoodShopOpen, svGenShopOpen, svWitchShopOpen, buildMenuOpen, placementMode, isOwner, confirmPlacement, tutorialStep, tradeOpen, unifiedShopOpen, helpOpen]);
 
+  // Canvas click handler (dialogue X button)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top) * scaleY;
+      const btn = dlgCloseRect.current;
+      if (btn && glDialogRef.current && cx >= btn.x && cx <= btn.x + btn.w && cy >= btn.y && cy <= btn.y + btn.h) {
+        glDialogRef.current = null;
+        dialogChoicesRef.current = { active: false, options: [] };
+        svDialogChoicesRef.current = { active: false, options: [] };
+        dlgCloseRect.current = null;
+      }
+    };
+    canvas.addEventListener('click', handleClick);
+    return () => canvas.removeEventListener('click', handleClick);
+  }, []);
+
   // Game loop
   useEffect(() => {
     if (!ready || !canvasRef.current || !mapRef.current || !ga || !terrainRef.current) return;
@@ -6448,7 +6487,34 @@ export function WorldExplore({
       // ── Fantasy RPG NPCs (static chibi characters) ──
       if (!fantasyNpcsSpawned.current) {
         fantasyNpcsSpawned.current = true;
-        fantasyNpcsRef.current = FANTASY_NPC_DATA.map(n => ({ ...n }));
+        fantasyNpcsRef.current = FANTASY_NPC_DATA.map(n => ({
+          ...n, tx: n.x, ty: n.y, homeX: n.x, homeY: n.y, idleTimer: 2 + Math.random() * 3,
+        }));
+      }
+
+      // ── Fantasy NPC wandering AI ──
+      for (const fnpc of fantasyNpcsRef.current) {
+        if (fnpc.zone !== zoneRef.current || !fnpc.wanders) continue;
+        if (fnpc.idleTimer > 0) {
+          fnpc.idleTimer -= dt;
+          if (fnpc.idleTimer <= 0) {
+            fnpc.tx = fnpc.homeX + (Math.random() * 6 - 3);
+            fnpc.ty = fnpc.homeY + (Math.random() * 4 - 2);
+          }
+        } else {
+          const fdx = fnpc.tx - fnpc.x;
+          const fdy = fnpc.ty - fnpc.y;
+          const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
+          if (fdist < 0.2) {
+            fnpc.x = fnpc.tx; fnpc.y = fnpc.ty;
+            fnpc.idleTimer = 3 + Math.random() * 5;
+          } else {
+            const spd = 1.2 * dt;
+            fnpc.x += (fdx / fdist) * spd;
+            fnpc.y += (fdy / fdist) * spd;
+            fnpc.facing = fdx > 0 ? 'right' : 'left';
+          }
+        }
       }
 
       // ── Skeleton enemies near Dark Cave (grassland) ──
@@ -6717,7 +6783,7 @@ export function WorldExplore({
         // Hub dialog timer
         if (glDialogRef.current && !dialogChoicesRef.current.active) {
           glDialogRef.current.timer -= dt;
-          if (glDialogRef.current.timer <= 0) glDialogRef.current = null;
+          if (glDialogRef.current.timer <= 0) { glDialogRef.current = null; dlgCloseRect.current = null; }
         }
         // Hub damage numbers
         damageNumbersRef.current = damageNumbersRef.current.filter(dn => { dn.timer -= dt; dn.y -= 30 * dt; return dn.timer > 0; });
@@ -7020,7 +7086,7 @@ export function WorldExplore({
         // Dialog timer (shared with grassland)
         if (glDialogRef.current && !svDialogChoicesRef.current.active) {
           glDialogRef.current.timer -= dt;
-          if (glDialogRef.current.timer <= 0) glDialogRef.current = null;
+          if (glDialogRef.current.timer <= 0) { glDialogRef.current = null; dlgCloseRect.current = null; }
         }
 
         // Damage numbers tick (shared)
@@ -7144,7 +7210,7 @@ export function WorldExplore({
         // Dialog timer (pause while choices active)
         if (glDialogRef.current && !dialogChoicesRef.current.active) {
           glDialogRef.current.timer -= dt;
-          if (glDialogRef.current.timer <= 0) glDialogRef.current = null;
+          if (glDialogRef.current.timer <= 0) { glDialogRef.current = null; dlgCloseRect.current = null; }
         }
       }
 
@@ -9032,6 +9098,23 @@ export function WorldExplore({
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 1.5;
         ctx.stroke();
+
+        // X close button (top-right corner)
+        const xBtnSize = 20;
+        const xBtnX = dlgX + dlgW - xBtnSize - 6;
+        const xBtnY = dlgY + 4;
+        dlgCloseRect.current = { x: xBtnX, y: xBtnY, w: xBtnSize, h: xBtnSize };
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.beginPath();
+        ctx.roundRect(xBtnX, xBtnY, xBtnSize, xBtnSize, 4);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText('\u00D7', xBtnX + xBtnSize / 2, xBtnY + xBtnSize / 2 + 4);
 
         // Speaker name tag
         const speakerColor = isLoot ? '#e8c86a' : '#88bbdd';
