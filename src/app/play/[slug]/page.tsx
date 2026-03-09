@@ -19,6 +19,11 @@ export default async function PlayPage({
   const session = await getSession();
   const isOwner = world.ownerId === null ? true : (session ? world.ownerId === session.sub : false);
 
+  // Private worlds are only accessible by the owner (demo worlds with null owner are always accessible)
+  if (world.visibility === 'PRIVATE' && world.ownerId !== null && !isOwner) {
+    notFound();
+  }
+
   const [allEntities, eras] = await Promise.all([
     getEntities(world.id),
     getEras(world.id),

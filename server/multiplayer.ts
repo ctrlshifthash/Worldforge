@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import { createServer } from 'http';
 
-const PORT = Number(process.env.WS_PORT) || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 // ─── Types ───
 
@@ -28,9 +29,27 @@ const rooms = new Map<string, Map<string, RoomPlayer>>();
 // Track next char index per room so players get different appearances
 const roomCharCounters = new Map<string, number>();
 
-// ─── Server ───
+// ─── HTTP server (health check for Railway/Render) ───
 
-const wss = new WebSocketServer({ port: PORT });
+const httpServer = createServer((req, res) => {
+  // CORS headers for preflight
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+
+  if (req.url === '/health') {
+    let totalPlayers = 0;
+    for (const room of rooms.values()) totalPlayers += room.size;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, players: totalPlayers }));
+  } else {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Worldforge Multiplayer Server');
+  }
+});
+
+// ─── WebSocket server (attached to HTTP server) ───
+
+const wss = new WebSocketServer({ server: httpServer });
 
 wss.on('connection', (ws) => {
   let playerId = crypto.randomUUID();
@@ -190,10 +209,12 @@ function broadcast(roomId: string, excludeId: string | null, msg: unknown) {
   }
 }
 
-// ─── Status ───
+// ─── Start ───
 
-console.log(`Multiplayer server running on ws://localhost:${PORT}`);
-console.log(`Rooms: 0 | Players: 0`);
+httpServer.listen(PORT, () => {
+  console.log(`Multiplayer server running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
+});
 
 // Log stats every 30 seconds
 setInterval(() => {

@@ -1,0 +1,17 @@
+{
+  "name": "worldforge-multiplayer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "tsx multiplayer.ts",
+    "build": "echo 'no build needed'"
+  },
+  "dependencies": {
+    "ws": "^8.19.0",
+    "tsx": "^4.20.5"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.9.3"
+  }
+}
