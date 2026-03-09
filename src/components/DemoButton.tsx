@@ -58,12 +58,14 @@ export function DemoButton() {
     router.push(`/play/${slug}`);
   }
 
+  const btnStyle = { width: 220, textAlign: 'center' as const };
+
   if (loading) {
     return (
-      <button className="btn btn-secondary btn-lg" disabled style={{ minWidth: 220, position: 'relative', overflow: 'hidden' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <button className="btn btn-secondary btn-lg" disabled style={btnStyle}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <span className="demo-spinner" />
-          {LOADING_STEPS[stepIndex]}
+          <span style={{ fontSize: '0.7em' }}>{LOADING_STEPS[stepIndex]}</span>
         </span>
       </button>
     );
@@ -73,6 +75,7 @@ export function DemoButton() {
     <button
       className="btn btn-secondary btn-lg"
       onClick={handleClick}
+      style={btnStyle}
     >
       Enter Demo World
     </button>
