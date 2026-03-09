@@ -13,7 +13,8 @@ interface PlayerState {
   y: number;
   dir: number;   // 0=down,1=left,2=right,3=up
   frame: number;
-  charIndex: number; // GuttyKreum character index (0-18)
+  charIndex: number; // GuttyKreum character index (0-16)
+  hueShift: number;  // 0-360 color shift
 }
 
 interface RoomPlayer {
@@ -68,13 +69,22 @@ wss.on('connection', (ws) => {
 
           const room = rooms.get(currentRoom)!;
 
-          // Assign a unique character appearance (17 human characters, skip ShibaInu=17 and Witch=18)
-          const usedIndices = new Set<number>();
-          for (const p of room.values()) usedIndices.add(p.state.charIndex);
-          let charIndex = 0;
-          for (let i = 0; i < 17; i++) {
-            if (!usedIndices.has(i)) { charIndex = i; break; }
+          // Use client-provided charIndex if valid (0-16), otherwise auto-assign
+          let charIndex: number;
+          if (typeof msg.charIndex === 'number' && msg.charIndex >= 0 && msg.charIndex <= 16) {
+            charIndex = msg.charIndex;
+          } else {
+            const usedIndices = new Set<number>();
+            for (const p of room.values()) usedIndices.add(p.state.charIndex);
+            charIndex = 0;
+            for (let i = 0; i < 17; i++) {
+              if (!usedIndices.has(i)) { charIndex = i; break; }
+            }
           }
+
+          const hueShift = typeof msg.hueShift === 'number'
+            ? Math.max(0, Math.min(360, Math.round(msg.hueShift)))
+            : 0;
 
           const state: PlayerState = {
             id: playerId,
@@ -85,6 +95,7 @@ wss.on('connection', (ws) => {
             dir: 0,
             frame: 0,
             charIndex,
+            hueShift,
           };
 
           room.set(playerId, { ws, state });
@@ -94,7 +105,7 @@ wss.on('connection', (ws) => {
             .filter((p) => p.state.id !== playerId)
             .map((p) => p.state);
 
-          send(ws, { type: 'welcome', playerId, charIndex, players });
+          send(ws, { type: 'welcome', playerId, charIndex, hueShift, players });
 
           // Tell others someone joined
           broadcast(currentRoom, playerId, { type: 'player_join', player: state });

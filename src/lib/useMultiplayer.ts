@@ -17,6 +17,7 @@ export interface RemotePlayer {
   dir: number;   // 0=down,1=left,2=right,3=up
   frame: number;
   charIndex: number;
+  hueShift: number;
 }
 
 export interface ChatMessage {
@@ -28,17 +29,29 @@ export interface ChatMessage {
 
 // ─── Hook ───
 
-export function useMultiplayer(worldSlug: string, playerName: string) {
+export function useMultiplayer(
+  worldSlug: string,
+  playerName: string,
+  charIndex: number,
+  hueShift: number
+) {
   const wsRef = useRef<WebSocket | null>(null);
   const playersRef = useRef<Map<string, RemotePlayer>>(new Map());
   const myIdRef = useRef('');
   const myCharIndexRef = useRef(0);
+  const myHueShiftRef = useRef(0);
   const connectedRef = useRef(false);
   const chatRef = useRef<ChatMessage[]>([]);
   const onlineCountRef = useRef(0);
 
   // Track last sent state for throttling
   const lastSentRef = useRef({ x: 0, y: 0, dir: 0, zone: '', time: 0 });
+
+  // Store latest charIndex/hueShift in refs so the effect doesn't re-run
+  const charIndexRef = useRef(charIndex);
+  const hueShiftRef = useRef(hueShift);
+  charIndexRef.current = charIndex;
+  hueShiftRef.current = hueShift;
 
   useEffect(() => {
     let ws: WebSocket;
@@ -52,7 +65,14 @@ export function useMultiplayer(worldSlug: string, playerName: string) {
 
     ws.onopen = () => {
       connectedRef.current = true;
-      ws.send(JSON.stringify({ type: 'join', worldSlug, playerName, zone: 'hub' }));
+      ws.send(JSON.stringify({
+        type: 'join',
+        worldSlug,
+        playerName,
+        zone: 'hub',
+        charIndex: charIndexRef.current,
+        hueShift: hueShiftRef.current,
+      }));
     };
 
     ws.onmessage = (event) => {
@@ -63,9 +83,15 @@ export function useMultiplayer(worldSlug: string, playerName: string) {
           case 'welcome':
             myIdRef.current = msg.playerId;
             myCharIndexRef.current = msg.charIndex;
+            myHueShiftRef.current = msg.hueShift ?? 0;
             playersRef.current.clear();
             for (const p of msg.players || []) {
-              playersRef.current.set(p.id, { ...p, targetX: p.x, targetY: p.y });
+              playersRef.current.set(p.id, {
+                ...p,
+                targetX: p.x,
+                targetY: p.y,
+                hueShift: p.hueShift ?? 0,
+              });
             }
             onlineCountRef.current = playersRef.current.size + 1;
             break;
@@ -76,6 +102,7 @@ export function useMultiplayer(worldSlug: string, playerName: string) {
                 ...msg.player,
                 targetX: msg.player.x,
                 targetY: msg.player.y,
+                hueShift: msg.player.hueShift ?? 0,
               });
               onlineCountRef.current = playersRef.current.size + 1;
             }
@@ -168,6 +195,7 @@ export function useMultiplayer(worldSlug: string, playerName: string) {
     playersRef,
     myIdRef,
     myCharIndexRef,
+    myHueShiftRef,
     connectedRef,
     chatRef,
     onlineCountRef,

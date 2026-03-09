@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { ENTITY_COLORS } from '@/lib/utils';
 import { useGameAssets, GameAssets } from './useGameAssets';
 import { useMultiplayer } from '@/lib/useMultiplayer';
+import CharacterPicker from './CharacterPicker';
+import { createHueShiftedCanvas } from '@/lib/hueShiftCanvas';
 import {
   TERRAIN_COLORS,
   COBBLESTONE_TILE,
@@ -3980,8 +3982,30 @@ export function WorldExplore({
   });
   const keysRef = useRef<Set<string>>(new Set());
 
+  // ── Character selection ──
+  const CHAR_SAVE_KEY = 'worldforge_character';
+  const savedChar = (() => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const raw = localStorage.getItem(CHAR_SAVE_KEY);
+      if (raw) return JSON.parse(raw) as { charIndex: number; hueShift: number };
+    } catch { /* ignore */ }
+    return null;
+  })();
+  const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? -1);
+  const [chosenHueShift, setChosenHueShift] = useState<number>(savedChar?.hueShift ?? 0);
+  const chosenCharRef = useRef({ charIndex: chosenCharIndex, hueShift: chosenHueShift });
+  chosenCharRef.current = { charIndex: chosenCharIndex, hueShift: chosenHueShift };
+  const [charPickerOpen, setCharPickerOpen] = useState(false);
+  const charPickerOpenRef = useRef(false);
+  charPickerOpenRef.current = charPickerOpen;
+  const needsCharPick = chosenCharIndex === -1;
+  const needsCharPickRef = useRef(needsCharPick);
+  needsCharPickRef.current = needsCharPick;
+  const hueCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
   // ── Multiplayer ──
-  const mp = useMultiplayer(slug, playerName);
+  const mp = useMultiplayer(slug, playerName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
   const [chatInput, setChatInput] = useState('');
   const [chatVisible, setChatVisible] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -4275,6 +4299,24 @@ export function WorldExplore({
   }, [saveProgress]);
 
   const { assets: ga, loading: assetsLoading, error: assetsError } = useGameAssets();
+
+  // ── Build hue-shifted canvas when assets + character are ready ──
+  useEffect(() => {
+    if (ga && chosenCharIndex >= 0) {
+      hueCanvasRef.current = createHueShiftedCanvas(ga.npcTilemap, chosenHueShift);
+    }
+  }, [ga, chosenCharIndex, chosenHueShift]);
+
+  const handleCharSelect = useCallback((charIdx: number, hue: number) => {
+    setChosenCharIndex(charIdx);
+    setChosenHueShift(hue);
+    chosenCharRef.current = { charIndex: charIdx, hueShift: hue };
+    setCharPickerOpen(false);
+    localStorage.setItem(CHAR_SAVE_KEY, JSON.stringify({ charIndex: charIdx, hueShift: hue }));
+    if (ga) {
+      hueCanvasRef.current = createHueShiftedCanvas(ga.npcTilemap, hue);
+    }
+  }, [ga]);
 
   const triggerAmbientSpeech = useCallback((id: string, text: string) => {
     ambientSpeechRef.current[id] = {
@@ -4620,9 +4662,15 @@ export function WorldExplore({
       }
       if (chatVisibleRef.current) return; // Don't process game keys while chatting
 
-      if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','b','r','m'].includes(k)) {
+      if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' ','b','r','m','c'].includes(k)) {
         e.preventDefault();
         keysRef.current.add(k);
+      }
+
+      // ── Character picker toggle (C key) ──
+      if (k === 'c' && !chatVisibleRef.current && !shopOpen && !tradeOpen && !glShopOpen && !svFoodShopOpen && !svGenShopOpen && !svWitchShopOpen && !inspecting && !placementMode && !charPickerOpen) {
+        setCharPickerOpen(true);
+        return;
       }
 
       // ── Build menu toggle (B key, owner only) ──
@@ -6136,7 +6184,7 @@ export function WorldExplore({
       if (hasSpeed) speed *= 1.4;
       if (staminaRef.current < 10) speed *= 0.6;
       let moving = false;
-      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current && !chatVisibleRef.current) {
+      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current && !chatVisibleRef.current && !charPickerOpenRef.current && !needsCharPickRef.current) {
         let dx = 0, dy = 0;
         if (keys.has('w') || keys.has('arrowup')) { dy = -1; p.facing = 'up'; }
         if (keys.has('s') || keys.has('arrowdown')) { dy = 1; p.facing = 'down'; }
@@ -7622,7 +7670,25 @@ export function WorldExplore({
         }});
       }
 
-      allDrawables.push({ y: p.y, fn: () => drawPlayer(ctx, p.x * TILE_SIZE, p.y * TILE_SIZE, p, ga.character) });
+      // Draw local player using chosen GuttyKreum character
+      allDrawables.push({ y: p.y, fn: () => {
+        const px = p.x * TILE_SIZE;
+        const py = p.y * TILE_SIZE;
+        const charIdx = Math.max(0, chosenCharRef.current.charIndex) % 17;
+        const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+        const dirRow = dirMap[p.facing] ?? 0;
+        const frame = p.moving ? p.animFrame % GK_COLS : 0;
+        const sx = frame * GK_FRAME;
+        const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath();
+        ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Sprite (use hue-shifted canvas if available)
+        const src = hueCanvasRef.current || ga.npcTilemap;
+        ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+      }});
 
       // Player attack slash arc
       if (playerAtkAnimRef.current > 0 && zoneRef.current === 'grassland') {
@@ -7786,8 +7852,11 @@ export function WorldExplore({
           ctx.beginPath();
           ctx.ellipse(rpx + 16, rpy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
           ctx.fill();
-          // Sprite
+          // Sprite (apply hue shift for remote players)
+          const hasHue = rp.hueShift && rp.hueShift !== 0;
+          if (hasHue) ctx.filter = `hue-rotate(${rp.hueShift}deg)`;
           ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, rpx + 2, rpy - 4, 28, 32);
+          if (hasHue) ctx.filter = 'none';
           // Name label
           ctx.font = '600 7px Inter, sans-serif';
           ctx.textAlign = 'center';
@@ -8839,6 +8908,17 @@ export function WorldExplore({
   return (
     <div className={fullscreen ? 'explore-fullscreen' : 'explore-container'}>
       <canvas ref={canvasRef} className="explore-canvas" tabIndex={0} onFocus={() => canvasRef.current?.focus()} />
+
+      {/* Character Picker */}
+      {(needsCharPick || charPickerOpen) && ga && (
+        <CharacterPicker
+          npcTilemap={ga.npcTilemap}
+          currentCharIndex={chosenCharIndex}
+          currentHueShift={chosenHueShift}
+          onSelect={handleCharSelect}
+          onClose={() => { if (!needsCharPick) setCharPickerOpen(false); }}
+        />
+      )}
 
       {fullscreen && (
         <button className="explore-back-btn" onClick={() => window.close()} title="Close world">

@@ -576,6 +576,38 @@ export const GK_CHAR_INDEX: Record<string, number> = {
 };
 export const GK_DIR_ROW = { down: 0, left: 1, right: 2, up: 3 } as const;
 
+// ─── Selectable player characters (human GuttyKreum only, indices 0-16) ───
+export const SELECTABLE_CHARACTERS = [
+  { index: 0,  key: 'FemaleBaker',        label: 'Baker' },
+  { index: 1,  key: 'FemaleCafeMaid',     label: 'Cafe Maid' },
+  { index: 2,  key: 'FemaleElder',        label: 'Elder' },
+  { index: 3,  key: 'FemaleOfficeWorker', label: 'Office Worker' },
+  { index: 4,  key: 'FemaleStudent',      label: 'Student' },
+  { index: 5,  key: 'FemaleTrendy',       label: 'Trendy' },
+  { index: 6,  key: 'FemaleYouth',        label: 'Youth' },
+  { index: 7,  key: 'GuttyChan',          label: 'Gutty Chan' },
+  { index: 8,  key: 'MaleBusinessMan',    label: 'Businessman' },
+  { index: 9,  key: 'MaleBusinessManOld', label: 'Senior Exec' },
+  { index: 10, key: 'MaleCasual',         label: 'Casual' },
+  { index: 11, key: 'MalePunk',           label: 'Punk' },
+  { index: 12, key: 'MaleStudent',        label: 'Student' },
+  { index: 13, key: 'MaleStudent1',       label: 'Student Alt' },
+  { index: 14, key: 'MaleTraditional',    label: 'Traditional' },
+  { index: 15, key: 'MaleTrafficCop',     label: 'Traffic Cop' },
+  { index: 16, key: 'MaleYouth',          label: 'Youth' },
+] as const;
+
+export const HUE_PRESETS = [
+  { label: 'Original', value: 0 },
+  { label: 'Crimson',  value: 330 },
+  { label: 'Ocean',    value: 200 },
+  { label: 'Forest',   value: 120 },
+  { label: 'Royal',    value: 270 },
+  { label: 'Sunset',   value: 30 },
+  { label: 'Frost',    value: 180 },
+  { label: 'Shadow',   value: 240 },
+] as const;
+
 // ─── Sheep spritesheets (256×896) — 4 cols × 28 rows of 64×32 frames ───
 export const SHEEP_FW = 64;
 export const SHEEP_FH = 32;
