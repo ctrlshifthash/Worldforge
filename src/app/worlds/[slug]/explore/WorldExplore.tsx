@@ -770,16 +770,18 @@ interface VillageNPC {
   patrolPath: { x: number; y: number }[] | null;
   patrolIdx: number;
   patrolTimer: number;
+  walkSpeed: number;
+  waitTime: number;
 }
 
 function initVillageNPCs(): VillageNPC[] {
   return [
-    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 26, y: 9 }, { x: 27, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 30, y: 9 }, { x: 31, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'elder', x: 10, y: 8, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 10, y: 8 }, { x: 13, y: 8 }, { x: 13, y: 11 }, { x: 10, y: 11 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'marina', x: 20, y: 10, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 20, y: 10 }, { x: 23, y: 10 }, { x: 23, y: 13 }, { x: 20, y: 13 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'villager', x: 15, y: 11, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'grandma', x: 8, y: 6, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 8, y: 6 }, { x: 11, y: 6 }, { x: 11, y: 9 }, { x: 8, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 26, y: 9 }, { x: 27, y: 9 }], patrolIdx: 0, patrolTimer: 0, walkSpeed: 0.8, waitTime: 4 },
+    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 30, y: 9 }, { x: 31, y: 9 }], patrolIdx: 0, patrolTimer: 0, walkSpeed: 0.8, waitTime: 5 },
+    { id: 'elder', x: 10, y: 8, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 10, y: 8 }, { x: 12, y: 9 }], patrolIdx: 0, patrolTimer: 1.5, walkSpeed: 0.6, waitTime: 6 },
+    { id: 'marina', x: 20, y: 12, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 20, y: 12 }, { x: 22, y: 11 }, { x: 21, y: 13 }], patrolIdx: 0, patrolTimer: 0, walkSpeed: 1.0, waitTime: 3.5 },
+    { id: 'villager', x: 16, y: 12, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 16, y: 12 }, { x: 18, y: 11 }, { x: 17, y: 13 }], patrolIdx: 1, patrolTimer: 2.0, walkSpeed: 1.2, waitTime: 4.5 },
+    { id: 'grandma', x: 8, y: 7, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 8, y: 7 }, { x: 9, y: 8 }], patrolIdx: 1, patrolTimer: 4.0, walkSpeed: 0.5, waitTime: 7 },
   ];
 }
 
@@ -1912,29 +1914,32 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
         fx * TILE_SIZE - 8, 45 * TILE_SIZE + 2, 48, 24);
     });
   });
-  // Marble pillars flanking the gate opening at x=95 and x=97
+  // Marble pillars flanking the gate opening at x=95 and x=97 with visible glow
   [[95, 45], [97, 45]].forEach(([gx, gy]) => {
     fix(gx, gy, () => {
-      ctx.fillStyle = 'rgba(120,180,200,0.06)';
+      ctx.fillStyle = 'rgba(120,180,220,0.15)';
       ctx.beginPath();
-      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 20, 0, Math.PI * 2);
+      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 24, 0, Math.PI * 2);
       ctx.fill();
       const ms = MARBLE_PILLAR_SPRITE;
       ctx.drawImage(ga.marbleFence, ms.sx, ms.sy, ms.sw, ms.sh,
         gx * TILE_SIZE + 6, gy * TILE_SIZE - 16, 18, 52);
     });
   });
-  // "Seaside Village" label below gate
+  // "Seaside Village" label below gate — large, bright, visible
   items.push({ x: 96, y: 45, draw: () => {
-    ctx.font = '600 9px Inter, sans-serif';
+    ctx.font = '700 11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    const lbl = 'Seaside Village';
+    const lbl = '\u25B6 Seaside Village \u25C0';
     const lm = ctx.measureText(lbl);
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.beginPath();
-    ctx.roundRect(96 * TILE_SIZE + 16 - lm.width / 2 - 5, 45 * TILE_SIZE + TILE_SIZE + 8, lm.width + 10, 13, 3);
+    ctx.roundRect(96 * TILE_SIZE + 16 - lm.width / 2 - 8, 45 * TILE_SIZE + TILE_SIZE + 4, lm.width + 16, 18, 4);
     ctx.fill();
-    ctx.fillStyle = 'rgba(120,180,200,0.8)';
+    ctx.strokeStyle = 'rgba(120,180,220,0.4)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(120,180,220,0.95)';
     ctx.fillText(lbl, 96 * TILE_SIZE + 16, 45 * TILE_SIZE + TILE_SIZE + 18);
   }});
   // Signpost at gate
@@ -2289,12 +2294,12 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
   });
 
   // ── Northern Pass — zone exit gate (future zone connection) ──
-  // Marble pillars flanking the north road
+  // Marble pillars flanking the north road with visible glow
   [[55, 18], [57, 18]].forEach(([gx, gy]) => {
     fix(gx, gy, () => {
-      ctx.fillStyle = 'rgba(200,140,50,0.06)';
+      ctx.fillStyle = 'rgba(200,164,78,0.15)';
       ctx.beginPath();
-      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 20, 0, Math.PI * 2);
+      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 24, 0, Math.PI * 2);
       ctx.fill();
       const ms = MARBLE_PILLAR_SPRITE;
       ctx.drawImage(ga.marbleFence, ms.sx, ms.sy, ms.sw, ms.sh,
@@ -2323,17 +2328,20 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
       WOODEN_FENCE_SPRITE.sw, WOODEN_FENCE_SPRITE.sh,
       59 * TILE_SIZE - 8, 18 * TILE_SIZE + 4, 48, 24);
   });
-  // "Northern Pass" label
+  // "Northern Pass" label — large, bright, visible
   items.push({ x: 56, y: 18, draw: () => {
-    ctx.font = '600 9px Inter, sans-serif';
+    ctx.font = '700 11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    const lbl = 'Northern Pass';
+    const lbl = '\u25B2 Northern Pass \u25B2';
     const lm = ctx.measureText(lbl);
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.beginPath();
-    ctx.roundRect(56 * TILE_SIZE + 16 - lm.width / 2 - 5, 18 * TILE_SIZE + TILE_SIZE + 8, lm.width + 10, 13, 3);
+    ctx.roundRect(56 * TILE_SIZE + 16 - lm.width / 2 - 8, 18 * TILE_SIZE + TILE_SIZE + 4, lm.width + 16, 18, 4);
     ctx.fill();
-    ctx.fillStyle = 'rgba(200,164,78,0.8)';
+    ctx.strokeStyle = 'rgba(200,164,78,0.4)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(200,164,78,0.95)';
     ctx.fillText(lbl, 56 * TILE_SIZE + 16, 18 * TILE_SIZE + TILE_SIZE + 18);
   }});
   // Signpost at gate
@@ -6925,15 +6933,15 @@ export function WorldExplore({
         const vPatrolMap = svMapRef.current!;
         for (const npc of svNpcsRef.current) {
           npc.animFrame += dt * 4;
-          // Patrol movement — timer only advances once NPC reaches waypoint
+          // Patrol movement — per-NPC speed and wait time, timer only advances at waypoint
           if (npc.patrolPath && npc.patrolPath.length > 1) {
             const target = npc.patrolPath[npc.patrolIdx];
             const pdx = target.x - npc.x;
             const pdy = target.y - npc.y;
             const pd = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pd > 0.15) {
-              // Moving toward waypoint — check walkability
-              const spd = 1.5 * dt;
+              // Moving toward waypoint — use NPC-specific walk speed
+              const spd = npc.walkSpeed * dt;
               const nx = npc.x + (pdx / pd) * spd;
               const ny = npc.y + (pdy / pd) * spd;
               const nxi = Math.floor(nx), nyi = Math.floor(ny);
@@ -6942,10 +6950,10 @@ export function WorldExplore({
               if (Math.abs(pdx) > Math.abs(pdy)) npc.facing = pdx > 0 ? 'right' : 'left';
               else npc.facing = pdy > 0 ? 'down' : 'up';
             } else {
-              // Arrived at waypoint — wait, then advance
+              // Arrived at waypoint — wait NPC-specific duration, then advance
               npc.x = target.x; npc.y = target.y;
               npc.patrolTimer += dt;
-              if (npc.patrolTimer >= 3) {
+              if (npc.patrolTimer >= npc.waitTime) {
                 npc.patrolTimer = 0;
                 npc.patrolIdx = (npc.patrolIdx + 1) % npc.patrolPath.length;
               }
@@ -8973,6 +8981,79 @@ export function WorldExplore({
         }
       }
 
+      // Hub zone entrance beacons — animated pulsing glow + chevrons
+      if (inHub) {
+        const t = timeRef.current;
+
+        // ── Northern Pass beacon (tile 56, 18) ──
+        const npCx = 56 * TILE_SIZE + 16;
+        const npCy = 18 * TILE_SIZE + 16;
+        const npPulse = 0.25 + Math.sin(t * 2.5) * 0.15;
+        const npGrad = ctx.createRadialGradient(npCx, npCy, 6, npCx, npCy, 56);
+        npGrad.addColorStop(0, `rgba(200,164,78,${npPulse})`);
+        npGrad.addColorStop(1, 'rgba(200,164,78,0)');
+        ctx.fillStyle = npGrad;
+        ctx.fillRect(npCx - 56, npCy - 56, 112, 112);
+        // Pillar glow rings
+        for (const px of [55, 57]) {
+          const pillarX = px * TILE_SIZE + 16;
+          const ringR = 12 + Math.sin(t * 3) * 3;
+          ctx.strokeStyle = `rgba(200,164,78,${0.3 + Math.sin(t * 2.5) * 0.15})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(pillarX, npCy, ringR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        // Animated upward chevrons
+        for (let i = 0; i < 3; i++) {
+          const yOff = ((t * 30 + i * 20) % 60) - 30;
+          const chAlpha = Math.max(0, 0.55 - Math.abs(yOff) / 45);
+          if (chAlpha > 0) {
+            ctx.strokeStyle = `rgba(200,164,78,${chAlpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(npCx - 7, npCy - yOff + 4);
+            ctx.lineTo(npCx, npCy - yOff - 4);
+            ctx.lineTo(npCx + 7, npCy - yOff + 4);
+            ctx.stroke();
+          }
+        }
+
+        // ── Seaside Village beacon (tile 96, 45) ──
+        const svCx = 96 * TILE_SIZE + 16;
+        const svCy = 45 * TILE_SIZE + 16;
+        const svPulse = 0.25 + Math.sin(t * 2.5 + 1.8) * 0.15;
+        const svGrad = ctx.createRadialGradient(svCx, svCy, 6, svCx, svCy, 56);
+        svGrad.addColorStop(0, `rgba(120,180,220,${svPulse})`);
+        svGrad.addColorStop(1, 'rgba(120,180,220,0)');
+        ctx.fillStyle = svGrad;
+        ctx.fillRect(svCx - 56, svCy - 56, 112, 112);
+        // Pillar glow rings
+        for (const px of [95, 97]) {
+          const pillarX = px * TILE_SIZE + 16;
+          const ringR = 12 + Math.sin(t * 3 + 1.8) * 3;
+          ctx.strokeStyle = `rgba(120,180,220,${0.3 + Math.sin(t * 2.5 + 1.8) * 0.15})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(pillarX, svCy, ringR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        // Animated downward chevrons
+        for (let i = 0; i < 3; i++) {
+          const yOff = ((t * 30 + i * 20) % 60) - 30;
+          const chAlpha = Math.max(0, 0.55 - Math.abs(yOff) / 45);
+          if (chAlpha > 0) {
+            ctx.strokeStyle = `rgba(120,180,220,${chAlpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(svCx - 7, svCy + yOff - 4);
+            ctx.lineTo(svCx, svCy + yOff + 4);
+            ctx.lineTo(svCx + 7, svCy + yOff - 4);
+            ctx.stroke();
+          }
+        }
+      }
+
       // Merchant interaction ring (hub only)
       if (inHub && nearMerchantRef.current && !shopOpenRef.current) {
         const mpx = MERCHANT_POS.x * TILE_SIZE;
@@ -9539,24 +9620,41 @@ export function WorldExplore({
           }
           ctx.globalAlpha = 1;
 
-          // Zone exits (yellow markers)
-          const exits: { x: number; y: number; label: string }[] = [];
+          // Zone exits (pulsing markers with labels)
+          const exits: { x: number; y: number; label: string; color: string }[] = [];
           if (zoneRef.current === 'hub') {
-            exits.push({ x: 50, y: 0, label: 'N' }); // Northern Pass
-            exits.push({ x: 96, y: 45, label: 'E' }); // Docks South Gate
+            exits.push({ x: 56, y: 18, label: 'Grassland', color: '#e8c86a' });
+            exits.push({ x: 96, y: 45, label: 'Village', color: '#80c8e0' });
           } else if (zoneRef.current === 'grassland') {
-            exits.push({ x: 40, y: 59, label: 'S' }); // Back to hub
+            exits.push({ x: 40, y: 59, label: 'Hub', color: '#e8c86a' });
           } else {
-            exits.push({ x: 0, y: 12, label: 'W' }); // Back to hub
+            exits.push({ x: 0, y: 12, label: 'Hub', color: '#e8c86a' });
           }
+          const exitPulse = 0.5 + Math.sin(timeRef.current * 3) * 0.5;
           for (const ex of exits) {
             const exx = mmX + ex.x * scaleX;
             const exy = mmY + ex.y * scaleY;
-            ctx.fillStyle = '#e8c86a';
+            // Outer glow ring
+            ctx.strokeStyle = ex.color;
+            ctx.globalAlpha = exitPulse * 0.4;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(exx, exy, 6, 0, Math.PI * 2);
+            ctx.stroke();
+            // Inner dot
+            ctx.globalAlpha = 0.6 + exitPulse * 0.4;
+            ctx.fillStyle = ex.color;
             ctx.beginPath();
             ctx.arc(exx, exy, 3, 0, Math.PI * 2);
             ctx.fill();
+            // Label
+            ctx.globalAlpha = 0.85;
+            ctx.font = '600 7px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = ex.color;
+            ctx.fillText(ex.label, exx, exy - 8);
           }
+          ctx.globalAlpha = 1;
 
           // Orcs (grassland — red dots)
           if (zoneRef.current === 'grassland') {
