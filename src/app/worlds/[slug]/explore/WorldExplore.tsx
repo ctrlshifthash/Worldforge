@@ -3885,27 +3885,18 @@ function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: G
     ctx.beginPath();
     ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
     ctx.fill();
-    const npcVariant = hashString(pe.entity.id) % 6;
-    const frame = Math.floor(time * 1.5) % 4;
-    if (npcVariant === 0) {
-      ctx.drawImage(ga.oldMan, frame * NPC_TALL_FRAME_W, 0, NPC_TALL_FRAME_W, NPC_TALL_FRAME_H,
-        px + 2, py - 6, TILE_SIZE - 4, TILE_SIZE + 6);
-    } else if (npcVariant === 1) {
-      ctx.drawImage(ga.oldWoman, frame * NPC_TALL_FRAME_W, 0, NPC_TALL_FRAME_W, NPC_TALL_FRAME_H,
-        px + 2, py - 6, TILE_SIZE - 4, TILE_SIZE + 6);
-    } else if (npcVariant === 2) {
-      ctx.drawImage(ga.youngMan, frame * NPC_TALL_FRAME_W, 0, NPC_TALL_FRAME_W, NPC_TALL_FRAME_H,
-        px + 2, py - 6, TILE_SIZE - 4, TILE_SIZE + 6);
-    } else if (npcVariant === 3) {
-      ctx.drawImage(ga.youngWoman, frame * NPC_TALL_FRAME_W, 0, NPC_TALL_FRAME_W, NPC_TALL_FRAME_H,
-        px + 2, py - 6, TILE_SIZE - 4, TILE_SIZE + 6);
-    } else if (npcVariant === 4) {
-      ctx.drawImage(ga.merchant, frame * NPC_SMALL_FRAME_W, 0, NPC_SMALL_FRAME_W, NPC_SMALL_FRAME_H,
-        px + 4, py + 2, TILE_SIZE - 8, TILE_SIZE - 4);
-    } else {
-      ctx.drawImage(ga.merchantGeneral, frame * NPC_SMALL_FRAME_W, 0, NPC_SMALL_FRAME_W, NPC_SMALL_FRAME_H,
-        px + 4, py + 2, TILE_SIZE - 8, TILE_SIZE - 4);
-    }
+    // Use GuttyKreum tilemap — pick character by hash
+    const GK_ENTITY_CHARS = ['FemaleBaker', 'MaleCasual', 'FemaleYouth', 'MaleTraditional', 'FemaleCafeMaid', 'MaleStudent', 'FemaleElder', 'MalePunk'];
+    const charKey = GK_ENTITY_CHARS[hashString(pe.entity.id) % GK_ENTITY_CHARS.length];
+    const charIdx = GK_CHAR_INDEX[charKey] ?? 0;
+    const dirRow = GK_DIR_ROW['down'];
+    const frame = Math.floor(time * 1.5) % 2;
+    const sx = frame * GK_FRAME;
+    const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+    const prevSmooth = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+    ctx.imageSmoothingEnabled = prevSmooth;
   } else if (pe.entity.type === 'FACTION') {
     ctx.drawImage(ga.market, MARKET_STALL.sx, MARKET_STALL.sy, MARKET_STALL.sw, MARKET_STALL.sh,
       px - TILE_SIZE / 2, py - TILE_SIZE / 2, TILE_SIZE * 2, TILE_SIZE * 1.5);
