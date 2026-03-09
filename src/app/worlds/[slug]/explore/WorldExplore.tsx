@@ -9632,18 +9632,21 @@ export function WorldExplore({
         for (const seg of segments) {
           // Key badge
           const bw = seg.keyW + badgePad * 2;
-          ctx.fillStyle = 'rgba(200,164,78,0.12)';
+          ctx.fillStyle = 'rgba(200,164,78,0.3)';
           ctx.beginPath();
           ctx.roundRect(cx, cy - 8, bw, 14, 3);
           ctx.fill();
+          ctx.strokeStyle = 'rgba(200,164,78,0.4)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           ctx.font = badgeFont;
-          ctx.fillStyle = 'rgba(200,164,78,0.6)';
+          ctx.fillStyle = 'rgba(230,200,100,0.9)';
           ctx.textAlign = 'center';
           ctx.fillText(seg.key, cx + bw / 2, cy + 3);
           cx += bw + 4;
           // Label
           ctx.font = labelFont;
-          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.fillStyle = 'rgba(255,255,255,0.65)';
           ctx.textAlign = 'left';
           ctx.fillText(seg.label, cx, cy + 3);
           cx += seg.labelW + gap;
