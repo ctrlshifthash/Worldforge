@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
-import { HeroGenerate } from '@/components/HeroGenerate';
 
 const STARS = Array.from({ length: 24 }, (_, i) => ({
   id: i,
@@ -61,11 +60,12 @@ export default async function LandingPage() {
             Grow your world from a concept into a place.
           </p>
 
-          <HeroGenerate />
-
           <div className="hero-v2-cta">
+            <Link href="/register" className="btn btn-primary btn-lg">
+              Generate Your World
+            </Link>
             <Link href="/play/everhold" className="btn btn-secondary btn-lg">
-              Or enter a demo world
+              Enter Demo World
             </Link>
           </div>
         </div>

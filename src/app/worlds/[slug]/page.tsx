@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation';
 import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments } from '@/lib/queries';
 import { ENTITY_COLORS, ENTITY_LABELS, timeAgo } from '@/lib/utils';
 import { GenerateWorld } from './GenerateWorld';
-import { ClaimWorldBanner } from '@/components/ClaimWorldBanner';
-import { getSession } from '@/lib/auth';
 
 export default async function WorldOverviewPage({
   params,
@@ -15,7 +13,7 @@ export default async function WorldOverviewPage({
   const world = await getWorldBySlug(slug);
   if (!world) notFound();
 
-  const [entities, activity, events, eras, sessions, pendingDevCount, recentCanon, session] = await Promise.all([
+  const [entities, activity, events, eras, sessions, pendingDevCount, recentCanon] = await Promise.all([
     getEntities(world.id),
     getActivity(world.id, 8),
     getEvents(world.id),
@@ -23,7 +21,6 @@ export default async function WorldOverviewPage({
     getCharacterSessions(world.id),
     getPendingDevelopmentCount(world.id),
     getRecentWorldDevelopments(world.id, 5),
-    getSession(),
   ]);
 
   const recentEntities = entities.slice(0, 6);
@@ -62,11 +59,6 @@ export default async function WorldOverviewPage({
           </div>
         </div>
       </div>
-
-      {/* Claim banner for unclaimed worlds */}
-      {!world.ownerId && (
-        <ClaimWorldBanner slug={slug} isLoggedIn={!!session} />
-      )}
 
       {/* Description */}
       {world.description ? (

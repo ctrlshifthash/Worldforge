@@ -8,6 +8,9 @@ const VALID_TYPES: EntityType[] = ['CHARACTER', 'LOCATION', 'FACTION', 'ARTIFACT
 
 export async function POST(request: Request) {
   const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const concept = body.concept || 'A unique and interesting fantasy world';
-  const visibility = session ? (body.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE') : 'PUBLIC';
+  const visibility = body.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE';
 
   const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -82,7 +85,7 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
     tagline: worldData.tagline || 'A new world takes shape.',
     description: worldData.description || '',
     visibility: visibility as 'PUBLIC' | 'PRIVATE',
-    ownerId: session?.sub ?? null,
+    ownerId: session.sub,
   });
 
   // Create eras
@@ -124,7 +127,7 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
         accent: ENTITY_COLORS[type] || '#c8a44e',
         facts: Array.isArray(e.facts) ? e.facts : [],
         tags: Array.isArray(e.tags) ? e.tags : [],
-        userId: session?.sub ?? null,
+        userId: session.sub,
       });
       entityMap[e.title] = entity.id;
       entitiesCreated++;
@@ -203,9 +206,7 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
     }
   }
 
-  if (session) {
-    await logActivity(world.id, session.sub, 'generated', `world with ${erasCreated} eras, ${entitiesCreated} entities, ${eventsCreated} events, ${relationsCreated} relations using AI`);
-  }
+  await logActivity(world.id, session.sub, 'generated', `world with ${erasCreated} eras, ${entitiesCreated} entities, ${eventsCreated} events, ${relationsCreated} relations using AI`);
 
   return NextResponse.json({
     world: { slug: world.slug, title: world.title },
