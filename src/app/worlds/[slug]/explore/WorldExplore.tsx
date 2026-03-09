@@ -784,8 +784,8 @@ interface VillageNPC {
 
 function initVillageNPCs(): VillageNPC[] {
   return [
-    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 26, y: 9 }, { x: 28, y: 9 }, { x: 28, y: 12 }, { x: 26, y: 12 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 30, y: 9 }, { x: 33, y: 9 }, { x: 33, y: 12 }, { x: 30, y: 12 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 26, y: 9 }, { x: 27, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: [{ x: 30, y: 9 }, { x: 31, y: 9 }], patrolIdx: 0, patrolTimer: 0 },
     { id: 'elder', x: 10, y: 8, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 10, y: 8 }, { x: 13, y: 8 }, { x: 13, y: 11 }, { x: 10, y: 11 }], patrolIdx: 0, patrolTimer: 0 },
     { id: 'marina', x: 20, y: 10, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 20, y: 10 }, { x: 23, y: 10 }, { x: 23, y: 13 }, { x: 20, y: 13 }], patrolIdx: 0, patrolTimer: 0 },
     { id: 'villager', x: 15, y: 11, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
