@@ -4008,7 +4008,7 @@ export function WorldExplore({
     } catch { /* ignore */ }
     return null;
   })();
-  const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? -1);
+  const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? (isOwner ? 0 : -1));
   const [chosenHueShift, setChosenHueShift] = useState<number>(savedChar?.hueShift ?? 0);
   const [chosenDisplayName, setChosenDisplayName] = useState<string>(savedChar?.displayName || playerName);
   const chosenCharRef = useRef({ charIndex: chosenCharIndex, hueShift: chosenHueShift });
@@ -4020,6 +4020,8 @@ export function WorldExplore({
   const needsCharPickRef = useRef(needsCharPick);
   needsCharPickRef.current = needsCharPick;
   const hueCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isOwnerRef = useRef(isOwner);
+  isOwnerRef.current = isOwner;
 
   // ── Multiplayer ──
   const mp = useMultiplayer(slug, chosenDisplayName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
@@ -6901,19 +6903,26 @@ export function WorldExplore({
             // Name label + [E] prompt when near
             const folkDist = Math.sqrt((ppx - folk.x) ** 2 + (ppy - folk.y) ** 2);
             if (folkDist < 4) {
-              ctx.font = '600 8px Inter, sans-serif';
+              ctx.font = '600 9px Inter, sans-serif';
               ctx.textAlign = 'center';
               const nm = ctx.measureText(folk.name);
-              ctx.fillStyle = 'rgba(0,0,0,0.5)';
+              const nbgW = nm.width + 12;
+              const nbgH = 16;
+              const nbgX = fx + 16 - nbgW / 2;
+              const nbgY = fy - 14;
+              ctx.fillStyle = 'rgba(10,10,15,0.85)';
               ctx.beginPath();
-              ctx.roundRect(fx + 16 - nm.width / 2 - 3, fy + TILE_SIZE, nm.width + 6, 11, 3);
+              ctx.roundRect(nbgX, nbgY, nbgW, nbgH, 4);
               ctx.fill();
-              ctx.fillStyle = folkDist < 2.5 ? '#e8c86a' : 'rgba(255,255,255,0.8)';
-              ctx.fillText(folk.name, fx + 16, fy + TILE_SIZE + 8);
+              ctx.strokeStyle = folkDist < 2.5 ? 'rgba(230,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+              ctx.fillStyle = folkDist < 2.5 ? '#ffd700' : 'rgba(255,255,255,0.9)';
+              ctx.fillText(folk.name, fx + 16, nbgY + 11.5);
               if (folkDist < 2.5) {
-                ctx.fillStyle = '#e8c86a';
-                ctx.font = 'bold 9px Inter, sans-serif';
-                ctx.fillText('[E]', fx + 16, fy - 10);
+                ctx.font = 'bold 8px Inter, sans-serif';
+                ctx.fillStyle = 'rgba(255,215,0,0.7)';
+                ctx.fillText('[E]', fx + 16, nbgY - 4);
               }
             }
           }});
@@ -6995,18 +7004,25 @@ export function WorldExplore({
             ctx.font = '600 9px Inter, sans-serif';
             ctx.textAlign = 'center';
             const lm = ctx.measureText(npc.name);
-            ctx.fillStyle = 'rgba(0,0,0,0.55)';
-            ctx.beginPath();
-            ctx.roundRect(nx + 16 - lm.width / 2 - 4, ny + TILE_SIZE + 6, lm.width + 8, 13, 3);
-            ctx.fill();
             const dist = Math.sqrt((px - npc.x) ** 2 + (py - npc.y) ** 2);
-            ctx.fillStyle = dist < 2.5 ? '#e8c86a' : 'rgba(255,255,255,0.85)';
-            ctx.fillText(npc.name, nx + 16, ny + TILE_SIZE + 16);
+            const nlW = lm.width + 12;
+            const nlH = 16;
+            const nlX = nx + 16 - nlW / 2;
+            const nlY = ny - 14;
+            ctx.fillStyle = 'rgba(10,10,15,0.85)';
+            ctx.beginPath();
+            ctx.roundRect(nlX, nlY, nlW, nlH, 4);
+            ctx.fill();
+            ctx.strokeStyle = dist < 2.5 ? 'rgba(230,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = dist < 2.5 ? '#ffd700' : 'rgba(255,255,255,0.9)';
+            ctx.fillText(npc.name, nx + 16, nlY + 11.5);
             // [E] prompt when near
             if (dist < 2.5) {
-              ctx.fillStyle = '#e8c86a';
-              ctx.font = 'bold 10px Inter, sans-serif';
-              ctx.fillText('[E]', nx + 16, ny - 8);
+              ctx.font = 'bold 8px Inter, sans-serif';
+              ctx.fillStyle = 'rgba(255,215,0,0.7)';
+              ctx.fillText('[E]', nx + 16, nlY - 4);
             }
           }});
         }
@@ -7813,24 +7829,30 @@ export function WorldExplore({
         }});
       }
 
-      // Draw local player using chosen GuttyKreum character
+      // Draw local player
       allDrawables.push({ y: p.y, fn: () => {
         const px = p.x * TILE_SIZE;
         const py = p.y * TILE_SIZE;
-        const charIdx = Math.max(0, chosenCharRef.current.charIndex) % 17;
-        const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
-        const dirRow = dirMap[p.facing] ?? 0;
-        const frame = p.moving ? p.animFrame % GK_COLS : 0;
-        const sx = frame * GK_FRAME;
-        const sy = (charIdx * 4 + dirRow) * GK_FRAME;
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.18)';
-        ctx.beginPath();
-        ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Sprite (use hue-shifted canvas if available)
-        const src = hueCanvasRef.current || ga.npcTilemap;
-        ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+        if (isOwnerRef.current) {
+          // Owner uses the original character spritesheet
+          drawPlayer(ctx, px, py, p, ga.character);
+        } else {
+          // Other players use chosen GuttyKreum character
+          const charIdx = Math.max(0, chosenCharRef.current.charIndex) % 17;
+          const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+          const dirRow = dirMap[p.facing] ?? 0;
+          const frame = p.moving ? p.animFrame % GK_COLS : 0;
+          const sx = frame * GK_FRAME;
+          const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+          // Shadow
+          ctx.fillStyle = 'rgba(0,0,0,0.18)';
+          ctx.beginPath();
+          ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Sprite (use hue-shifted canvas if available)
+          const src = hueCanvasRef.current || ga.npcTilemap;
+          ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+        }
       }});
 
       // Player attack slash arc
@@ -8352,12 +8374,36 @@ export function WorldExplore({
         ctx.globalAlpha = dlgAlpha;
 
         const dlgW = Math.min(420, w - 40);
-        const dlgH = 64;
         const dlgX = w / 2 - dlgW / 2;
-        const dlgY = h - 110;
+        const maxTextW = dlgW - 24;
+        const lineHeight = 15;
+
+        // Pre-calculate wrapped lines so box height is dynamic
+        ctx.font = '400 11px Inter, sans-serif';
+        const words = dlg.text.split(' ');
+        const wrappedLines: string[] = [];
+        let curLine = '';
+        for (const word of words) {
+          const test = curLine ? curLine + ' ' + word : word;
+          if (ctx.measureText(test).width > maxTextW && curLine) {
+            wrappedLines.push(curLine);
+            curLine = word;
+          } else {
+            curLine = test;
+          }
+        }
+        if (curLine) wrappedLines.push(curLine);
+
+        // 26px header (name + divider) + text lines + 10px bottom padding
+        const dlgH = 26 + wrappedLines.length * lineHeight + 10;
+        const activeChoices = dialogChoicesRef.current.active ? dialogChoicesRef.current : svDialogChoicesRef.current.active ? svDialogChoicesRef.current : null;
+        const btnH = 28;
+        const btnGap = 8;
+        const totalBottom = dlgH + (activeChoices ? btnGap + btnH : 0) + 20;
+        const dlgY = h - totalBottom;
 
         // Background
-        ctx.fillStyle = 'rgba(6,6,8,0.9)';
+        ctx.fillStyle = 'rgba(6,6,8,0.92)';
         ctx.beginPath();
         ctx.roundRect(dlgX, dlgY, dlgW, dlgH, 8);
         ctx.fill();
@@ -8380,45 +8426,44 @@ export function WorldExplore({
         ctx.fillStyle = 'rgba(255,255,255,0.08)';
         ctx.fillRect(dlgX + 12, dlgY + 22, dlgW - 24, 1);
 
-        // Message text — wrap if needed
+        // Draw pre-wrapped text lines
         ctx.font = '400 11px Inter, sans-serif';
-        ctx.fillStyle = 'rgba(240,240,240,0.9)';
-        const maxTextW = dlgW - 24;
-        const words = dlg.text.split(' ');
-        let line = '';
-        let lineY = dlgY + 38;
-        for (const word of words) {
-          const test = line ? line + ' ' + word : word;
-          if (ctx.measureText(test).width > maxTextW && line) {
-            ctx.fillText(line, dlgX + 12, lineY);
-            line = word;
-            lineY += 14;
-          } else {
-            line = test;
-          }
-        }
-        if (line) ctx.fillText(line, dlgX + 12, lineY);
+        ctx.fillStyle = 'rgba(240,240,240,0.92)';
+        wrappedLines.forEach((ln, i) => {
+          ctx.fillText(ln, dlgX + 12, dlgY + 38 + i * lineHeight);
+        });
 
-        // Dialogue choice buttons (grassland or village)
-        const activeChoices = dialogChoicesRef.current.active ? dialogChoicesRef.current : svDialogChoicesRef.current.active ? svDialogChoicesRef.current : null;
+        // Dialogue choice buttons
         if (activeChoices) {
           const choices = activeChoices.options;
-          const btnY = dlgY + dlgH + 6;
-          const btnH = 22;
+          const btnY = dlgY + dlgH + btnGap;
           const btnW = Math.floor((dlgW - 16) / choices.length) - 4;
           choices.forEach((opt, ci) => {
             const bx = dlgX + 8 + ci * (btnW + 4);
-            ctx.fillStyle = 'rgba(200,164,78,0.12)';
+            // Solid dark background
+            ctx.fillStyle = 'rgba(20,18,30,0.95)';
             ctx.beginPath();
-            ctx.roundRect(bx, btnY, btnW, btnH, 4);
+            ctx.roundRect(bx, btnY, btnW, btnH, 5);
             ctx.fill();
-            ctx.strokeStyle = 'rgba(200,164,78,0.35)';
-            ctx.lineWidth = 1;
+            // Gold border
+            ctx.strokeStyle = 'rgba(230,200,100,0.6)';
+            ctx.lineWidth = 1.5;
             ctx.stroke();
-            ctx.font = '600 10px Inter, sans-serif';
+            // Key number badge
+            const badgeX = bx + 10;
+            const badgeY = btnY + btnH / 2;
+            ctx.fillStyle = 'rgba(230,200,100,0.15)';
+            ctx.beginPath();
+            ctx.arc(badgeX, badgeY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = 'bold 10px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillStyle = '#e8c86a';
-            ctx.fillText(`[${ci + 1}] ${opt.label}`, bx + btnW / 2, btnY + 15);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillText(`${ci + 1}`, badgeX, badgeY + 4);
+            // Label text
+            ctx.font = '600 10px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(240,240,240,0.9)';
+            ctx.fillText(opt.label, bx + 10 + (btnW - 10) / 2, btnY + btnH / 2 + 4);
           });
         }
 
