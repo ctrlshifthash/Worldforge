@@ -65,8 +65,8 @@ export default async function ExplorePage({
         <div className="page-header-row">
           <div>
             <p className="eyebrow">{world.title}</p>
-            <h1 className="text-headline">Walk Around</h1>
-            <p className="page-description">Walk through your world in 2D. Use WASD or arrow keys to move, and click on entities to inspect them.</p>
+            <h1 className="text-headline">Play</h1>
+            <p className="page-description">Enter your world. Use WASD to move, SPACE to attack, E to interact.</p>
           </div>
         </div>
       </div>

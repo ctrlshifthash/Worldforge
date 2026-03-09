@@ -27,7 +27,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Explore',
     items: [
-      { label: 'Walk Around', path: '/explore', hint: 'Walk through your world in 2D' },
+      { label: 'Play', path: '/explore', hint: 'Enter and explore your world' },
       { label: 'Map', path: '/map', hint: 'Bird\'s-eye view with regions and territories' },
       { label: 'Connections', path: '/graph', hint: 'See how everything in your world is linked' },
     ],

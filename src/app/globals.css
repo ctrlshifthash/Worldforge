@@ -5960,10 +5960,23 @@ body::before {
 
 .hero-v2-cta {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 16px;
+  gap: 32px;
   margin-bottom: 56px;
+}
+.hero-cta-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 220px;
+  text-align: center;
+}
+.hero-cta-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 /* Hero Generate — inline world generator */
@@ -6702,9 +6715,8 @@ body::before {
 @media (max-width: 768px) {
   .hero-v2 { padding-top: 100px; padding-bottom: 60px; }
   .hero-v2-title { font-size: clamp(2.8rem, 12vw, 4rem); }
-  .hero-generate-form { flex-direction: column; }
-  .hero-generate-input { width: 100%; }
-  .hero-v2-cta { flex-direction: column; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .hero-v2-cta { flex-direction: column; align-items: center; gap: 24px; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .hero-cta-option { max-width: 100%; }
   .hero-v2-cta .btn { width: 100%; }
   .hero-v2-stats { flex-direction: column; gap: 8px; }
   .hero-hud-strip { overflow-x: auto; justify-content: flex-start; padding: 0 var(--space-xl); }

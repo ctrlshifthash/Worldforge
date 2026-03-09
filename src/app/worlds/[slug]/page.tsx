@@ -196,8 +196,8 @@ export default async function WorldOverviewPage({
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 12h18M12 3v18"/></svg>
               </div>
               <div>
-                <h4>Walk Around</h4>
-                <p>Walk through your world in a 2D procedurally-generated terrain with entity markers you can interact with. Use arrow keys or WASD to move.</p>
+                <h4>Play</h4>
+                <p>Enter your world. Explore, fight enemies, talk to NPCs, complete quests, and build structures.</p>
               </div>
             </Link>
 
