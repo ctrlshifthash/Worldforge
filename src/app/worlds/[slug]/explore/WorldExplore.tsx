@@ -695,9 +695,8 @@ interface VillageNPC {
   x: number;
   y: number;
   name: string;
-  spriteKey: 'oldMan' | 'oldWoman' | 'youngMan' | 'youngWoman' | 'merchant' | 'merchantGeneral';
+  charKey: string; // GuttyKreum character key
   facing: 'down' | 'left' | 'right' | 'up';
-  kind: 'tall' | 'small';
   animFrame: number;
   patrolPath: { x: number; y: number }[] | null;
   patrolIdx: number;
@@ -706,12 +705,12 @@ interface VillageNPC {
 
 function initVillageNPCs(): VillageNPC[] {
   return [
-    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'elder', x: 10, y: 5, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'marina', x: 20, y: 7, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'villager', x: 15, y: 11, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'grandma', x: 8, y: 3, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', charKey: 'FemaleBaker', facing: 'down', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', charKey: 'MaleBusinessMan', facing: 'down', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'elder', x: 10, y: 5, name: 'Elder Rowan', charKey: 'MaleBusinessManOld', facing: 'right', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'marina', x: 20, y: 7, name: 'Marina', charKey: 'FemaleStudent', facing: 'down', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'villager', x: 15, y: 11, name: 'Tom', charKey: 'MaleYouth', facing: 'right', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'grandma', x: 8, y: 3, name: 'Nana Rose', charKey: 'FemaleElder', facing: 'down', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
   ];
 }
 
@@ -4091,6 +4090,7 @@ export function WorldExplore({
   const fadeRef = useRef(0);
   const fadeDirRef = useRef<'in' | 'out' | null>(null);
   const pendingZoneRef = useRef<'hub' | 'grassland' | 'village' | null>(null);
+  const zoneTransCooldownRef = useRef(0); // seconds after zone switch before gates activate
   const glMapRef = useRef<TileId[][] | null>(null);
   const glTerrainRef = useRef<HTMLCanvasElement | null>(null);
   const glDecoRef = useRef<HTMLCanvasElement | null>(null);
@@ -5930,7 +5930,7 @@ export function WorldExplore({
             decoRef.current = svDecoRef.current;
             zoneWRef.current = SV_W;
             zoneHRef.current = SV_H;
-            p.x = 1; p.y = 12; p.facing = 'right'; p.moving = false;
+            p.x = 3; p.y = 12; p.facing = 'right'; p.moving = false;
             zoneRef.current = 'village';
             zoneBannerRef.current = 'Seaside Village';
             zoneBannerTimer.current = 3;
@@ -5943,8 +5943,8 @@ export function WorldExplore({
             zoneHRef.current = H;
             const saved = hubPlayerSave.current;
             if (prevZone === 'village') {
-              // Return north of Docks south gate
-              p.x = 96; p.y = 44; p.facing = 'up';
+              // Return north of Docks south gate (offset from gate to avoid re-trigger)
+              p.x = 96; p.y = 42; p.facing = 'up';
             } else if (saved) {
               p.x = saved.x; p.y = saved.y; p.facing = 'down';
             } else {
@@ -5982,11 +5982,13 @@ export function WorldExplore({
           }
           pendingZoneRef.current = null;
           fadeDirRef.current = 'out';
+          zoneTransCooldownRef.current = 1.5;
         }
       } else if (fadeDirRef.current === 'out') {
         fadeRef.current = Math.max(0, fadeRef.current - dt * FADE_SPEED);
         if (fadeRef.current <= 0) fadeDirRef.current = null;
       }
+      if (zoneTransCooldownRef.current > 0) zoneTransCooldownRef.current -= dt;
 
       if (zoneBannerTimer.current > 0) {
         zoneBannerTimer.current -= dt;
@@ -6962,44 +6964,19 @@ export function WorldExplore({
           allDrawables.push({ y: npc.y, fn: () => {
             const nx = npc.x * TILE_SIZE;
             const ny = npc.y * TILE_SIZE;
-            const isTall = npc.kind === 'tall';
-            const fw = isTall ? NPC_TALL_FRAME_W : NPC_SMALL_FRAME_W;
-            const fh = isTall ? NPC_TALL_FRAME_H : NPC_SMALL_FRAME_H;
-            const img = ga[npc.spriteKey];
-            const cols = Math.floor(img.width / fw);
-            // Tall spritesheets: row0=right, row1=left, row2=down, row3=up
-            // Small spritesheets: row0=down, row1=right, row2=up (no left — flip right)
-            let facingRow: number;
-            let flipX = false;
-            if (isTall) {
-              facingRow = npc.facing === 'right' ? 0 : npc.facing === 'left' ? 1 : npc.facing === 'down' ? 2 : 3;
-            } else {
-              if (npc.facing === 'down') { facingRow = 0; }
-              else if (npc.facing === 'right') { facingRow = 1; }
-              else if (npc.facing === 'left') { facingRow = 1; flipX = true; }
-              else { facingRow = 2; } // up
-            }
-            const frame = Math.floor(npc.animFrame) % (cols || 1);
+            const gkIdx = GK_CHAR_INDEX[npc.charKey] ?? 0;
+            const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+            const dirRow = dirMap[npc.facing] ?? 0;
+            const frame = Math.floor(npc.animFrame) % GK_COLS;
+            const sx = frame * GK_FRAME;
+            const sy = (gkIdx * 4 + dirRow) * GK_FRAME;
             // Shadow
             ctx.fillStyle = 'rgba(0,0,0,0.12)';
             ctx.beginPath();
             ctx.ellipse(nx + 16, ny + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
             ctx.fill();
             // Sprite
-            const scale = isTall ? 1.2 : 1.0;
-            const destW = fw * scale;
-            const destH = fh * scale;
-            if (flipX) {
-              ctx.save();
-              ctx.translate(nx + 16, 0);
-              ctx.scale(-1, 1);
-              ctx.drawImage(img, frame * fw, facingRow * fh, fw, fh,
-                -destW / 2, ny + TILE_SIZE - destH, destW, destH);
-              ctx.restore();
-            } else {
-              ctx.drawImage(img, frame * fw, facingRow * fh, fw, fh,
-                nx + 16 - destW / 2, ny + TILE_SIZE - destH, destW, destH);
-            }
+            ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, nx + 2, ny - 4, 28, 32);
             // Name label
             ctx.font = '600 9px Inter, sans-serif';
             ctx.textAlign = 'center';
@@ -8974,7 +8951,7 @@ export function WorldExplore({
       }
 
       // ── Zone transitions ──
-      if (!isFading) {
+      if (!isFading && zoneTransCooldownRef.current <= 0) {
         if (inHub) {
           // Northern Pass → Grassland
           const gateDist = Math.sqrt((p.x - 56) ** 2 + (p.y - 17) ** 2);
