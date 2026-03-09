@@ -1604,19 +1604,29 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
     ctx.ellipse(58 * TILE_SIZE + 16, 41 * TILE_SIZE + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
     ctx.fill();
     // Merchant sprite (in front of stall)
+    const prevSM = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(ga.merchant, 0, 0, NPC_SMALL_FRAME_W, NPC_SMALL_FRAME_H,
-      58 * TILE_SIZE + 4, 41 * TILE_SIZE + 2, TILE_SIZE - 8, TILE_SIZE - 4);
-    // Label
+      58 * TILE_SIZE + 2, 41 * TILE_SIZE - 2, 28, 32);
+    ctx.imageSmoothingEnabled = prevSM;
+    // Label — above sprite
     ctx.font = '600 9px Inter, sans-serif';
     ctx.textAlign = 'center';
     const lbl = 'Merchant';
     const lm = ctx.measureText(lbl);
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    const mlW = lm.width + 12;
+    const mlH = 16;
+    const mlX = 58 * TILE_SIZE + 16 - mlW / 2;
+    const mlY = 41 * TILE_SIZE - 18;
+    ctx.fillStyle = 'rgba(10,10,15,0.85)';
     ctx.beginPath();
-    ctx.roundRect(58 * TILE_SIZE + 16 - lm.width / 2 - 4, 41 * TILE_SIZE + TILE_SIZE + 4, lm.width + 8, 12, 3);
+    ctx.roundRect(mlX, mlY, mlW, mlH, 4);
     ctx.fill();
+    ctx.strokeStyle = 'rgba(230,200,100,0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.fillStyle = '#e8c86a';
-    ctx.fillText(lbl, 58 * TILE_SIZE + 16, 41 * TILE_SIZE + TILE_SIZE + 13);
+    ctx.fillText(lbl, 58 * TILE_SIZE + 16, mlY + 11.5);
   });
 
   // Market props: dense goods around stalls
@@ -3760,8 +3770,11 @@ function drawPlayer(ctx: CanvasRenderingContext2D, x: number, y: number, player:
   ctx.ellipse(x + TILE_SIZE / 2, y + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
+  const prevSP = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
   ctx.drawImage(img, sx, sy, PLAYER_FRAME_W, PLAYER_FRAME_H,
     x + offsetX, y + TILE_SIZE - destH, destW, destH);
+  ctx.imageSmoothingEnabled = prevSP;
 }
 
 // ─── Draw entity ───
@@ -6902,7 +6915,10 @@ export function WorldExplore({
             ctx.beginPath();
             ctx.ellipse(fx + 16, fy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
             ctx.fill();
+            const prevS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, fx + 2, fy - 4, 28, 32);
+            ctx.imageSmoothingEnabled = prevS;
             // Name label + [E] prompt when near
             const folkDist = Math.sqrt((ppx - folk.x) ** 2 + (ppy - folk.y) ** 2);
             if (folkDist < 4) {
@@ -6912,7 +6928,7 @@ export function WorldExplore({
               const nbgW = nm.width + 12;
               const nbgH = 16;
               const nbgX = fx + 16 - nbgW / 2;
-              const nbgY = fy - 14;
+              const nbgY = fy - 18;
               ctx.fillStyle = 'rgba(10,10,15,0.85)';
               ctx.beginPath();
               ctx.roundRect(nbgX, nbgY, nbgW, nbgH, 4);
@@ -6936,7 +6952,10 @@ export function WorldExplore({
             const lsx = 92 * TILE_SIZE;
             const lsy = 52 * TILE_SIZE;
             const lsFrame = Math.floor(timeRef.current * 2) % SHEEP_COLS;
+            const prevSLS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(ga.sheepWhite, lsFrame * SHEEP_FW, 0, SHEEP_FW, SHEEP_FH, lsx - 16, lsy - 8, 64, 32);
+            ctx.imageSmoothingEnabled = prevSLS;
             // Exclamation mark to draw attention
             ctx.font = 'bold 10px Inter, sans-serif';
             ctx.textAlign = 'center';
@@ -6952,8 +6971,10 @@ export function WorldExplore({
             const sy = sheep.y * TILE_SIZE;
             const img = sheep.variant === 'white' ? ga.sheepWhite : ga.sheepBrown;
             const frame = Math.floor(sheep.animFrame) % SHEEP_COLS;
-            // Row 0 = south idle/walk
+            const prevSS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, frame * SHEEP_FW, 0, SHEEP_FW, SHEEP_FH, sx - 16, sy - 8, 64, 32);
+            ctx.imageSmoothingEnabled = prevSS;
           }});
         }
       } else if (zoneRef.current === 'village') {
@@ -7106,24 +7127,34 @@ export function WorldExplore({
           ctx.beginPath();
           ctx.ellipse(wx + 16, wy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
           ctx.fill();
+          const prevSW = ctx.imageSmoothingEnabled;
+          ctx.imageSmoothingEnabled = false;
           ctx.drawImage(ga.npcTilemap, frame * GK_FRAME, sy, GK_FRAME, GK_FRAME, wx + 2, wy - 4, 28, 32);
-          // Name label
+          ctx.imageSmoothingEnabled = prevSW;
+          // Name label — above sprite, pill bg
           ctx.font = '600 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           const lbl = 'Willow';
           const lm = ctx.measureText(lbl);
-          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          const wlW = lm.width + 12;
+          const wlH = 16;
+          const wlX = wx + 16 - wlW / 2;
+          const wlY = wy - 18;
+          ctx.fillStyle = 'rgba(10,10,15,0.85)';
           ctx.beginPath();
-          ctx.roundRect(wx + 16 - lm.width / 2 - 4, wy + TILE_SIZE + 2, lm.width + 8, 13, 3);
+          ctx.roundRect(wlX, wlY, wlW, wlH, 4);
           ctx.fill();
           const witchDist = Math.sqrt((px - SV_WITCH_POS.x) ** 2 + (py - SV_WITCH_POS.y) ** 2);
+          ctx.strokeStyle = witchDist < SV_WITCH_RANGE ? 'rgba(192,128,224,0.5)' : 'rgba(255,255,255,0.15)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           ctx.fillStyle = witchDist < SV_WITCH_RANGE ? '#c080e0' : 'rgba(200,160,255,0.85)';
-          ctx.fillText(lbl, wx + 16, wy + TILE_SIZE + 12);
+          ctx.fillText(lbl, wx + 16, wlY + 11.5);
           // [E] prompt when near
           if (witchDist < SV_WITCH_RANGE) {
-            ctx.fillStyle = '#c080e0';
-            ctx.font = 'bold 10px Inter, sans-serif';
-            ctx.fillText('[E]', wx + 16, wy - 8);
+            ctx.font = 'bold 8px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(192,128,224,0.7)';
+            ctx.fillText('[E]', wx + 16, wlY - 4);
           }
         }});
 
@@ -7142,19 +7173,29 @@ export function WorldExplore({
             ctx.beginPath();
             ctx.ellipse(vx + 16, vy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
             ctx.fill();
+            const prevSV = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, vx + 2, vy - 4, 28, 32);
-            // Name label when near
+            ctx.imageSmoothingEnabled = prevSV;
+            // Name label when near — above sprite, pill bg
             const vdist = Math.sqrt((px - vw.x) ** 2 + (py - vw.y) ** 2);
             if (vdist < 4) {
-              ctx.font = '600 8px Inter, sans-serif';
+              ctx.font = '600 9px Inter, sans-serif';
               ctx.textAlign = 'center';
               const nm = ctx.measureText(vw.name);
-              ctx.fillStyle = 'rgba(0,0,0,0.5)';
+              const vwW = nm.width + 12;
+              const vwH = 16;
+              const vwX = vx + 16 - vwW / 2;
+              const vwY = vy - 18;
+              ctx.fillStyle = 'rgba(10,10,15,0.85)';
               ctx.beginPath();
-              ctx.roundRect(vx + 16 - nm.width / 2 - 3, vy + TILE_SIZE, nm.width + 6, 11, 3);
+              ctx.roundRect(vwX, vwY, vwW, vwH, 4);
               ctx.fill();
+              ctx.strokeStyle = vdist < 2.5 ? 'rgba(144,208,144,0.5)' : 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.stroke();
               ctx.fillStyle = vdist < 2.5 ? '#90d090' : 'rgba(255,255,255,0.75)';
-              ctx.fillText(vw.name, vx + 16, vy + TILE_SIZE + 8);
+              ctx.fillText(vw.name, vx + 16, vwY + 11.5);
             }
           }});
         }
@@ -7350,28 +7391,33 @@ export function WorldExplore({
           ctx.beginPath();
           ctx.ellipse(GL_VENDOR_POS.x * TILE_SIZE + 16, GL_VENDOR_POS.y * TILE_SIZE + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
           ctx.fill();
+          const prevSVnd = ctx.imageSmoothingEnabled;
+          ctx.imageSmoothingEnabled = false;
           ctx.drawImage(ga.glVendor, frame * GL_VENDOR_FW, 0, GL_VENDOR_FW, GL_VENDOR_FH,
             GL_VENDOR_POS.x * TILE_SIZE - 16, GL_VENDOR_POS.y * TILE_SIZE - 48, 64, 64);
-          ctx.font = '600 10px Inter, sans-serif';
+          ctx.imageSmoothingEnabled = prevSVnd;
+          // Label — above sprite, pill bg
+          ctx.font = '600 9px Inter, sans-serif';
           ctx.textAlign = 'center';
           const lbl = 'Traveling Vendor';
           const lm = ctx.measureText(lbl);
-          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          const vlW = lm.width + 12;
+          const vlH = 16;
+          const vlX = GL_VENDOR_POS.x * TILE_SIZE + 16 - vlW / 2;
+          const vlY = GL_VENDOR_POS.y * TILE_SIZE - 62;
+          ctx.fillStyle = 'rgba(10,10,15,0.85)';
           ctx.beginPath();
-          ctx.roundRect(GL_VENDOR_POS.x * TILE_SIZE + 16 - lm.width / 2 - 5, GL_VENDOR_POS.y * TILE_SIZE + TILE_SIZE + 8, lm.width + 10, 14, 3);
+          ctx.roundRect(vlX, vlY, vlW, vlH, 4);
           ctx.fill();
+          ctx.strokeStyle = vendorDist < MERCHANT_RANGE ? 'rgba(230,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
           ctx.fillStyle = vendorDist < MERCHANT_RANGE ? '#e8c86a' : 'rgba(255,255,255,0.85)';
-          ctx.fillText(lbl, GL_VENDOR_POS.x * TILE_SIZE + 16, GL_VENDOR_POS.y * TILE_SIZE + TILE_SIZE + 19);
+          ctx.fillText(lbl, GL_VENDOR_POS.x * TILE_SIZE + 16, vlY + 11.5);
           if (vendorDist < MERCHANT_RANGE) {
-            ctx.strokeStyle = '#e8c86a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(GL_VENDOR_POS.x * TILE_SIZE + 16, GL_VENDOR_POS.y * TILE_SIZE + 16, TILE_SIZE / 2 + 8, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = '#e8c86a';
-            ctx.font = 'bold 10px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('[E]', GL_VENDOR_POS.x * TILE_SIZE + 16, GL_VENDOR_POS.y * TILE_SIZE - 16);
+            ctx.font = 'bold 8px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(230,200,100,0.7)';
+            ctx.fillText('[E]', GL_VENDOR_POS.x * TILE_SIZE + 16, vlY - 4);
           }
         }});
 
@@ -7596,7 +7642,10 @@ export function WorldExplore({
             const spy = sheep.y * TILE_SIZE;
             const img = sheep.variant === 'white' ? ga.sheepWhite : ga.sheepBrown;
             const frame = Math.floor(sheep.animFrame) % SHEEP_COLS;
+            const prevSGS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, frame * SHEEP_FW, 0, SHEEP_FW, SHEEP_FH, spx - 16, spy - 8, 64, 32);
+            ctx.imageSmoothingEnabled = prevSGS;
           }});
         }
 
@@ -7606,27 +7655,42 @@ export function WorldExplore({
           allDrawables.push({ y: guard.y, fn: () => {
             const gx = guard.x * TILE_SIZE;
             const gy = guard.y * TILE_SIZE;
-            // Use frame 0 (idle standing pose)
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(gx + 14, gy + TILE_SIZE - 2, 9, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Use frame 0 (idle standing pose) — crisp pixel rendering
+            const prevSG = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
             ctx.save();
             if (guard.facing === 'left') {
-              ctx.translate(gx + WARRIOR_FW / 2, 0);
+              ctx.translate(gx + 14, 0);
               ctx.scale(-1, 1);
-              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, -WARRIOR_FW / 2 - 4, gy - 32, 32, 56);
+              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, -14, gy - 24, 28, 48);
             } else {
-              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, gx - 4, gy - 32, 32, 56);
+              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, gx, gy - 24, 28, 48);
             }
             ctx.restore();
-            // Label
-            ctx.font = '600 8px Inter, sans-serif';
+            ctx.imageSmoothingEnabled = prevSG;
+            // Label — above sprite, pill bg
+            ctx.font = '600 9px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.beginPath();
             const lbl = guard.name;
             const lm = ctx.measureText(lbl);
-            ctx.roundRect(gx + 12 - lm.width / 2 - 3, gy + 28, lm.width + 6, 11, 3);
+            const glW = lm.width + 12;
+            const glH = 16;
+            const glX = gx + 14 - glW / 2;
+            const glY = gy - 38;
+            ctx.fillStyle = 'rgba(10,10,15,0.85)';
+            ctx.beginPath();
+            ctx.roundRect(glX, glY, glW, glH, 4);
             ctx.fill();
+            ctx.strokeStyle = 'rgba(100,180,255,0.4)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
             ctx.fillStyle = 'rgba(100,180,255,0.9)';
-            ctx.fillText(lbl, gx + 12, gy + 36);
+            ctx.fillText(lbl, gx + 14, glY + 11.5);
           }});
         }
 
