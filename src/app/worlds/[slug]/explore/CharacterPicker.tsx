@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { SELECTABLE_CHARACTERS, HUE_PRESETS, GK_FRAME, GK_COLS } from '@/lib/tileAtlas';
 
 interface CharacterPickerProps {
@@ -9,80 +9,6 @@ interface CharacterPickerProps {
   currentHueShift: number;
   onSelect: (charIndex: number, hueShift: number) => void;
   onClose: () => void;
-}
-
-// Individual animated character preview
-function CharPreview({
-  tilemap,
-  charIndex,
-  hueShift,
-  selected,
-  onClick,
-  label,
-}: {
-  tilemap: HTMLImageElement;
-  charIndex: number;
-  hueShift: number;
-  selected: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
-    let animId: number;
-    let tick = 0;
-
-    const draw = () => {
-      tick++;
-      if (tick % 12 === 0) frameRef.current = (frameRef.current + 1) % GK_COLS;
-
-      ctx.clearRect(0, 0, 64, 64);
-
-      // Apply hue shift
-      if (hueShift !== 0) {
-        ctx.filter = `hue-rotate(${hueShift}deg)`;
-      } else {
-        ctx.filter = 'none';
-      }
-
-      const sx = frameRef.current * GK_FRAME;
-      const sy = (charIndex * 4 + 0) * GK_FRAME; // direction 0 = down (facing camera)
-      ctx.drawImage(tilemap, sx, sy, GK_FRAME, GK_FRAME, 16, 12, 32, 40);
-
-      animId = requestAnimationFrame(draw);
-    };
-
-    animId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(animId);
-  }, [tilemap, charIndex, hueShift]);
-
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        cursor: 'pointer',
-        textAlign: 'center',
-        padding: 6,
-        borderRadius: 8,
-        border: selected ? '2px solid #ffd700' : '2px solid rgba(255,255,255,0.1)',
-        background: selected ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)',
-        transition: 'border 0.15s, background 0.15s',
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        width={64}
-        height={64}
-        style={{ imageRendering: 'pixelated', display: 'block', margin: '0 auto' }}
-      />
-      <div style={{ fontSize: 10, color: '#ccc', marginTop: 2, whiteSpace: 'nowrap' }}>{label}</div>
-    </div>
-  );
 }
 
 export default function CharacterPicker({
@@ -94,6 +20,47 @@ export default function CharacterPicker({
 }: CharacterPickerProps) {
   const [selectedIndex, setSelectedIndex] = useState(currentCharIndex >= 0 ? currentCharIndex : 0);
   const [hueShift, setHueShift] = useState(currentHueShift);
+  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const frameRef = useRef(0);
+
+  const setCanvasRef = useCallback((idx: number, el: HTMLCanvasElement | null) => {
+    if (el) canvasRefs.current.set(idx, el);
+    else canvasRefs.current.delete(idx);
+  }, []);
+
+  // Single shared animation loop for all previews
+  useEffect(() => {
+    let animId: number;
+    let lastTime = 0;
+    const FRAME_INTERVAL = 180; // ms per animation frame
+
+    const draw = (time: number) => {
+      if (time - lastTime >= FRAME_INTERVAL) {
+        lastTime = time;
+        frameRef.current = (frameRef.current + 1) % GK_COLS;
+
+        for (const [charIndex, canvas] of canvasRefs.current) {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
+
+          ctx.clearRect(0, 0, 48, 48);
+          if (hueShift !== 0) {
+            ctx.filter = `hue-rotate(${hueShift}deg)`;
+          } else {
+            ctx.filter = 'none';
+          }
+          const sx = frameRef.current * GK_FRAME;
+          const sy = (charIndex * 4 + 0) * GK_FRAME; // down = facing camera
+          ctx.drawImage(npcTilemap, sx, sy, GK_FRAME, GK_FRAME, 8, 4, 32, 40);
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    animId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(animId);
+  }, [npcTilemap, hueShift]);
 
   return (
     <div
@@ -105,53 +72,107 @@ export default function CharacterPicker({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: '"Press Start 2P", monospace',
       }}
+      onClick={(e) => { if (e.target === e.currentTarget && currentCharIndex >= 0) onClose(); }}
     >
       <div
         style={{
-          background: '#1a1a2e',
-          border: '2px solid #333',
-          borderRadius: 12,
-          padding: '24px 28px',
-          maxWidth: 620,
-          width: '95vw',
-          maxHeight: '90vh',
+          background: 'linear-gradient(180deg, #1e1e3a 0%, #151528 100%)',
+          border: '2px solid #3a3a5c',
+          borderRadius: 14,
+          padding: '20px 24px 24px',
+          maxWidth: 540,
+          width: '92vw',
+          maxHeight: '88vh',
           overflowY: 'auto',
           color: '#eee',
+          boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
         }}
       >
         {/* Title */}
-        <h2 style={{ textAlign: 'center', fontSize: 14, color: '#ffd700', margin: '0 0 16px' }}>
-          Choose Your Character
-        </h2>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
+          <h2 style={{
+            fontSize: 13,
+            color: '#ffd700',
+            margin: 0,
+            fontFamily: '"Press Start 2P", monospace',
+            letterSpacing: 1,
+          }}>
+            Choose Your Character
+          </h2>
+          <div style={{ fontSize: 10, color: '#666', marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
+            Press C anytime to change
+          </div>
+        </div>
 
-        {/* Character grid */}
+        {/* Character grid — 6 columns */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+            gridTemplateColumns: 'repeat(6, 1fr)',
             gap: 6,
-            marginBottom: 20,
+            marginBottom: 18,
           }}
         >
           {SELECTABLE_CHARACTERS.map((ch) => (
-            <CharPreview
+            <div
               key={ch.index}
-              tilemap={npcTilemap}
-              charIndex={ch.index}
-              hueShift={hueShift}
-              selected={selectedIndex === ch.index}
               onClick={() => setSelectedIndex(ch.index)}
-              label={ch.label}
-            />
+              style={{
+                cursor: 'pointer',
+                textAlign: 'center',
+                padding: '6px 2px 4px',
+                borderRadius: 8,
+                border: selectedIndex === ch.index
+                  ? '2px solid #ffd700'
+                  : '2px solid transparent',
+                background: selectedIndex === ch.index
+                  ? 'rgba(255,215,0,0.12)'
+                  : 'rgba(255,255,255,0.04)',
+                transition: 'all 0.12s',
+              }}
+            >
+              <canvas
+                ref={(el) => setCanvasRef(ch.index, el)}
+                width={48}
+                height={48}
+                style={{
+                  imageRendering: 'pixelated',
+                  display: 'block',
+                  margin: '0 auto',
+                  width: 48,
+                  height: 48,
+                }}
+              />
+              <div style={{
+                fontSize: 8,
+                color: selectedIndex === ch.index ? '#ffd700' : '#888',
+                marginTop: 2,
+                fontFamily: 'Inter, sans-serif',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {ch.label}
+              </div>
+            </div>
           ))}
         </div>
 
+        {/* Divider */}
+        <div style={{ height: 1, background: '#333', margin: '0 0 14px' }} />
+
         {/* Color section */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>Color Variant</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+        <div style={{ marginBottom: 18 }}>
+          <div style={{
+            fontSize: 10,
+            color: '#888',
+            marginBottom: 8,
+            fontFamily: '"Press Start 2P", monospace',
+          }}>
+            Color
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
             {HUE_PRESETS.map((preset) => (
               <div
                 key={preset.value}
@@ -159,31 +180,41 @@ export default function CharacterPicker({
                 title={preset.label}
                 style={{
                   cursor: 'pointer',
-                  width: 28,
-                  height: 28,
+                  width: 26,
+                  height: 26,
                   borderRadius: '50%',
                   background: preset.value === 0
-                    ? '#888'
-                    : `hsl(${preset.value}, 70%, 50%)`,
+                    ? 'linear-gradient(135deg, #999, #666)'
+                    : `hsl(${preset.value}, 65%, 45%)`,
                   border: hueShift === preset.value
                     ? '3px solid #ffd700'
-                    : '2px solid rgba(255,255,255,0.2)',
-                  transition: 'border 0.15s',
+                    : '2px solid rgba(255,255,255,0.15)',
+                  transition: 'border 0.12s, transform 0.12s',
+                  transform: hueShift === preset.value ? 'scale(1.15)' : 'scale(1)',
+                  boxShadow: hueShift === preset.value ? '0 0 8px rgba(255,215,0,0.3)' : 'none',
                 }}
               />
             ))}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 9, color: '#888' }}>Fine tune:</span>
+            <span style={{ fontSize: 9, color: '#555', fontFamily: 'Inter, sans-serif' }}>Fine tune</span>
             <input
               type="range"
               min={0}
               max={360}
               value={hueShift}
               onChange={(e) => setHueShift(Number(e.target.value))}
-              style={{ flex: 1, accentColor: '#ffd700' }}
+              style={{ flex: 1, accentColor: '#ffd700', height: 4 }}
             />
-            <span style={{ fontSize: 9, color: '#888', minWidth: 28 }}>{hueShift}</span>
+            <span style={{
+              fontSize: 9,
+              color: '#555',
+              minWidth: 24,
+              textAlign: 'right',
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              {hueShift}
+            </span>
           </div>
         </div>
 
@@ -195,13 +226,16 @@ export default function CharacterPicker({
               style={{
                 padding: '8px 20px',
                 fontSize: 10,
-                background: '#333',
-                color: '#aaa',
-                border: '1px solid #555',
+                background: 'transparent',
+                color: '#666',
+                border: '1px solid #444',
                 borderRadius: 6,
                 cursor: 'pointer',
-                fontFamily: 'inherit',
+                fontFamily: '"Press Start 2P", monospace',
+                transition: 'color 0.15s',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#aaa')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
             >
               Cancel
             </button>
@@ -209,16 +243,20 @@ export default function CharacterPicker({
           <button
             onClick={() => onSelect(selectedIndex, hueShift)}
             style={{
-              padding: '8px 24px',
+              padding: '8px 28px',
               fontSize: 10,
-              background: '#ffd700',
+              background: 'linear-gradient(180deg, #ffd700, #e6b800)',
               color: '#1a1a2e',
               border: 'none',
               borderRadius: 6,
               cursor: 'pointer',
               fontWeight: 'bold',
-              fontFamily: 'inherit',
+              fontFamily: '"Press Start 2P", monospace',
+              boxShadow: '0 2px 8px rgba(255,215,0,0.25)',
+              transition: 'transform 0.1s',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             Confirm
           </button>
