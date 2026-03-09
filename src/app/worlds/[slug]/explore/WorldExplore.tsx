@@ -141,8 +141,6 @@ import {
   SHEEP_FW,
   SHEEP_FH,
   SHEEP_COLS,
-  WARRIOR_FW,
-  WARRIOR_FH,
 } from '@/lib/tileAtlas';
 
 // ─── Types ───
@@ -236,14 +234,6 @@ interface AmbientSheep {
   facing: 'down' | 'left' | 'right' | 'up';
   animFrame: number;
   idleTimer: number;
-  zone: 'hub' | 'grassland' | 'village';
-}
-
-interface WarriorGuard {
-  id: string;
-  name: string;
-  x: number; y: number;
-  facing: 'left' | 'right';
   zone: 'hub' | 'grassland' | 'village';
 }
 
@@ -4274,8 +4264,6 @@ export function WorldExplore({
   const ambientSheepRef = useRef<AmbientSheep[]>([]);
   const sheepSpawned = useRef(false);
   // Warrior guards
-  const warriorGuardsRef = useRef<WarriorGuard[]>([]);
-  const guardsSpawned = useRef(false);
   // Village ambient wanderers (non-quest NPCs)
   const villageWanderersRef = useRef<AmbientNpc[]>([]);
   const villageWandererSpawned = useRef(false);
@@ -4469,10 +4457,6 @@ export function WorldExplore({
         speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice });
       }
     } else if (zone === 'grassland') {
-      for (const guard of warriorGuardsRef.current) {
-        if (guard.zone !== zone) continue;
-        speakers.push({ id: guard.id, name: guard.name, x: guard.x, y: guard.y, zone, voice: 'guard' });
-      }
       for (const sheep of ambientSheepRef.current) {
         if (sheep.zone !== zone) continue;
         speakers.push({ id: sheep.id, name: 'Sheep', x: sheep.x, y: sheep.y, zone, voice: 'sheep' });
@@ -5384,35 +5368,8 @@ export function WorldExplore({
         else if (zoneRef.current === 'grassland') {
           const px = playerRef.current.x, py = playerRef.current.y;
 
-          // Guard dialogue
-          let spokeToGuard = false;
-          for (const guard of warriorGuardsRef.current) {
-            const gd = Math.sqrt((px - guard.x) ** 2 + (py - guard.y) ** 2);
-            if (gd < 2.5 && !glDialogRef.current) {
-              spokeToGuard = true;
-              const killed = orcsKilledRef.current;
-              const cleared = glRewardGivenRef.current;
-              let guardText: string;
-              if (cleared) {
-                guardText = guard.id === 'guard_l'
-                  ? 'The stronghold has fallen. You fight like a champion. Safe travels back south.'
-                  : 'I saw the smoke clear from the stronghold. You did what a dozen soldiers couldn\'t.';
-              } else if (killed >= 3) {
-                guardText = guard.id === 'guard_l'
-                  ? `${7 - killed} orcs remain. Keep pushing. The shrine chest won't open until they're all gone.`
-                  : 'I can hear the fighting from here. Give them no mercy \u2014 they showed us none.';
-              } else {
-                guardText = guard.id === 'guard_l'
-                  ? 'Seven orcs hold the stronghold to the north. Clear them all and the ancient shrine unlocks a reward. SPACE to swing your weapon.'
-                  : 'We guard this pass day and night. The vendor camp to the south has supplies if you need healing potions.';
-              }
-              glDialogRef.current = { speaker: guard.name || 'Guard', text: guardText, timer: 6 };
-              break;
-            }
-          }
-
           // Sylara — Elf Scout (fantasy NPC)
-          if (!spokeToGuard && !glDialogRef.current) {
+          if (!glDialogRef.current) {
             for (const fnpc of fantasyNpcsRef.current) {
               if (fnpc.zone !== 'grassland') continue;
               const fd = Math.sqrt((px - fnpc.x) ** 2 + (py - fnpc.y) ** 2);
@@ -6513,15 +6470,6 @@ export function WorldExplore({
             }
           }
         }
-      }
-
-      // ── Warrior guards ──
-      if (!guardsSpawned.current) {
-        guardsSpawned.current = true;
-        warriorGuardsRef.current = [
-          { id: 'guard_l', name: 'Varn', x: 50, y: 4, facing: 'right', zone: 'grassland' },
-          { id: 'guard_r', name: 'Drell', x: 52, y: 4, facing: 'left', zone: 'grassland' },
-        ];
       }
 
       // ── Fantasy RPG NPCs (static chibi characters) ──
@@ -8203,51 +8151,6 @@ export function WorldExplore({
             ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, frame * SHEEP_FW, 0, SHEEP_FW, SHEEP_FH, spx - 16, spy - 8, 64, 32);
             ctx.imageSmoothingEnabled = prevSGS;
-          }});
-        }
-
-        // ── Warrior guards near zone entrance ──
-        for (const guard of warriorGuardsRef.current) {
-          if (guard.zone !== 'grassland') continue;
-          allDrawables.push({ y: guard.y, fn: () => {
-            const gx = guard.x * TILE_SIZE;
-            const gy = guard.y * TILE_SIZE;
-            // Shadow
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.beginPath();
-            ctx.ellipse(gx + 14, gy + TILE_SIZE - 2, 9, 3, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Use frame 0 (idle standing pose) — crisp pixel rendering
-            const prevSG = ctx.imageSmoothingEnabled;
-            ctx.imageSmoothingEnabled = false;
-            ctx.save();
-            if (guard.facing === 'left') {
-              ctx.translate(gx + 14, 0);
-              ctx.scale(-1, 1);
-              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, -14, gy - 24, 28, 48);
-            } else {
-              ctx.drawImage(ga.warriorRun, 0, 0, WARRIOR_FW, WARRIOR_FH, gx, gy - 24, 28, 48);
-            }
-            ctx.restore();
-            ctx.imageSmoothingEnabled = prevSG;
-            // Label — above sprite, pill bg
-            ctx.font = '600 9px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            const lbl = guard.name;
-            const lm = ctx.measureText(lbl);
-            const glW = lm.width + 12;
-            const glH = 16;
-            const glX = gx + 14 - glW / 2;
-            const glY = gy - 38;
-            ctx.fillStyle = 'rgba(10,10,15,0.85)';
-            ctx.beginPath();
-            ctx.roundRect(glX, glY, glW, glH, 4);
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(100,180,255,0.4)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(100,180,255,0.9)';
-            ctx.fillText(lbl, gx + 14, glY + 11.5);
           }});
         }
 
