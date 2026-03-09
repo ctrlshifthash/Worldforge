@@ -6525,12 +6525,12 @@ export function WorldExplore({
         }
       }
 
-      // ── Skeleton enemies near Dark Cave (grassland) ──
+      // ── Skeleton enemies (grassland — central area) ──
       if (!skeletonsSpawned.current) {
         skeletonsSpawned.current = true;
         skeletonEnemiesRef.current = [
-          { id: 'skel_1', x: 64, y: 25, hp: 30, maxHp: 30, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonMace', facing: 'left', contactTimer: 0 },
-          { id: 'skel_2', x: 66, y: 24, hp: 35, maxHp: 35, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonAxe', facing: 'right', contactTimer: 0 },
+          { id: 'skel_1', x: 38, y: 30, hp: 30, maxHp: 30, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonMace', facing: 'left', contactTimer: 0 },
+          { id: 'skel_2', x: 42, y: 32, hp: 35, maxHp: 35, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonAxe', facing: 'right', contactTimer: 0 },
         ];
       }
 
