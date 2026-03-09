@@ -708,10 +708,10 @@ function initVillageNPCs(): VillageNPC[] {
   return [
     { id: 'food_merchant', x: 26, y: 9, name: 'Fiona', spriteKey: 'merchant', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
     { id: 'gen_merchant', x: 30, y: 9, name: 'Gerald', spriteKey: 'merchantGeneral', facing: 'down', kind: 'small', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'elder', x: 10, y: 5, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
-    { id: 'marina', x: 20, y: 7, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'elder', x: 18, y: 14, name: 'Elder Rowan', spriteKey: 'oldMan', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 18, y: 14 }, { x: 24, y: 14 }, { x: 24, y: 18 }, { x: 18, y: 18 }], patrolIdx: 0, patrolTimer: 0 },
+    { id: 'marina', x: 28, y: 16, name: 'Marina', spriteKey: 'youngWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 28, y: 16 }, { x: 33, y: 16 }, { x: 33, y: 20 }, { x: 28, y: 20 }], patrolIdx: 0, patrolTimer: 0 },
     { id: 'villager', x: 15, y: 11, name: 'Tom', spriteKey: 'youngMan', facing: 'right', kind: 'tall', animFrame: 0, patrolPath: [{ x: 15, y: 11 }, { x: 22, y: 11 }, { x: 22, y: 14 }, { x: 15, y: 14 }], patrolIdx: 0, patrolTimer: 0 },
-    { id: 'grandma', x: 8, y: 3, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: null, patrolIdx: 0, patrolTimer: 0 },
+    { id: 'grandma', x: 12, y: 20, name: 'Nana Rose', spriteKey: 'oldWoman', facing: 'down', kind: 'tall', animFrame: 0, patrolPath: [{ x: 12, y: 20 }, { x: 17, y: 20 }, { x: 17, y: 23 }, { x: 12, y: 23 }], patrolIdx: 0, patrolTimer: 0 },
   ];
 }
 
@@ -6989,11 +6989,8 @@ export function WorldExplore({
             const isTall = npc.kind === 'tall';
             const fw = isTall ? NPC_TALL_FRAME_W : NPC_SMALL_FRAME_W;
             const img = ga[npc.spriteKey];
-            // Tall sprites: old_man/young_man are 240×288 (30×36, 8 rows),
-            // old_woman/young_woman are 240×300 (30×30, 10 rows)
-            const fh = isTall
-              ? (img.naturalHeight % NPC_TALL_FRAME_H === 0 ? NPC_TALL_FRAME_H : fw)
-              : NPC_SMALL_FRAME_H;
+            // Tall sprites have 6 rows: old_man/young_man 240×288 (30×48), old_woman/young_woman 240×300 (30×50)
+            const fh = isTall ? Math.round(img.naturalHeight / 6) : NPC_SMALL_FRAME_H;
             const cols = Math.floor(img.width / fw);
             // Tall spritesheets: row0=left, row1=right, row2=down, row3=up
             // Small spritesheets: row0=down, row1=right, row2=up (no left — flip right)
@@ -7016,8 +7013,8 @@ export function WorldExplore({
             // Sprite — integer dest sizes for crisp pixel art
             const prevSmoothing = ctx.imageSmoothingEnabled;
             ctx.imageSmoothingEnabled = false;
-            const destW = 36;
-            const destH = Math.round(fh * 1.2);
+            const destW = fw;
+            const destH = fh;
             const dx = Math.round(nx + 16 - destW / 2);
             const dy = Math.round(ny + TILE_SIZE - destH);
             if (flipX) {
