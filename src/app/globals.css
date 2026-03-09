@@ -6005,6 +6005,22 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.4;
 }
 
+/* ─── Demo Button Loading ─── */
+.demo-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: demoSpin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes demoSpin {
+  to { transform: rotate(360deg); }
+}
+
 /* Hero Generate — inline world generator */
 .hero-generate {
   max-width: 600px;
