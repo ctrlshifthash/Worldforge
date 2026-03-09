@@ -245,6 +245,29 @@ interface WarriorGuard {
   zone: 'hub' | 'grassland' | 'village';
 }
 
+// Fantasy RPG sprite pack — static chibi characters
+interface FantasyNpc {
+  id: string;
+  name: string;
+  title: string;
+  x: number; y: number;
+  spriteKey: string;
+  zone: 'hub' | 'grassland' | 'village';
+  facing: 'left' | 'right';
+}
+
+interface SkeletonEnemy {
+  id: string;
+  x: number; y: number;
+  hp: number; maxHp: number;
+  state: 'idle' | 'hurt' | 'dead';
+  hurtTimer: number;
+  deathAlpha: number;
+  spriteKey: string;
+  facing: 'left' | 'right';
+  contactTimer: number;
+}
+
 interface AmbientSpeechState {
   text: string;
   timer: number;
@@ -271,6 +294,20 @@ const MAX_STAMINA = 100;
 const AMBIENT_SPEECH_DURATION = 3.2;
 const AMBIENT_SPEECH_MIN_COOLDOWN = 10;
 const AMBIENT_SPEECH_MAX_COOLDOWN = 18;
+
+// Fantasy RPG NPC placement data (static chibi sprites)
+const FANTASY_NPC_DATA: Omit<FantasyNpc, never>[] = [
+  // Hub — 3 NPCs
+  { id: 'f_aldric',  name: 'Sir Aldric',     title: 'Gate Guard',     x: 48, y: 42, spriteKey: 'fPaladinGuard', zone: 'hub',       facing: 'right' },
+  { id: 'f_cedric',  name: 'Father Cedric',  title: 'Sage',           x: 30, y: 60, spriteKey: 'fElderPriest',  zone: 'hub',       facing: 'right' },
+  { id: 'f_thorin',  name: 'Thorin',         title: 'Blacksmith',     x: 62, y: 50, spriteKey: 'fDwarfSmith',   zone: 'hub',       facing: 'left'  },
+  // Grassland — 1 NPC (+ 2 skeleton enemies handled separately)
+  { id: 'f_sylara',  name: 'Sylara',         title: 'Elf Scout',      x: 25, y: 40, spriteKey: 'fElfScout',     zone: 'grassland', facing: 'right' },
+  // Village — 3 NPCs
+  { id: 'f_brenna',  name: 'Brenna',         title: 'Village Guard',  x: 20, y: 3,  spriteKey: 'fSwordswoman',  zone: 'village',   facing: 'left'  },
+  { id: 'f_ember',   name: 'Ember',          title: 'Apprentice',     x: 8,  y: 20, spriteKey: 'fFireWitch',    zone: 'village',   facing: 'right' },
+  { id: 'f_sera',    name: 'Sera',           title: 'Herbalist',      x: 32, y: 18, spriteKey: 'fElfHerbalist', zone: 'village',   facing: 'left'  },
+];
 
 const AMBIENT_SPEECH_LINES: Record<string, string[]> = {
   merchant_food: [
@@ -364,6 +401,41 @@ const AMBIENT_SPEECH_LINES: Record<string, string[]> = {
     'No one passes without our say.',
   ],
   sheep: ['Baa.', '*soft bleat*', 'Maa.'],
+  paladin: [
+    'Duty above all.',
+    'The road north grows restless.',
+    'Stand firm.',
+  ],
+  sage: [
+    'The old texts speak of this place...',
+    'Patience reveals all truths.',
+    'There is power in these stones.',
+  ],
+  blacksmith: [
+    'Iron bends to will and flame.',
+    'Good steel needs a steady hand.',
+    'Build strong or not at all.',
+  ],
+  elf_scout: [
+    'The wind carries orc voices.',
+    'I count seven... no, fewer now.',
+    'Eyes open, feet light.',
+  ],
+  village_guard_f: [
+    'I won\'t let bandits near the gate.',
+    'Steel solves what words cannot.',
+    'The village counts on me.',
+  ],
+  apprentice: [
+    'One day I\'ll cast real spells.',
+    'Willow says I have potential.',
+    'The herbs smell strange today.',
+  ],
+  herbalist: [
+    'Fresh salve, ready for wounds.',
+    'The shore herbs bloom at dusk.',
+    'Nature provides, if you listen.',
+  ],
 };
 
 const AMBIENT_CHATTER: Array<{ a: string; b: string; lines: [string, string][] }> = [
@@ -4209,6 +4281,11 @@ export function WorldExplore({
   // Village ambient wanderers (non-quest NPCs)
   const villageWanderersRef = useRef<AmbientNpc[]>([]);
   const villageWandererSpawned = useRef(false);
+  // Fantasy RPG NPCs (static chibi characters)
+  const fantasyNpcsRef = useRef<FantasyNpc[]>([]);
+  const fantasyNpcsSpawned = useRef(false);
+  const skeletonEnemiesRef = useRef<SkeletonEnemy[]>([]);
+  const skeletonsSpawned = useRef(false);
   // Quest flags — persistent across zone transitions
   const questFlagsRef = useRef<Set<string>>(new Set());
   const ambientSpeechRef = useRef<Record<string, AmbientSpeechState>>({});
@@ -4388,6 +4465,11 @@ export function WorldExplore({
         if (sheep.zone !== 'hub') continue;
         speakers.push({ id: sheep.id, name: 'Sheep', x: sheep.x, y: sheep.y, zone, voice: 'sheep' });
       }
+      for (const fnpc of fantasyNpcsRef.current) {
+        if (fnpc.zone !== 'hub') continue;
+        const voice = fnpc.id === 'f_aldric' ? 'paladin' : fnpc.id === 'f_cedric' ? 'sage' : 'blacksmith';
+        speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice });
+      }
     } else if (zone === 'grassland') {
       for (const guard of warriorGuardsRef.current) {
         if (guard.zone !== zone) continue;
@@ -4396,6 +4478,10 @@ export function WorldExplore({
       for (const sheep of ambientSheepRef.current) {
         if (sheep.zone !== zone) continue;
         speakers.push({ id: sheep.id, name: 'Sheep', x: sheep.x, y: sheep.y, zone, voice: 'sheep' });
+      }
+      for (const fnpc of fantasyNpcsRef.current) {
+        if (fnpc.zone !== 'grassland') continue;
+        speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice: 'elf_scout' });
       }
     } else if (zone === 'village') {
       for (const npc of svNpcsRef.current) {
@@ -4415,6 +4501,11 @@ export function WorldExplore({
           vw.id === 'village_youth' ? 'youth_village' :
           'shiba';
         speakers.push({ id: vw.id, name: vw.name, x: vw.x, y: vw.y, zone, voice });
+      }
+      for (const fnpc of fantasyNpcsRef.current) {
+        if (fnpc.zone !== 'village') continue;
+        const voice = fnpc.id === 'f_brenna' ? 'village_guard_f' : fnpc.id === 'f_ember' ? 'apprentice' : 'herbalist';
+        speakers.push({ id: fnpc.id, name: fnpc.name, x: fnpc.x, y: fnpc.y, zone, voice });
       }
     }
 
@@ -4887,6 +4978,52 @@ export function WorldExplore({
             }
           }
         }
+
+        // Also hit skeleton enemies near Dark Cave
+        for (const skel of skeletonEnemiesRef.current) {
+          if (skel.state === 'dead') continue;
+          const dx = skel.x - p.x;
+          const dy = skel.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > PLAYER_ATK_RANGE) continue;
+
+          let inCone = false;
+          if (p.facing === 'right' && dx > 0) inCone = true;
+          if (p.facing === 'left' && dx < 0) inCone = true;
+          if (p.facing === 'down' && dy > 0) inCone = true;
+          if (p.facing === 'up' && dy < 0) inCone = true;
+          if (dist < 0.8) inCone = true;
+
+          if (inCone) {
+            let dmg = PLAYER_ATK_DAMAGE;
+            if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 1.5);
+            const hasStr = buffsRef.current.some(b => b.effect === 'strength' && b.remaining > 0);
+            if (hasStr) dmg = Math.floor(dmg * 1.5);
+            if (placedObjectsRef.current.some(o => o.itemType === 'barracks' && o.zone === zoneRef.current)) dmg = Math.floor(dmg * 1.15);
+
+            skel.hp -= dmg;
+            skel.hurtTimer = 0.3;
+            skel.state = 'hurt';
+            skel.facing = dx > 0 ? 'left' : 'right';
+
+            damageNumbersRef.current.push({
+              x: skel.x * TILE_SIZE + 16, y: skel.y * TILE_SIZE - 16,
+              text: `-${dmg}`, color: '#c0a0ff', timer: 1.0,
+            });
+
+            if (skel.hp <= 0) {
+              skel.hp = 0;
+              skel.state = 'dead';
+              const goldDrop = 12;
+              playerGoldRef.current = Math.min(playerGoldRef.current + goldDrop, resourceCapRef.current.gold);
+              setPlayerGold(playerGoldRef.current);
+              damageNumbersRef.current.push({
+                x: skel.x * TILE_SIZE + 16, y: skel.y * TILE_SIZE - 32,
+                text: `+${goldDrop}G`, color: '#e8c86a', timer: 1.5,
+              });
+            }
+          }
+        }
       }
 
       // ── SPACE: village hunt ──
@@ -5153,6 +5290,58 @@ export function WorldExplore({
             break;
           }
 
+          // Hub fantasy NPCs (Sir Aldric, Father Cedric, Thorin)
+          if (!spokeToNpc) {
+            for (const fnpc of fantasyNpcsRef.current) {
+              if (fnpc.zone !== 'hub') continue;
+              const fd = Math.sqrt((hpx - fnpc.x) ** 2 + (hpy - fnpc.y) ** 2);
+              if (fd > 2.5) continue;
+              spokeToNpc = true;
+
+              switch (fnpc.id) {
+                case 'f_aldric': {
+                  const doneGL = glCompletionGold.current;
+                  if (doneGL) {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "The orc threat is crushed. I stand guard now out of habit, but for the first time in years this road feels safe. You've earned the respect of every soldier here.", timer: 7 };
+                  } else if (orcsKilledRef.current >= 1) {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: `I can hear the battle echoes from the north. ${7 - orcsKilledRef.current} orcs still hold the stronghold. Press forward \u2014 this land needs you.`, timer: 6 };
+                  } else {
+                    glDialogRef.current = { speaker: 'Sir Aldric \u2014 Gate Guard', text: "Halt, traveler. The northern road leads through the pass into orc territory. Seven warriors and a shaman guard the stronghold. If you're heading that way, stock up on potions first.", timer: 7 };
+                  }
+                  break;
+                }
+                case 'f_cedric': {
+                  const heal = 20;
+                  if (healthRef.current < MAX_HEALTH * 0.8) {
+                    healthRef.current = Math.min(MAX_HEALTH, healthRef.current + heal);
+                    damageNumbersRef.current.push({ x: hpx * TILE_SIZE + 16, y: hpy * TILE_SIZE - 16, text: `+${heal} HP`, color: '#60c060', timer: 1.5 });
+                    glDialogRef.current = { speaker: 'Father Cedric \u2014 Sage', text: "You carry wounds, child. Let me mend what I can. The old prayers still hold power. Go carefully \u2014 the land whispers of dark things stirring in the caves to the north.", timer: 7 };
+                  } else {
+                    const lore = [
+                      "This settlement sits on ancient ground. The runes in the southern ruins predate our calendars. Whoever carved them understood forces we've forgotten.",
+                      "I've studied the shrine by the lake for decades. Its power waxes with the moon. Visit at night and you may feel something stir.",
+                      "The witch in the seaside village, Willow \u2014 she and I studied under the same master. Her potions are genuine. Trust her brews.",
+                    ];
+                    glDialogRef.current = { speaker: 'Father Cedric \u2014 Sage', text: lore[Math.floor(Math.random() * lore.length)], timer: 7 };
+                  }
+                  break;
+                }
+                case 'f_thorin': {
+                  const bCount = buildingCountRef.current;
+                  if (bCount >= 15) {
+                    glDialogRef.current = { speaker: 'Thorin \u2014 Blacksmith', text: `${bCount} structures! This is proper town-building. My forge could barely keep up. Every wall you raise makes this settlement harder to threaten. Fine work, builder.`, timer: 7 };
+                  } else if (bCount >= 5) {
+                    glDialogRef.current = { speaker: 'Thorin \u2014 Blacksmith', text: "Good foundations you're laying. A few more buildings and this place will attract traders. Stone holds better than wood for walls \u2014 remember that.", timer: 6 };
+                  } else {
+                    glDialogRef.current = { speaker: 'Thorin \u2014 Blacksmith', text: "Name's Thorin. I work the forge when there's metal to shape. You're building here? Good. Use wood for shelters and stone for defenses. The land provides if you look.", timer: 7 };
+                  }
+                  break;
+                }
+              }
+              break;
+            }
+          }
+
           // Hub landmark inspections (only if no NPC was spoken to)
           if (!spokeToNpc) {
             const landmarks: { id: string; x: number; y: number; r: number; speaker: string; text: string; heal?: number }[] = [
@@ -5220,6 +5409,28 @@ export function WorldExplore({
                   : 'We guard this pass day and night. The vendor camp to the south has supplies if you need healing potions.';
               }
               glDialogRef.current = { speaker: guard.name || 'Guard', text: guardText, timer: 6 };
+              break;
+            }
+          }
+
+          // Sylara — Elf Scout (fantasy NPC)
+          if (!spokeToGuard && !glDialogRef.current) {
+            for (const fnpc of fantasyNpcsRef.current) {
+              if (fnpc.zone !== 'grassland') continue;
+              const fd = Math.sqrt((px - fnpc.x) ** 2 + (py - fnpc.y) ** 2);
+              if (fd > 2.5) continue;
+
+              if (fnpc.id === 'f_sylara') {
+                const killed = orcsKilledRef.current;
+                const cleared = glRewardGivenRef.current;
+                if (cleared) {
+                  glDialogRef.current = { speaker: 'Sylara \u2014 Elf Scout', text: "The stronghold has fallen. I've already sent word to the elven outpost. You fight well for a human. The cave to the east still holds dangers \u2014 I've seen skeleton guards near its mouth.", timer: 7 };
+                } else if (killed >= 3) {
+                  glDialogRef.current = { speaker: 'Sylara \u2014 Elf Scout', text: `You're thinning their ranks. ${7 - killed} orcs remain. The shaman is the key \u2014 kill him and the warriors lose their coordination. Watch for the shrine to the north. It grants power if the area is clear.`, timer: 7 };
+                } else {
+                  glDialogRef.current = { speaker: 'Sylara \u2014 Elf Scout', text: "I've been scouting these grasslands for weeks. The orcs hold a stronghold to the north \u2014 seven warriors and a shaman. There's a vendor camp to the south with supplies. And be wary of the cave to the east... I've seen bones move.", timer: 8 };
+                }
+              }
               break;
             }
           }
@@ -5515,6 +5726,46 @@ export function WorldExplore({
               };
               break;
             }
+          }
+
+          // Fantasy RPG NPCs in village (Brenna, Ember, Sera)
+          for (const fnpc of fantasyNpcsRef.current) {
+            if (fnpc.zone !== 'village') continue;
+            const fd = Math.sqrt((px - fnpc.x) ** 2 + (py - fnpc.y) ** 2);
+            if (fd > 2.5 || glDialogRef.current) continue;
+
+            switch (fnpc.id) {
+              case 'f_brenna': {
+                const allBanditsClear = svBanditsRef.current.every(b => b.state === 'dead');
+                if (allBanditsClear) {
+                  glDialogRef.current = { speaker: 'Brenna \u2014 Village Guard', text: "The bandits are gone. I can finally sheathe my sword for a moment. You did what the village militia couldn't. If you ever need a blade at your side, you know where to find me.", timer: 7 };
+                } else {
+                  glDialogRef.current = { speaker: 'Brenna \u2014 Village Guard', text: "Four bandits lurk in the village outskirts. They've been raiding supplies and terrorizing the fishermen. I guard this entrance, but I can't leave my post. Clear them out and the village will owe you a debt.", timer: 8 };
+                }
+                break;
+              }
+              case 'f_ember':
+                glDialogRef.current = { speaker: 'Ember \u2014 Apprentice', text: "I'm studying under Willow \u2014 the witch who lives nearby. She's teaching me to brew barrier hexes. Between you and me, her fortune-telling is actually real. The things she sees... they always come true.", timer: 7 };
+                break;
+              case 'f_sera': {
+                if (!coinsCollectedRef.current.has('sera_herb_gift')) {
+                  coinsCollectedRef.current.add('sera_herb_gift');
+                  const heal = 25;
+                  healthRef.current = Math.min(MAX_HEALTH, healthRef.current + heal);
+                  damageNumbersRef.current.push({ x: px * TILE_SIZE + 16, y: py * TILE_SIZE - 16, text: `+${heal} HP`, color: '#60c060', timer: 1.5 });
+                  glDialogRef.current = { speaker: 'Sera \u2014 Herbalist', text: "Oh, a traveler! Here \u2014 take this healing salve. I gather herbs along the shore. The salt air does wonders for certain plants. Come back anytime you're hurt.", timer: 7 };
+                } else {
+                  const tips = [
+                    "The purple mushrooms in the grasslands aren't poisonous, despite what people say. They make excellent wound poultices.",
+                    "If you find yourself near the frog pond in the grasslands, the water there has mild restorative properties.",
+                    "The old well in the hub settlement has the cleanest water I've ever tested. Stand near it to recover your strength.",
+                  ];
+                  glDialogRef.current = { speaker: 'Sera \u2014 Herbalist', text: tips[Math.floor(Math.random() * tips.length)], timer: 6 };
+                }
+                break;
+              }
+            }
+            break;
           }
 
           // Witch NPC interaction (standalone, not in NPC array)
@@ -6213,6 +6464,54 @@ export function WorldExplore({
           { id: 'guard_l', name: 'Varn', x: 50, y: 4, facing: 'right', zone: 'grassland' },
           { id: 'guard_r', name: 'Drell', x: 52, y: 4, facing: 'left', zone: 'grassland' },
         ];
+      }
+
+      // ── Fantasy RPG NPCs (static chibi characters) ──
+      if (!fantasyNpcsSpawned.current) {
+        fantasyNpcsSpawned.current = true;
+        fantasyNpcsRef.current = FANTASY_NPC_DATA.map(n => ({ ...n }));
+      }
+
+      // ── Skeleton enemies near Dark Cave (grassland) ──
+      if (!skeletonsSpawned.current) {
+        skeletonsSpawned.current = true;
+        skeletonEnemiesRef.current = [
+          { id: 'skel_1', x: 64, y: 25, hp: 30, maxHp: 30, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonMace', facing: 'left', contactTimer: 0 },
+          { id: 'skel_2', x: 66, y: 24, hp: 35, maxHp: 35, state: 'idle', hurtTimer: 0, deathAlpha: 1, spriteKey: 'fSkeletonAxe', facing: 'right', contactTimer: 0 },
+        ];
+      }
+
+      // ── Skeleton AI (grassland — contact damage, no chasing) ──
+      if (zoneRef.current === 'grassland') {
+        for (const skel of skeletonEnemiesRef.current) {
+          if (skel.state === 'dead') {
+            skel.deathAlpha = Math.max(0, skel.deathAlpha - dt * 0.5);
+            continue;
+          }
+          if (skel.hurtTimer > 0) skel.hurtTimer -= dt;
+          if (skel.hurtTimer <= 0 && skel.state === 'hurt') skel.state = 'idle';
+
+          // Contact damage when player lingers close
+          const sdx = playerRef.current.x - skel.x;
+          const sdy = playerRef.current.y - skel.y;
+          const sdist = Math.sqrt(sdx * sdx + sdy * sdy);
+          if (sdist < 1.5) {
+            skel.facing = sdx > 0 ? 'right' : 'left';
+            skel.contactTimer += dt;
+            if (skel.contactTimer >= 1.0) {
+              skel.contactTimer = 0;
+              const dmg = 6;
+              healthRef.current = Math.max(0, healthRef.current - dmg);
+              damageNumbersRef.current.push({
+                x: playerRef.current.x * TILE_SIZE + 16,
+                y: playerRef.current.y * TILE_SIZE - 16,
+                text: `-${dmg}`, color: '#c0a0ff', timer: 1.5,
+              });
+            }
+          } else {
+            skel.contactTimer = 0;
+          }
+        }
       }
 
       // ── Village ambient wanderers ──
@@ -6977,6 +7276,71 @@ export function WorldExplore({
             ctx.imageSmoothingEnabled = prevSS;
           }});
         }
+        // ── Fantasy RPG NPCs in hub ──
+        const hubPpx = p.x, hubPpy = p.y;
+        for (const fnpc of fantasyNpcsRef.current) {
+          if (fnpc.zone !== 'hub') continue;
+          allDrawables.push({ y: fnpc.y, fn: () => {
+            const img = ga[fnpc.spriteKey as keyof typeof ga] as HTMLImageElement;
+            if (!img) return;
+            const nx = fnpc.x * TILE_SIZE;
+            const ny = fnpc.y * TILE_SIZE;
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = 28 / iw;
+            const dw = 28;
+            const dh = Math.round(ih * scale);
+            // Idle bob
+            const bob = Math.sin(timeRef.current * 1.5 + fnpc.x * 3) * 1.5;
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(nx + 16, ny + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Sprite
+            const prevS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
+            ctx.save();
+            if (fnpc.facing === 'left') {
+              ctx.translate(nx + 16, 0);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, 0, 0, iw, ih, -dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            } else {
+              ctx.drawImage(img, 0, 0, iw, ih, nx + 16 - dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            }
+            ctx.restore();
+            ctx.imageSmoothingEnabled = prevS;
+            // Name + title label
+            const dist = Math.sqrt((hubPpx - fnpc.x) ** 2 + (hubPpy - fnpc.y) ** 2);
+            if (dist < 4) {
+              ctx.font = '600 9px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              const lbl = fnpc.name;
+              const lm = ctx.measureText(lbl);
+              const nlW = lm.width + 12;
+              const nlH = 16;
+              const nlX = nx + 16 - nlW / 2;
+              const nlY = ny + TILE_SIZE - dh - 20 + bob;
+              ctx.fillStyle = 'rgba(10,10,15,0.85)';
+              ctx.beginPath();
+              ctx.roundRect(nlX, nlY, nlW, nlH, 4);
+              ctx.fill();
+              ctx.strokeStyle = dist < 2.5 ? 'rgba(230,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+              ctx.fillStyle = dist < 2.5 ? '#ffd700' : 'rgba(255,255,255,0.9)';
+              ctx.fillText(lbl, nx + 16, nlY + 11.5);
+              // Title subtitle
+              ctx.font = '500 7px Inter, sans-serif';
+              ctx.fillStyle = 'rgba(180,160,120,0.7)';
+              ctx.fillText(fnpc.title, nx + 16, nlY + nlH + 8);
+              if (dist < 2.5) {
+                ctx.font = 'bold 8px Inter, sans-serif';
+                ctx.fillStyle = 'rgba(255,215,0,0.7)';
+                ctx.fillText('[E]', nx + 16, nlY - 4);
+              }
+            }
+          }});
+        }
       } else if (zoneRef.current === 'village') {
         // ── Village NPC rendering ──
         const t = timeRef.current;
@@ -7198,6 +7562,68 @@ export function WorldExplore({
               ctx.stroke();
               ctx.fillStyle = vdist < 2.5 ? '#90d090' : 'rgba(255,255,255,0.75)';
               ctx.fillText(vw.name, vx + 16, vwY + 11.5);
+            }
+          }});
+        }
+
+        // ── Fantasy RPG NPCs in village ──
+        for (const fnpc of fantasyNpcsRef.current) {
+          if (fnpc.zone !== 'village') continue;
+          allDrawables.push({ y: fnpc.y, fn: () => {
+            const img = ga[fnpc.spriteKey as keyof typeof ga] as HTMLImageElement;
+            if (!img) return;
+            const nx = fnpc.x * TILE_SIZE;
+            const ny = fnpc.y * TILE_SIZE;
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = 28 / iw;
+            const dw = 28;
+            const dh = Math.round(ih * scale);
+            const bob = Math.sin(timeRef.current * 1.5 + fnpc.x * 3) * 1.5;
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(nx + 16, ny + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            const prevS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
+            ctx.save();
+            if (fnpc.facing === 'left') {
+              ctx.translate(nx + 16, 0);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, 0, 0, iw, ih, -dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            } else {
+              ctx.drawImage(img, 0, 0, iw, ih, nx + 16 - dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            }
+            ctx.restore();
+            ctx.imageSmoothingEnabled = prevS;
+            // Name + title label
+            const dist = Math.sqrt((px - fnpc.x) ** 2 + (py - fnpc.y) ** 2);
+            if (dist < 4) {
+              ctx.font = '600 9px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              const lbl = fnpc.name;
+              const lm = ctx.measureText(lbl);
+              const nlW = lm.width + 12;
+              const nlH = 16;
+              const nlX = nx + 16 - nlW / 2;
+              const nlY = ny + TILE_SIZE - dh - 20 + bob;
+              ctx.fillStyle = 'rgba(10,10,15,0.85)';
+              ctx.beginPath();
+              ctx.roundRect(nlX, nlY, nlW, nlH, 4);
+              ctx.fill();
+              ctx.strokeStyle = dist < 2.5 ? 'rgba(230,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+              ctx.fillStyle = dist < 2.5 ? '#ffd700' : 'rgba(255,255,255,0.9)';
+              ctx.fillText(lbl, nx + 16, nlY + 11.5);
+              ctx.font = '500 7px Inter, sans-serif';
+              ctx.fillStyle = 'rgba(180,160,120,0.7)';
+              ctx.fillText(fnpc.title, nx + 16, nlY + nlH + 8);
+              if (dist < 2.5) {
+                ctx.font = 'bold 8px Inter, sans-serif';
+                ctx.fillStyle = 'rgba(255,215,0,0.7)';
+                ctx.fillText('[E]', nx + 16, nlY - 4);
+              }
             }
           }});
         }
@@ -7693,6 +8119,147 @@ export function WorldExplore({
             ctx.stroke();
             ctx.fillStyle = 'rgba(100,180,255,0.9)';
             ctx.fillText(lbl, gx + 14, glY + 11.5);
+          }});
+        }
+
+        // ── Fantasy RPG NPCs in grassland (Sylara) ──
+        for (const fnpc of fantasyNpcsRef.current) {
+          if (fnpc.zone !== 'grassland') continue;
+          allDrawables.push({ y: fnpc.y, fn: () => {
+            const img = ga[fnpc.spriteKey as keyof typeof ga] as HTMLImageElement;
+            if (!img) return;
+            const nx = fnpc.x * TILE_SIZE;
+            const ny = fnpc.y * TILE_SIZE;
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = 28 / iw;
+            const dw = 28;
+            const dh = Math.round(ih * scale);
+            const bob = Math.sin(timeRef.current * 1.5 + fnpc.x * 3) * 1.5;
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(nx + 16, ny + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            const prevS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
+            ctx.save();
+            if (fnpc.facing === 'left') {
+              ctx.translate(nx + 16, 0);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, 0, 0, iw, ih, -dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            } else {
+              ctx.drawImage(img, 0, 0, iw, ih, nx + 16 - dw / 2, ny + TILE_SIZE - dh + bob, dw, dh);
+            }
+            ctx.restore();
+            ctx.imageSmoothingEnabled = prevS;
+            // Name + title label
+            const fdist = Math.sqrt((p.x - fnpc.x) ** 2 + (p.y - fnpc.y) ** 2);
+            if (fdist < 4) {
+              ctx.font = '600 9px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              const lbl = fnpc.name;
+              const lm = ctx.measureText(lbl);
+              const nlW = lm.width + 12;
+              const nlH = 16;
+              const nlX = nx + 16 - nlW / 2;
+              const nlY = ny + TILE_SIZE - dh - 20 + bob;
+              ctx.fillStyle = 'rgba(10,10,15,0.85)';
+              ctx.beginPath();
+              ctx.roundRect(nlX, nlY, nlW, nlH, 4);
+              ctx.fill();
+              ctx.strokeStyle = fdist < 2.5 ? 'rgba(100,200,100,0.5)' : 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+              ctx.fillStyle = fdist < 2.5 ? '#80e080' : 'rgba(255,255,255,0.9)';
+              ctx.fillText(lbl, nx + 16, nlY + 11.5);
+              ctx.font = '500 7px Inter, sans-serif';
+              ctx.fillStyle = 'rgba(120,180,120,0.7)';
+              ctx.fillText(fnpc.title, nx + 16, nlY + nlH + 8);
+              if (fdist < 2.5) {
+                ctx.font = 'bold 8px Inter, sans-serif';
+                ctx.fillStyle = 'rgba(100,200,100,0.7)';
+                ctx.fillText('[E]', nx + 16, nlY - 4);
+              }
+            }
+          }});
+        }
+
+        // ── Skeleton enemies near Dark Cave ──
+        for (const skel of skeletonEnemiesRef.current) {
+          if (skel.state === 'dead' && skel.deathAlpha <= 0) continue;
+          allDrawables.push({ y: skel.y, fn: () => {
+            const img = ga[skel.spriteKey as keyof typeof ga] as HTMLImageElement;
+            if (!img) return;
+            const sx = skel.x * TILE_SIZE;
+            const sy = skel.y * TILE_SIZE;
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            const scale = 32 / iw;
+            const dw = 32;
+            const dh = Math.round(ih * scale);
+
+            // Death fade
+            if (skel.state === 'dead') ctx.globalAlpha = skel.deathAlpha;
+
+            // Shadow
+            if (skel.state !== 'dead') {
+              ctx.fillStyle = 'rgba(0,0,0,0.15)';
+              ctx.beginPath();
+              ctx.ellipse(sx + 16, sy + TILE_SIZE - 2, 12, 4, 0, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Subtle idle sway
+            const sway = skel.state !== 'dead' ? Math.sin(timeRef.current * 2 + skel.x * 5) * 1 : 0;
+            const prevS = ctx.imageSmoothingEnabled;
+            ctx.imageSmoothingEnabled = false;
+            ctx.save();
+            if (skel.facing === 'left') {
+              ctx.translate(sx + 16, 0);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, 0, 0, iw, ih, -dw / 2, sy + TILE_SIZE - dh + sway, dw, dh);
+            } else {
+              ctx.drawImage(img, 0, 0, iw, ih, sx + 16 - dw / 2, sy + TILE_SIZE - dh + sway, dw, dh);
+            }
+            ctx.restore();
+            ctx.imageSmoothingEnabled = prevS;
+
+            // Hurt flash
+            if (skel.hurtTimer > 0) {
+              ctx.globalAlpha = skel.hurtTimer * 3;
+              ctx.fillStyle = 'rgba(180,120,255,0.4)';
+              ctx.fillRect(sx + 16 - dw / 2, sy + TILE_SIZE - dh + sway, dw, dh);
+              ctx.globalAlpha = 1;
+            }
+
+            // HP bar (when damaged, alive)
+            if (skel.state !== 'dead' && skel.hp < skel.maxHp) {
+              const barW = 36, barH = 4;
+              const barX = sx + 16 - barW / 2;
+              const barY = sy + TILE_SIZE - dh - 8 + sway;
+              ctx.fillStyle = 'rgba(0,0,0,0.6)';
+              ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+              ctx.fillStyle = '#222';
+              ctx.fillRect(barX, barY, barW, barH);
+              const hpPct = skel.hp / skel.maxHp;
+              ctx.fillStyle = hpPct > 0.3 ? '#8060c0' : '#c040ff';
+              ctx.fillRect(barX, barY, barW * hpPct, barH);
+            }
+
+            // Name label (alive)
+            if (skel.state !== 'dead') {
+              const lbl = skel.spriteKey === 'fSkeletonMace' ? 'Skeleton Guard' : 'Skeleton Sentinel';
+              ctx.font = '600 8px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              const lm = ctx.measureText(lbl);
+              ctx.fillStyle = 'rgba(0,0,0,0.5)';
+              ctx.beginPath();
+              ctx.roundRect(sx + 16 - lm.width / 2 - 4, sy + TILE_SIZE + 8, lm.width + 8, 12, 3);
+              ctx.fill();
+              ctx.fillStyle = 'rgba(180,140,220,0.8)';
+              ctx.fillText(lbl, sx + 16, sy + TILE_SIZE + 17);
+            }
+
+            if (skel.state === 'dead') ctx.globalAlpha = 1;
           }});
         }
 

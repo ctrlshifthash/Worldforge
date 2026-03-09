@@ -29,6 +29,21 @@ export const ASSET_PATHS = {
   marbleFence: `${VILLAGE}/tiles/marble_fence.png`,
 } as const;
 
+// ─── Fantasy RPG sprite pack (static chibi characters) ───
+const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
+
+export const FANTASY_NPC_PATHS = {
+  paladinGuard: `${FANTASY}/paladin_01_001.png`,
+  elderPriest: `${FANTASY}/priest_01_001.png`,
+  dwarfSmith: `${FANTASY}/dwarf_01_008.png`,
+  elfScout: `${FANTASY}/elf_01_001.png`,
+  skeletonMace: `${FANTASY}/skeleton_01_001.png`,
+  skeletonAxe: `${FANTASY}/skeleton_01_005.png`,
+  swordswoman: `${FANTASY}/warrior_01_003.png`,
+  fireWitch: `${FANTASY}/mage_01_005.png`,
+  elfHerbalist: `${FANTASY}/elf_02_005.png`,
+} as const;
+
 export interface SpriteRect {
   sx: number; sy: number; sw: number; sh: number;
 }

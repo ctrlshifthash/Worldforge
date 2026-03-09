@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ASSET_PATHS, GRASSLAND_PATHS, VILLAGE_PATHS, NPC_PACK_PATHS } from '@/lib/tileAtlas';
+import { ASSET_PATHS, GRASSLAND_PATHS, VILLAGE_PATHS, NPC_PACK_PATHS, FANTASY_NPC_PATHS } from '@/lib/tileAtlas';
 
 export interface GameAssets {
   assets: HTMLImageElement;
@@ -129,6 +129,16 @@ export interface GameAssets {
   sheepWhite: HTMLImageElement;
   sheepBrown: HTMLImageElement;
   warriorRun: HTMLImageElement;
+  // Fantasy RPG NPCs (static chibi sprites)
+  fPaladinGuard: HTMLImageElement;
+  fElderPriest: HTMLImageElement;
+  fDwarfSmith: HTMLImageElement;
+  fElfScout: HTMLImageElement;
+  fSkeletonMace: HTMLImageElement;
+  fSkeletonAxe: HTMLImageElement;
+  fSwordswoman: HTMLImageElement;
+  fFireWitch: HTMLImageElement;
+  fElfHerbalist: HTMLImageElement;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -183,6 +193,9 @@ export function useGameAssets(): { assets: GameAssets | null; loading: boolean; 
           svWaterDeep, svWaterShallow, svWaterShallowDirt, svWaterfall,
           svRockBrown, svRockGrey, svWaterLily2, svWaterLily3,
           npcTilemap, sheepWhite, sheepBrown, warriorRun,
+          fPaladinGuard, fElderPriest, fDwarfSmith,
+          fElfScout, fSkeletonMace, fSkeletonAxe,
+          fSwordswoman, fFireWitch, fElfHerbalist,
         ] = await Promise.all([
           loadImage(ASSET_PATHS.assets),
           loadImage(ASSET_PATHS.character),
@@ -301,6 +314,16 @@ export function useGameAssets(): { assets: GameAssets | null; loading: boolean; 
           loadImage(NPC_PACK_PATHS.sheepWhite),
           loadImage(NPC_PACK_PATHS.sheepBrown),
           loadImage(NPC_PACK_PATHS.warriorRun),
+          // Fantasy RPG NPCs
+          loadImage(FANTASY_NPC_PATHS.paladinGuard),
+          loadImage(FANTASY_NPC_PATHS.elderPriest),
+          loadImage(FANTASY_NPC_PATHS.dwarfSmith),
+          loadImage(FANTASY_NPC_PATHS.elfScout),
+          loadImage(FANTASY_NPC_PATHS.skeletonMace),
+          loadImage(FANTASY_NPC_PATHS.skeletonAxe),
+          loadImage(FANTASY_NPC_PATHS.swordswoman),
+          loadImage(FANTASY_NPC_PATHS.fireWitch),
+          loadImage(FANTASY_NPC_PATHS.elfHerbalist),
         ]);
 
         if (!cancelled) {
@@ -335,6 +358,9 @@ export function useGameAssets(): { assets: GameAssets | null; loading: boolean; 
             svWaterDeep, svWaterShallow, svWaterShallowDirt, svWaterfall,
             svRockBrown, svRockGrey, svWaterLily2, svWaterLily3,
             npcTilemap, sheepWhite, sheepBrown, warriorRun,
+            fPaladinGuard, fElderPriest, fDwarfSmith,
+            fElfScout, fSkeletonMace, fSkeletonAxe,
+            fSwordswoman, fFireWitch, fElfHerbalist,
           });
           setLoading(false);
         }
