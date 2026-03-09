@@ -108,8 +108,14 @@ Generate 3-5 eras, 6-10 entities (mix of types), 4-6 timeline events (each assig
   let generated;
   try {
     let raw = content.trim();
+    // Strip markdown code fences
     if (raw.startsWith('```')) {
       raw = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    }
+    // Extract JSON object if surrounded by other text
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      raw = jsonMatch[0];
     }
     generated = JSON.parse(raw);
   } catch {
