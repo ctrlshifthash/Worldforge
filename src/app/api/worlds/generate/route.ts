@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       'X-Title': 'Worldforge',
     },
     body: JSON.stringify({
-      model: 'anthropic/claude-sonnet-4',
+      model: 'google/gemini-2.0-flash-001',
       max_tokens: 4000,
       messages: [
         {
