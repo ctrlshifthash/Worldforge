@@ -5,7 +5,7 @@
 const SOCIALS = [
   {
     name: 'Pump.fun',
-    href: '#',
+    href: 'https://pump.fun/coin/',
     img: '/socials/pumpfun.png',
     dark: false,
     scale: '100%',
@@ -19,21 +19,21 @@ const SOCIALS = [
   },
   {
     name: 'GitHub',
-    href: '#',
+    href: 'https://github.com/PlayWorldforge/Worldforge',
     img: '/socials/github.png',
     dark: false,
     scale: '100%',
   },
   {
     name: 'GitBook',
-    href: '#',
+    href: 'https://worldforge.gitbook.io/worldforge',
     img: '/socials/gitbook.png',
     dark: true,
     scale: '200%',
   },
   {
     name: 'Medium',
-    href: '#',
+    href: 'https://medium.com/@Worldforge',
     img: '/socials/medium.png',
     dark: true,
     scale: '75%',

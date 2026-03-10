@@ -567,7 +567,8 @@ export default function HowItWorksPage() {
       <footer className="landing-footer">
         <div className="container">
           <div className="ornament" style={{ marginBottom: 24 }}>Worldforge</div>
-          <p>An AI worldbuilding game.</p>
+          <p>Your world, alive.</p>
+          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldforge 2026</p>
         </div>
       </footer>
     </div>
