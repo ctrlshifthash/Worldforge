@@ -131,12 +131,12 @@ export const SACK: SpriteRect         = { sx: 100, sy: 224, sw: 24, sh: 24 };
 export const CRATE: SpriteRect        = { sx: 176, sy: 224, sw: 24, sh: 28 };
 
 // ─── Player character (352x400) ───
-// Rows: 0=walk down, 1=walk left, 2=walk right, 3=walk up
+// Rows: 0=walk down, 1=walk up, 2=walk left, 3=walk right
 // 8 frames per row, frame size ~32x50
 export const PLAYER_FRAME_W = 44;
 export const PLAYER_FRAME_H = 50;
 export const PLAYER_WALK_FRAMES = 8;
-export const PLAYER_ROWS = { down: 0, left: 1, right: 2, up: 3 } as const;
+export const PLAYER_ROWS = { down: 0, up: 1, left: 2, right: 3 } as const;
 
 // ─── NPC sprites ───
 // Tall NPCs (old_man 240x288, old_woman 240x300, young_man 240x288, young_woman 240x300)
