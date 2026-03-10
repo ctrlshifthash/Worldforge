@@ -42,7 +42,7 @@ for (let i = 0; i < PARTICLE_COUNT; i++) {
   });
 }
 
-const MARKETING_PATHS = ['/', '/about', '/how-it-works', '/discover'];
+const MARKETING_PATHS = ['/', '/about', '/how-it-works'];
 
 export function PixelSkyBackground() {
   const pathname = usePathname();

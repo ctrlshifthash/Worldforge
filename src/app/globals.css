@@ -119,8 +119,7 @@ body:has(.landing) {
   background: #030810;
 }
 body:has(.about-page),
-body:has(.hiw-page),
-body:has(.discover-page) {
+body:has(.hiw-page) {
   background: var(--bg);
 }
 
