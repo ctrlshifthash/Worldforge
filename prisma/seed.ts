@@ -34,18 +34,18 @@ async function main() {
       data: {
         email: 'noor@worldforge.app',
         username: 'noor',
-        name: 'Noor Kashan',
+        name: 'John',
         passwordHash,
-        avatar: 'NK',
+        avatar: 'J',
       },
     }),
     prisma.user.create({
       data: {
         email: 'eli@worldforge.app',
         username: 'eli',
-        name: 'Eli Thorne',
+        name: 'Rick',
         passwordHash,
-        avatar: 'ET',
+        avatar: 'R',
       },
     }),
   ]);
