@@ -6557,9 +6557,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .social-link-icon img {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
