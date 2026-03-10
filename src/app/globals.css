@@ -5,6 +5,7 @@
 
 :root {
   color-scheme: dark;
+  --sky-scroll: 0;
 
   /* ─── Core Palette: Dark Forest Game World ─── */
   --void:    #060a06;
