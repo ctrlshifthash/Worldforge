@@ -6998,37 +6998,27 @@ h1, h2, h3, h4, h5, h6 {
 .lore-section {
   padding: 120px 0;
   position: relative;
-  background: linear-gradient(180deg,
-    rgba(14,12,8,0.72) 0%,
-    rgba(18,15,10,0.65) 30%,
-    rgba(20,17,12,0.62) 50%,
-    rgba(18,15,10,0.65) 70%,
-    rgba(14,12,8,0.72) 100%
-  );
+  background: url('/backgrounds/lore.png') center / cover no-repeat fixed;
 }
 
-/* Archive shelf lines */
+/* Dark overlay */
 .lore-section::before {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    repeating-linear-gradient(180deg,
-      transparent 0px,
-      transparent 198px,
-      rgba(240,192,96,0.015) 200px
-    );
+  background: rgba(0,0,0,0.30);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Warm ambient glow from center */
+/* Edge vignette */
 .lore-section::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 50% 50% at 50% 50%,
-    rgba(240,192,96,0.025) 0%, transparent 70%);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.3) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -7037,6 +7027,8 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 .lore-header {
