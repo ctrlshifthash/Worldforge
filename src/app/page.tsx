@@ -30,36 +30,6 @@ const BUILD_ITEMS = [
   { name: 'Fence', src: `${GL}/Props/Static props/sheet1-sprites/fence - left - right - 1.png` },
 ];
 
-/* Sprites composing the hero world scene backdrop */
-const GLS = `${GL}/Props/Static props`;
-const SCENE_SPRITES: { src: string; style: React.CSSProperties }[] = [
-  /* ── Back row: far trees (small, darker = depth) ── */
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { left: '3%',  bottom: '38%', height: 120, opacity: 0.30, filter: 'brightness(0.4) saturate(0.6)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '18%', bottom: '40%', height: 100, opacity: 0.25, filter: 'brightness(0.35) saturate(0.5)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '15%', bottom: '39%', height: 110, opacity: 0.28, filter: 'brightness(0.38) saturate(0.55)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '5%', bottom: '37%', height: 105, opacity: 0.26, filter: 'brightness(0.36) saturate(0.5)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '38%', bottom: '41%', height: 95, opacity: 0.22, filter: 'brightness(0.32) saturate(0.45)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '38%', bottom: '40%', height: 90, opacity: 0.20, filter: 'brightness(0.30) saturate(0.4)' } },
-
-  /* ── Mid row: structures + medium trees ── */
-  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '-2%', bottom: '22%', height: 220, opacity: 0.50, filter: 'brightness(0.55) saturate(0.75)' } },
-  { src: `${GLS}/Cabin/cabin.png`,                    style: { left: '14%', bottom: '18%', height: 150, opacity: 0.50, filter: 'brightness(0.55) saturate(0.8)' } },
-  { src: `${GLS}/sheet2-sprites/watchtower - front.png`, style: { right: '12%', bottom: '20%', height: 200, opacity: 0.45, filter: 'brightness(0.50) saturate(0.75)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '-1%', bottom: '20%', height: 200, opacity: 0.48, filter: 'brightness(0.52) saturate(0.7)' } },
-  { src: `${GLS}/sheet2-sprites/stronghold - horizontal - entrance - on grass.png`, style: { left: '42%', bottom: '16%', height: 130, opacity: 0.42, filter: 'brightness(0.50) saturate(0.7)', transform: 'translateX(-50%)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '30%', bottom: '24%', height: 160, opacity: 0.40, filter: 'brightness(0.48) saturate(0.65)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '30%', bottom: '23%', height: 150, opacity: 0.38, filter: 'brightness(0.45) saturate(0.6)' } },
-
-  /* ── Front row: foreground props + large trees at edges ── */
-  { src: `${GLS}/sheet1-sprites/lamp post 1 - lamp.png`, style: { left: '25%', bottom: '10%', height: 110, opacity: 0.50, filter: 'brightness(0.55) saturate(0.8)' } },
-  { src: `${GLS}/sheet1-sprites/campfire 1.png`,      style: { left: '48%', bottom: '8%', height: 55, opacity: 0.55, filter: 'brightness(0.6) saturate(0.85)' } },
-  { src: `${GL}/Props/Animated props/shrine-base-with grass.png`, style: { right: '25%', bottom: '8%', height: 80, opacity: 0.45, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/rocks on grass - color scheme 1 - 5.png`, style: { left: '58%', bottom: '5%', height: 45, opacity: 0.40, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/sign 1.png`,          style: { right: '42%', bottom: '6%', height: 35, opacity: 0.40, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/barrel 1.png`,        style: { left: '8%', bottom: '6%', height: 40, opacity: 0.38, filter: 'brightness(0.45) saturate(0.65)' } },
-  { src: `${GLS}/sheet1-sprites/waterwell - rope.png`, style: { right: '8%', bottom: '7%', height: 65, opacity: 0.42, filter: 'brightness(0.50) saturate(0.7)' } },
-];
-
 export default async function LandingPage() {
   const worlds = await prisma.world.findMany({
     where: { visibility: 'PUBLIC' },
@@ -80,14 +50,8 @@ export default async function LandingPage() {
           HUD strip below proves this is a real game immediately
           ═══════════════════════════════════════════════════════ */}
       <section className="hero-v2">
-        {/* Real game world scene backdrop */}
-        <div className="hero-world-scene">
-          <div className="hero-world-terrain" />
-          {SCENE_SPRITES.map((s, i) => (
-            <img key={i} src={s.src} alt="" style={s.style} />
-          ))}
-          <div className="hero-world-overlay" />
-        </div>
+        <div className="hero-world-bg" />
+        <div className="hero-world-overlay" />
         <div className="hero-v2-glow" />
 
         <div className="hero-v2-content">
@@ -177,7 +141,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           STATEMENT — One powerful sentence
           ═══════════════════════════════════════════════════════ */}
-      <div className="zone-divider" />
+      <div className="mountain-divider" />
       <section className="statement-section tileset-bg">
         <p className="statement-text">
           Every world you create becomes a <span className="gold">playable 2D game</span> with
@@ -186,7 +150,7 @@ export default async function LandingPage() {
           you can explore, edit, and grow.
         </p>
       </section>
-      <div className="zone-divider" />
+      <div className="horizon-glow" />
 
       {/* ═══════════════════════════════════════════════════════
           THE JOURNEY — Narrative walkthrough: Describe → Generate → Enter → Play
@@ -432,7 +396,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="zone-divider" />
+      <div className="mountain-divider" />
 
       {/* ═══════════════════════════════════════════════════════
           GAME SYSTEMS — Editorial spreads proving each system is real
@@ -655,7 +619,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="zone-divider" />
+      <div className="horizon-glow" />
 
       {/* ═══════════════════════════════════════════════════════
           LORE LAYER — The worldbuilding tools under the game
@@ -886,6 +850,8 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      <div className="mountain-divider" />
 
       {/* ═══════════════════════════════════════════════════════
           FINAL CTA

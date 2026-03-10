@@ -38,6 +38,8 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <div className="mountain-divider" />
+
       {/* ─── What Is Worldforge ─── */}
       <section className="about-statement">
         <div className="about-statement-inner">
@@ -440,6 +442,8 @@ export default function AboutPage() {
           </details>
         </div>
       </section>
+
+      <div className="mountain-divider" />
 
       {/* ─── Final CTA ─── */}
       <section className="about-final-cta">

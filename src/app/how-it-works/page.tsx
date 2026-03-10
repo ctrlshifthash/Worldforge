@@ -37,6 +37,8 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
+      <div className="horizon-glow" />
+
       {/* ─── Table of Contents ─── */}
       <nav className="hiw-toc">
         <div className="hiw-toc-inner">
@@ -548,6 +550,8 @@ export default function HowItWorksPage() {
         </section>
 
       </div>
+
+      <div className="mountain-divider" />
 
       {/* ─── CTA ─── */}
       <section className="hiw-cta">
