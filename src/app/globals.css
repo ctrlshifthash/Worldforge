@@ -3,6 +3,85 @@
    Pixel-art indie game aesthetic. Dark world, retro UI.
    ═══════════════════════════════════════════════════════════ */
 
+/* ─── Loading Screen ─── */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #050a05;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease;
+}
+.loading-screen--fade {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-screen-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.loading-screen-logo {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 2.4rem;
+  color: #c8a23c;
+  border: 3px solid #c8a23c;
+  border-radius: 14px;
+  background: rgba(200, 162, 60, 0.08);
+  animation: loading-pulse 1.2s ease-in-out infinite;
+}
+.loading-screen-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.4rem;
+  color: #f0e6d0;
+  letter-spacing: 2px;
+  margin: 0;
+}
+.loading-screen-slogan {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: #b0a898;
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+.loading-screen-slogan em {
+  color: #c8a23c;
+  font-style: italic;
+}
+.loading-screen-bar-track {
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.loading-screen-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #c8a23c, #d4af4a);
+  border-radius: 2px;
+  animation: loading-fill 1.6s ease-out forwards;
+}
+@keyframes loading-fill {
+  0% { width: 0%; }
+  60% { width: 75%; }
+  100% { width: 100%; }
+}
+@keyframes loading-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
 :root {
   color-scheme: dark;
   --sky-scroll: 0;

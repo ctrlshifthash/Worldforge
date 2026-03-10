@@ -460,7 +460,7 @@ export default function AboutPage() {
       <footer className="landing-footer">
         <div className="container">
           <div className="ornament" style={{ marginBottom: 24 }}>Worldforge</div>
-          <p>Your world, alive.</p>
+          <p>Your World.<br /><em>Alive.</em></p>
           <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldforge 2026</p>
         </div>
       </footer>
