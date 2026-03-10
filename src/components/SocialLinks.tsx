@@ -12,7 +12,7 @@ const SOCIALS = [
   },
   {
     name: 'X',
-    href: '#',
+    href: 'https://x.com/PlayWorldforge',
     img: '/socials/x.png',
     dark: false,
     scale: '70%',
