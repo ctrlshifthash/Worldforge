@@ -4007,16 +4007,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: url('/backgrounds/hero.png') center/cover no-repeat fixed;
-}
-.about-opening::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.25) 90%, rgba(0,0,0,0.55) 100%);
-  pointer-events: none;
-  z-index: 0;
+  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 20%, rgba(8,18,16,0.62) 40%, rgba(12,26,14,0.62) 70%, rgba(13,20,12,0.68) 100%);
 }
 
 .about-opening-lines {
@@ -4079,7 +4070,6 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1;
 }
 
 .about-scroll-line {
@@ -4097,25 +4087,11 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Statement Block ─── */
 
 .about-statement {
-  position: relative;
   padding: 120px 24px;
   display: flex;
   justify-content: center;
-  background: url('/backgrounds/lore.png') center/cover no-repeat fixed;
-}
-.about-statement::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-statement > * { position: relative; z-index: 1; }
-
-.about-statement-2 {
-  background-image: url('/backgrounds/statement.png');
+  border-top: 1px solid rgba(100,140,80,0.08);
+  background: linear-gradient(180deg, rgba(14,30,14,0.70) 0%, rgba(13,26,14,0.65) 50%, rgba(12,22,10,0.70) 100%);
 }
 
 .about-statement-inner {
@@ -4191,22 +4167,11 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Demo Terminal ─── */
 
 .about-demo-section {
-  position: relative;
   padding: 80px 24px 120px;
   display: flex;
   justify-content: center;
-  background: url('/backgrounds/systems.png') center/cover no-repeat fixed;
+  background: linear-gradient(180deg, rgba(12,11,14,0.75) 0%, rgba(14,13,18,0.70) 50%, rgba(12,11,14,0.75) 100%);
 }
-.about-demo-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 10%, rgba(0,0,0,0.35) 90%, rgba(0,0,0,0.65) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-demo-section > * { position: relative; z-index: 1; }
 
 .about-demo-container {
   max-width: 720px;
@@ -4337,22 +4302,12 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Bento Grid ─── */
 
 .about-bento-section {
-  position: relative;
   padding: 100px 24px;
   max-width: 1000px;
   margin: 0 auto;
-  background: url('/backgrounds/journey.png') center/cover no-repeat fixed;
+  border-top: 1px solid rgba(240,192,96,0.06);
+  background: linear-gradient(180deg, rgba(14,12,8,0.72) 0%, rgba(18,15,10,0.65) 50%, rgba(14,12,8,0.72) 100%);
 }
-.about-bento-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-bento-section > * { position: relative; z-index: 1; }
 
 .about-bento {
   display: grid;
@@ -4461,20 +4416,11 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Big Numbers ─── */
 
 .about-numbers {
-  position: relative;
   padding: 80px 24px;
-  background: url('/backgrounds/htp.png') center/cover no-repeat fixed;
+  border-top: 1px solid rgba(240,192,96,0.06);
+  border-bottom: 1px solid rgba(240,192,96,0.06);
+  background: linear-gradient(180deg, rgba(14,12,8,0.75) 0%, rgba(20,17,12,0.68) 50%, rgba(14,12,8,0.75) 100%);
 }
-.about-numbers::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-numbers > * { position: relative; z-index: 1; }
 
 .about-numbers-inner {
   max-width: 900px;
@@ -4517,20 +4463,9 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Audience Section ─── */
 
 .about-audience-section {
-  position: relative;
   padding: 100px 24px;
-  background: url('/backgrounds/community.png') center/cover no-repeat fixed;
+  background: linear-gradient(180deg, rgba(12,16,10,0.70) 0%, rgba(16,24,16,0.62) 30%, rgba(20,32,20,0.58) 50%, rgba(16,24,16,0.62) 70%, rgba(12,16,10,0.70) 100%);
 }
-.about-audience-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.3) 90%, rgba(0,0,0,0.6) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-audience-section > * { position: relative; z-index: 1; }
 
 .about-audience-scroll {
   display: grid;
@@ -4574,20 +4509,10 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── FAQ Accordion ─── */
 
 .about-faq-section {
-  position: relative;
+  background: linear-gradient(180deg, rgba(8,12,18,0.72) 0%, rgba(10,16,24,0.65) 50%, rgba(8,12,18,0.72) 100%);
   padding: 100px 24px;
-  background: url('/backgrounds/statement.png') center/cover no-repeat fixed;
+  border-top: 1px solid rgba(100,140,200,0.06);
 }
-.about-faq-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 10%, rgba(0,0,0,0.35) 90%, rgba(0,0,0,0.65) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.about-faq-section > * { position: relative; z-index: 1; }
 
 .about-faq-list {
   max-width: 680px;
@@ -4644,16 +4569,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 140px 24px;
   overflow: hidden;
-  background: url('/backgrounds/cta.png') center/cover no-repeat fixed;
-}
-.about-final-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.25) 90%, rgba(0,0,0,0.55) 100%);
-  pointer-events: none;
-  z-index: 0;
+  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(32,28,12,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
 }
 
 .about-final-cta-bg {
@@ -5397,21 +5313,10 @@ h1, h2, h3, h4, h5, h6 {
 .hiw-hero {
   text-align: center;
   padding: 140px 24px 56px;
-  max-width: none;
+  max-width: 720px;
   margin: 0 auto;
   position: relative;
-  background: url('/backgrounds/journey.png') center/cover no-repeat fixed;
-}
-.hiw-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.25) 90%, rgba(0,0,0,0.55) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.hiw-hero > * { position: relative; z-index: 1; max-width: 720px; margin-left: auto; margin-right: auto;
+  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 30%, rgba(8,18,16,0.62) 70%, rgba(12,26,14,0.68) 100%);
 }
 
 .hiw-hero h1 {
@@ -5475,22 +5380,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Content area */
 .hiw-content {
-  position: relative;
   max-width: 900px;
   margin: 0 auto;
   padding: 0 24px 64px;
-  background: url('/backgrounds/lore.png') center/cover no-repeat fixed;
 }
-.hiw-content::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 5%, rgba(0,0,0,0.4) 95%, rgba(0,0,0,0.65) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.hiw-content > * { position: relative; z-index: 1; }
 
 .hiw-section {
   margin-bottom: 64px;
@@ -5642,18 +5535,9 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 120px 24px;
   position: relative;
-  background: url('/backgrounds/cta.png') center/cover no-repeat fixed;
+  border-top: 1px solid rgba(240,192,96,0.08);
+  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(26,22,8,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
 }
-.hiw-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 10%, rgba(0,0,0,0.25) 90%, rgba(0,0,0,0.55) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.hiw-cta > * { position: relative; z-index: 1; }
 
 .hiw-cta::before {
   content: '';
