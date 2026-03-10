@@ -77,7 +77,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── What's In A World ─── */}
-      <section className="about-statement" style={{ borderTop: '1px solid rgba(30,68,32,0.12)' }}>
+      <section className="about-statement" style={{ borderTop: '1px solid rgba(100,140,80,0.08)' }}>
         <div className="about-statement-inner">
           <h2 className="about-statement-heading">What&apos;s inside a world?</h2>
           <p className="about-big-text">
@@ -443,7 +443,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mountain-divider" />
+      <div className="mountain-divider hills" />
 
       {/* ─── Final CTA ─── */}
       <section className="about-final-cta">

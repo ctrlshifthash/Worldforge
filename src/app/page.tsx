@@ -22,31 +22,31 @@ const HERO_SPRITES = [
 /* Sprites composing the hero world scene backdrop */
 const GLS = `${GL}/Props/Static props`;
 const SCENE_SPRITES: { src: string; style: React.CSSProperties }[] = [
-  /* ── Back row: far trees (small, darker = depth) ── */
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { left: '3%',  bottom: '38%', height: 120, opacity: 0.30, filter: 'brightness(0.4) saturate(0.6)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '18%', bottom: '40%', height: 100, opacity: 0.25, filter: 'brightness(0.35) saturate(0.5)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '15%', bottom: '39%', height: 110, opacity: 0.28, filter: 'brightness(0.38) saturate(0.55)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '5%', bottom: '37%', height: 105, opacity: 0.26, filter: 'brightness(0.36) saturate(0.5)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '38%', bottom: '41%', height: 95, opacity: 0.22, filter: 'brightness(0.32) saturate(0.45)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '38%', bottom: '40%', height: 90, opacity: 0.20, filter: 'brightness(0.30) saturate(0.4)' } },
+  /* ── Back row: far trees (atmospheric depth) ── */
+  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { left: '3%',  bottom: '38%', height: 120, opacity: 0.50, filter: 'brightness(0.55) saturate(0.7)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '18%', bottom: '40%', height: 100, opacity: 0.45, filter: 'brightness(0.50) saturate(0.65)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '15%', bottom: '39%', height: 110, opacity: 0.48, filter: 'brightness(0.52) saturate(0.7)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '5%', bottom: '37%', height: 105, opacity: 0.46, filter: 'brightness(0.50) saturate(0.65)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '38%', bottom: '41%', height: 95, opacity: 0.42, filter: 'brightness(0.48) saturate(0.6)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '38%', bottom: '40%', height: 90, opacity: 0.40, filter: 'brightness(0.45) saturate(0.55)' } },
 
   /* ── Mid row: structures + medium trees ── */
-  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '-2%', bottom: '22%', height: 220, opacity: 0.50, filter: 'brightness(0.55) saturate(0.75)' } },
-  { src: `${GLS}/Cabin/cabin.png`,                    style: { left: '14%', bottom: '18%', height: 150, opacity: 0.50, filter: 'brightness(0.55) saturate(0.8)' } },
-  { src: `${GLS}/sheet2-sprites/watchtower - front.png`, style: { right: '12%', bottom: '20%', height: 200, opacity: 0.45, filter: 'brightness(0.50) saturate(0.75)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '-1%', bottom: '20%', height: 200, opacity: 0.48, filter: 'brightness(0.52) saturate(0.7)' } },
-  { src: `${GLS}/sheet2-sprites/stronghold - horizontal - entrance - on grass.png`, style: { left: '42%', bottom: '16%', height: 130, opacity: 0.42, filter: 'brightness(0.50) saturate(0.7)', transform: 'translateX(-50%)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '30%', bottom: '24%', height: 160, opacity: 0.40, filter: 'brightness(0.48) saturate(0.65)' } },
-  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '30%', bottom: '23%', height: 150, opacity: 0.38, filter: 'brightness(0.45) saturate(0.6)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_0.png`,  style: { left: '-2%', bottom: '22%', height: 220, opacity: 0.72, filter: 'brightness(0.70) saturate(0.85)' } },
+  { src: `${GLS}/Cabin/cabin.png`,                    style: { left: '14%', bottom: '18%', height: 150, opacity: 0.70, filter: 'brightness(0.68) saturate(0.88)' } },
+  { src: `${GLS}/sheet2-sprites/watchtower - front.png`, style: { right: '12%', bottom: '20%', height: 200, opacity: 0.65, filter: 'brightness(0.65) saturate(0.82)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_6.png`,  style: { right: '-1%', bottom: '20%', height: 200, opacity: 0.68, filter: 'brightness(0.68) saturate(0.8)' } },
+  { src: `${GLS}/sheet2-sprites/stronghold - horizontal - entrance - on grass.png`, style: { left: '42%', bottom: '16%', height: 130, opacity: 0.62, filter: 'brightness(0.62) saturate(0.8)', transform: 'translateX(-50%)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_9.png`,  style: { left: '30%', bottom: '24%', height: 160, opacity: 0.60, filter: 'brightness(0.60) saturate(0.78)' } },
+  { src: `${GLS}/pine-tree-sprites/pine-tree_3.png`,  style: { right: '30%', bottom: '23%', height: 150, opacity: 0.58, filter: 'brightness(0.58) saturate(0.75)' } },
 
-  /* ── Front row: foreground props + large trees at edges ── */
-  { src: `${GLS}/sheet1-sprites/lamp post 1 - lamp.png`, style: { left: '25%', bottom: '10%', height: 110, opacity: 0.50, filter: 'brightness(0.55) saturate(0.8)' } },
-  { src: `${GLS}/sheet1-sprites/campfire 1.png`,      style: { left: '48%', bottom: '8%', height: 55, opacity: 0.55, filter: 'brightness(0.6) saturate(0.85)' } },
-  { src: `${GL}/Props/Animated props/shrine-base-with grass.png`, style: { right: '25%', bottom: '8%', height: 80, opacity: 0.45, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/rocks on grass - color scheme 1 - 5.png`, style: { left: '58%', bottom: '5%', height: 45, opacity: 0.40, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/sign 1.png`,          style: { right: '42%', bottom: '6%', height: 35, opacity: 0.40, filter: 'brightness(0.50) saturate(0.7)' } },
-  { src: `${GLS}/sheet1-sprites/barrel 1.png`,        style: { left: '8%', bottom: '6%', height: 40, opacity: 0.38, filter: 'brightness(0.45) saturate(0.65)' } },
-  { src: `${GLS}/sheet1-sprites/waterwell - rope.png`, style: { right: '8%', bottom: '7%', height: 65, opacity: 0.42, filter: 'brightness(0.50) saturate(0.7)' } },
+  /* ── Front row: foreground props (most visible) ── */
+  { src: `${GLS}/sheet1-sprites/lamp post 1 - lamp.png`, style: { left: '25%', bottom: '10%', height: 110, opacity: 0.78, filter: 'brightness(0.75) saturate(0.88)' } },
+  { src: `${GLS}/sheet1-sprites/campfire 1.png`,      style: { left: '48%', bottom: '8%', height: 55, opacity: 0.82, filter: 'brightness(0.80) saturate(0.9)' } },
+  { src: `${GL}/Props/Animated props/shrine-base-with grass.png`, style: { right: '25%', bottom: '8%', height: 80, opacity: 0.72, filter: 'brightness(0.70) saturate(0.85)' } },
+  { src: `${GLS}/sheet1-sprites/rocks on grass - color scheme 1 - 5.png`, style: { left: '58%', bottom: '5%', height: 45, opacity: 0.68, filter: 'brightness(0.68) saturate(0.82)' } },
+  { src: `${GLS}/sheet1-sprites/sign 1.png`,          style: { right: '42%', bottom: '6%', height: 35, opacity: 0.65, filter: 'brightness(0.65) saturate(0.8)' } },
+  { src: `${GLS}/sheet1-sprites/barrel 1.png`,        style: { left: '8%', bottom: '6%', height: 40, opacity: 0.68, filter: 'brightness(0.65) saturate(0.8)' } },
+  { src: `${GLS}/sheet1-sprites/waterwell - rope.png`, style: { right: '8%', bottom: '7%', height: 65, opacity: 0.70, filter: 'brightness(0.68) saturate(0.82)' } },
 ];
 
 const BUILD_ITEMS = [
@@ -178,7 +178,7 @@ export default async function LandingPage() {
           STATEMENT — One powerful sentence
           ═══════════════════════════════════════════════════════ */}
       <div className="mountain-divider" />
-      <section className="statement-section tileset-bg">
+      <section className="statement-section">
         <p className="statement-text">
           Every world you create becomes a <span className="gold">playable 2D game</span> with
           combat, NPCs, quests, building, vendors, wildlife, and
@@ -186,13 +186,13 @@ export default async function LandingPage() {
           you can explore, edit, and grow.
         </p>
       </section>
-      <div className="horizon-glow" />
+      <div className="transition-clearing" />
 
       {/* ═══════════════════════════════════════════════════════
           THE JOURNEY — Narrative walkthrough: Describe → Generate → Enter → Play
           Alternating panels, each visually unique
           ═══════════════════════════════════════════════════════ */}
-      <section className="journey-section tile-bg">
+      <section className="journey-section">
 
         {/* Step 1: Describe */}
         <div className="journey-step">
@@ -432,7 +432,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="mountain-divider" />
+      <div className="mountain-divider rocky" />
 
       {/* ═══════════════════════════════════════════════════════
           GAME SYSTEMS — Editorial spreads proving each system is real
@@ -655,7 +655,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="horizon-glow" />
+      <div className="transition-archive" />
 
       {/* ═══════════════════════════════════════════════════════
           LORE LAYER — The worldbuilding tools under the game
@@ -745,7 +745,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           HOW TO PLAY — Quick controls reference
           ═══════════════════════════════════════════════════════ */}
-      <section className="htp-section tile-bg">
+      <section className="htp-section">
         <div className="container">
           <div className="htp-header">
             <h2>How to Play</h2>
@@ -887,7 +887,8 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="mountain-divider" />
+      <div className="mountain-divider hills" />
+      <div className="transition-dawn" />
 
       {/* ═══════════════════════════════════════════════════════
           FINAL CTA

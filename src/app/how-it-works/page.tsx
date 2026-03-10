@@ -551,7 +551,7 @@ export default function HowItWorksPage() {
 
       </div>
 
-      <div className="mountain-divider" />
+      <div className="mountain-divider hills" />
 
       {/* ─── CTA ─── */}
       <section className="hiw-cta">
