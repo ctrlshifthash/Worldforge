@@ -43,7 +43,7 @@ export function SocialLinks() {
           title={s.name}
         >
           <span className="social-link-icon">
-            <img src={s.img} alt={s.name} width={24} height={24} />
+            <img src={s.img} alt={s.name} width={44} height={44} />
           </span>
           <span className="social-link-name">{s.name}</span>
         </a>

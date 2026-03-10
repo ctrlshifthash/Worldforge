@@ -6544,31 +6544,28 @@ h1, h2, h3, h4, h5, h6 {
 
 .social-link-icon {
   flex-shrink: 0;
-  width: 48px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.social-link-icon img {
-  width: 42px;
-  height: 42px;
+  background: #fff;
   border-radius: 10px;
-  object-fit: contain;
-  background: rgba(255,255,255,0.95);
-  padding: 6px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.15);
+  overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
 }
 
-.social-link:hover .social-link-icon {
-  transform: scale(1.2);
+.social-link-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.social-link:hover .social-link-icon img {
+.social-link:hover .social-link-icon {
+  transform: scale(1.15);
   box-shadow: 0 0 16px rgba(240,192,96,0.4), 0 2px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(240,192,96,0.3);
-  background: #fff;
 }
 
 .social-link-name {
@@ -6599,10 +6596,9 @@ h1, h2, h3, h4, h5, h6 {
     width: 38px;
     transform: none;
   }
-  .social-link-icon img {
+  .social-link-icon {
     width: 34px;
     height: 34px;
-    padding: 5px;
   }
   .social-link-name { display: none; }
   .ca-badge { min-width: 240px; font-size: 0.42rem; }
