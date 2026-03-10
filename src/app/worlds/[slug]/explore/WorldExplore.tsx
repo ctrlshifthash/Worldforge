@@ -9317,16 +9317,19 @@ export function WorldExplore({
       ctx.textAlign = 'left';
       const locIcon = '\u25C9'; // ◉
       const locText = `${locIcon}  ${zoneName}`;
-      const regionText = regionLabel;
       const lm = ctx.measureText(locText);
+      // Build second line: region + era + online count
+      const onlineCount = mp.connectedRef.current ? mp.onlineCountRef.current : 0;
+      const secondLine = regionLabel + (eraLabelRef.current ? ` \u2022 ${eraLabelRef.current}` : '') + (onlineCount > 0 ? `  \u2022  ${onlineCount} online` : '');
       ctx.font = '400 9px Inter, sans-serif';
-      const rm = ctx.measureText(regionText);
+      const rm = ctx.measureText(secondLine);
       const pillW = Math.max(lm.width, rm.width) + 28;
       const pillX = 12;
-      const pillY = 12;
+      const pillY = 10;
+      const pillH = 34;
       ctx.fillStyle = 'rgba(6,6,8,0.78)';
       ctx.beginPath();
-      ctx.roundRect(pillX, pillY, pillW, 36, 6);
+      ctx.roundRect(pillX, pillY, pillW, pillH, 6);
       ctx.fill();
       ctx.strokeStyle = 'rgba(200,164,78,0.12)';
       ctx.lineWidth = 1;
@@ -9334,17 +9337,72 @@ export function WorldExplore({
       // Zone name
       ctx.font = '600 11px Inter, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.fillText(locText, pillX + 10, pillY + 15);
-      // Region label
+      ctx.fillText(locText, pillX + 10, pillY + 14);
+      // Region label + online count
       ctx.font = '400 9px Inter, sans-serif';
       ctx.fillStyle = 'rgba(200,164,78,0.5)';
-      ctx.fillText(regionLabel + (eraLabelRef.current ? ` \u2022 ${eraLabelRef.current}` : ''), pillX + 10, pillY + 28);
+      ctx.fillText(secondLine, pillX + 10, pillY + 27);
+      // Online dot indicator (green)
+      if (onlineCount > 0) {
+        const dotX = pillX + 10 + ctx.measureText(regionLabel + (eraLabelRef.current ? ` \u2022 ${eraLabelRef.current}` : '') + '  \u2022  ').width - 4;
+        ctx.fillStyle = '#36B37E';
+        ctx.beginPath();
+        ctx.arc(dotX, pillY + 24, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
-      // ── Character bar (top-left) ──
+      // ── Objective bar (below location pill) ──
+      const curObjective = inVillage ? svObjectiveRef.current : objectiveRef.current;
+      const objY = pillY + pillH + 6; // 50
+      const objW = 220;
+      const objH = 22;
+      ctx.fillStyle = 'rgba(6,6,8,0.78)';
+      ctx.beginPath();
+      ctx.roundRect(pillX, objY, objW, objH, 5);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(200,164,78,0.08)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.font = '600 9px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(200,164,78,0.7)';
+      ctx.fillText('\u25C6', pillX + 8, objY + 14);
+      ctx.font = '500 9px Inter, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillText(curObjective, pillX + 20, objY + 14);
+      // Quest/combat trackers (right side of obj bar)
+      ctx.textAlign = 'right';
+      if (zoneRef.current === 'grassland' && orcsKilledRef.current > 0) {
+        ctx.font = '600 9px Inter, sans-serif';
+        ctx.fillStyle = orcsKilledRef.current >= 7 ? '#78c850' : '#dc6450';
+        ctx.fillText(`\u2694 ${orcsKilledRef.current}/7`, pillX + objW - 8, objY + 14);
+      }
+      if (shrineBuffRef.current.active) {
+        ctx.font = '500 8px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(160,120,255,0.7)';
+        ctx.fillText(`\u269A ${Math.ceil(shrineBuffRef.current.timer)}s`, pillX + objW - 8, objY + 14);
+      }
+      if (inVillage) {
+        ctx.font = '600 9px Inter, sans-serif';
+        const q = svQuestRef.current;
+        if (q.stage === 'searching') {
+          ctx.fillStyle = 'rgba(200,180,80,0.7)';
+          ctx.fillText(`${q.searched.filter(Boolean).length}/3`, pillX + objW - 8, objY + 14);
+        } else if (q.stage === 'found') {
+          ctx.fillStyle = '#78c850';
+          ctx.fillText('\u2713 Found', pillX + objW - 8, objY + 14);
+        } else if (q.stage === 'returned' || q.stage === 'complete') {
+          ctx.fillStyle = '#78c850';
+          ctx.fillText('\u2713 Done', pillX + objW - 8, objY + 14);
+        }
+      }
+      ctx.textAlign = 'left';
+
+      // ── Character bar (below objective) ──
       const barX = 12;
       const barW = 220;
-      const barH = isOwner ? 130 : 68;
-      const barY = 54;
+      const barH = isOwner ? 140 : 72;
+      const barY = objY + objH + 6; // 78
 
       // Panel background
       ctx.fillStyle = 'rgba(6,6,8,0.82)';
@@ -9474,16 +9532,19 @@ export function WorldExplore({
         }
 
         // ── Builder Tier section ──
-        const tierSectionY = resY + (curPop > 0 ? 28 : 16);
+        const tierSectionY = resY + (curPop > 0 ? 32 : 20);
         const tier = playerTierRef.current;
         const ti = TIER_INFO.find(t => t.tier === tier) || TIER_INFO[0];
         const tierLabel = ti.name;
         const tierColor = ti.color;
         const tierY = tierSectionY;
+        // Divider above tier
+        ctx.fillStyle = 'rgba(200,164,78,0.08)';
+        ctx.fillRect(barX + 10, tierY - 4, barW - 20, 1);
         // Tier badge bg
         ctx.fillStyle = `${tierColor}0D`;
         ctx.beginPath();
-        ctx.roundRect(barX + 8, tierY, barW - 16, 22, 4);
+        ctx.roundRect(barX + 8, tierY, barW - 16, 24, 5);
         ctx.fill();
         ctx.strokeStyle = `${tierColor}25`;
         ctx.lineWidth = 1;
@@ -9492,9 +9553,9 @@ export function WorldExplore({
         ctx.font = '10px Inter, sans-serif';
         ctx.fillStyle = tierColor;
         ctx.textAlign = 'left';
-        ctx.fillText('\u2605', barX + 14, tierY + 14);
+        ctx.fillText('\u2605', barX + 14, tierY + 15);
         ctx.font = 'bold 10px Inter, sans-serif';
-        ctx.fillText(tierLabel, barX + 26, tierY + 14);
+        ctx.fillText(tierLabel, barX + 28, tierY + 15);
         // Progress bar (next tier) with descriptive label
         if (tier < 6) {
           let progress = 0;
@@ -9530,71 +9591,29 @@ export function WorldExplore({
           }
           const pbX = barX + 14;
           const pbW = barW - 28;
-          // Descriptive task label above bar
-          ctx.font = '500 7px Inter, sans-serif';
-          ctx.fillStyle = 'rgba(255,255,255,0.35)';
+          // Descriptive task label
+          ctx.font = '500 8px Inter, sans-serif';
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
           ctx.textAlign = 'left';
-          ctx.fillText(progDesc, pbX, tierY + 26);
+          ctx.fillText(progDesc, pbX, tierY + 30);
           // Progress bar
           ctx.fillStyle = 'rgba(255,255,255,0.06)';
           ctx.beginPath();
-          ctx.roundRect(pbX, tierY + 29, pbW, 6, 3);
+          ctx.roundRect(pbX, tierY + 34, pbW, 7, 3);
           ctx.fill();
           ctx.fillStyle = `${tierColor}70`;
           ctx.beginPath();
-          ctx.roundRect(pbX, tierY + 29, Math.max(0, pbW * progress), 6, 3);
+          ctx.roundRect(pbX, tierY + 34, Math.max(0, pbW * progress), 7, 3);
           ctx.fill();
-          ctx.font = '600 7px Inter, sans-serif';
+          ctx.font = '600 8px Inter, sans-serif';
           ctx.fillStyle = 'rgba(255,255,255,0.5)';
           ctx.textAlign = 'right';
-          ctx.fillText(progLabel, barX + barW - 14, tierY + 36);
+          ctx.fillText(progLabel, barX + barW - 14, tierY + 41);
           ctx.textAlign = 'left';
         }
       }
 
-      // ── Objective bar (bottom-left, below character bar) ──
-      const curObjective = inVillage ? svObjectiveRef.current : objectiveRef.current;
-      const objY = barY - 26;
-      const objW = barW;
-      ctx.fillStyle = 'rgba(6,6,8,0.72)';
-      ctx.beginPath();
-      ctx.roundRect(barX, objY, objW, 20, 5);
-      ctx.fill();
-      ctx.font = '600 9px Inter, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(200,164,78,0.6)';
-      ctx.fillText('\u25C6', barX + 8, objY + 13);
-      ctx.font = '500 9px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.fillText(curObjective, barX + 20, objY + 13);
-
-      // ── Quest/combat trackers (right side of obj bar) ──
-      ctx.textAlign = 'right';
-      if (zoneRef.current === 'grassland' && orcsKilledRef.current > 0) {
-        ctx.font = '600 9px Inter, sans-serif';
-        ctx.fillStyle = orcsKilledRef.current >= 7 ? '#78c850' : '#dc6450';
-        ctx.fillText(`\u2694 ${orcsKilledRef.current}/7`, barX + objW - 8, objY + 13);
-      }
-      if (shrineBuffRef.current.active) {
-        ctx.font = '500 8px Inter, sans-serif';
-        ctx.fillStyle = 'rgba(160,120,255,0.7)';
-        ctx.fillText(`\u269A ${Math.ceil(shrineBuffRef.current.timer)}s`, barX + objW - 8, objY + 13);
-      }
-      if (inVillage) {
-        ctx.font = '600 9px Inter, sans-serif';
-        const q = svQuestRef.current;
-        if (q.stage === 'searching') {
-          ctx.fillStyle = 'rgba(200,180,80,0.7)';
-          ctx.fillText(`${q.searched.filter(Boolean).length}/3`, barX + objW - 8, objY + 13);
-        } else if (q.stage === 'found') {
-          ctx.fillStyle = '#78c850';
-          ctx.fillText('\u2713 Found', barX + objW - 8, objY + 13);
-        } else if (q.stage === 'returned' || q.stage === 'complete') {
-          ctx.fillStyle = '#78c850';
-          ctx.fillText('\u2713 Done', barX + objW - 8, objY + 13);
-        }
-      }
-      ctx.textAlign = 'left';
+      // (Objective bar is now drawn above the character bar, before this section)
 
       // Placement mode instruction bar (bottom center)
       if (placementModeRef.current && placementItemRef.current) {
@@ -11156,18 +11175,7 @@ export function WorldExplore({
       })()}
 
       {/* ── Multiplayer: Online count ── */}
-      {mp.connectedRef.current && (
-        <div style={{
-          position: 'absolute', top: 12, left: 16, zIndex: 20,
-          display: 'flex', alignItems: 'center', gap: 6,
-          padding: '4px 10px', borderRadius: 0,
-          background: 'rgba(6,6,8,0.78)', border: '1px solid rgba(255,255,255,0.08)',
-          fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.55)',
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#36B37E', flexShrink: 0 }} />
-          {mp.onlineCountRef.current} online
-        </div>
-      )}
+      {/* Online indicator is now integrated into the canvas location pill */}
 
       {/* ── Multiplayer: Chat ── */}
       <div style={{
