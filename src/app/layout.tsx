@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { PixelSkyBackground } from '@/components/PixelSkyBackground';
 
 export const metadata: Metadata = {
   title: 'Worldforge — Collaborative Worldbuilding Platform',
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <PixelSkyBackground />
+        {children}
+      </body>
     </html>
   );
 }

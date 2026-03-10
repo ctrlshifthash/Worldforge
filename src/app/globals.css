@@ -87,6 +87,9 @@
   --duration-fast: 150ms;
   --duration-normal: 250ms;
   --duration-slow: 400ms;
+
+  /* ─── Animated Sky System ─── */
+  --sky-scroll: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -111,12 +114,194 @@ body {
   background: var(--bg);
 }
 
+/* Marketing pages: deep night sky to match animated sky gradient */
+body:has(.landing),
+body:has(.about-page),
+body:has(.hiw-page),
+body:has(.discover-page) {
+  background: #030810;
+}
+
 
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; }
 input, textarea, select { font: inherit; }
 img { display: block; max-width: 100%; image-rendering: auto; }
 ul, ol { list-style: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   PIXEL SKY — Animated scroll-reactive background
+   ═══════════════════════════════════════════════════════════ */
+
+.pixel-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Sky gradient — 300vh tall, shifts upward as user scrolls */
+.pixel-sky-gradient {
+  position: absolute;
+  inset: 0;
+  height: 300vh;
+  transform: translateY(calc(var(--sky-scroll) * -200vh));
+  will-change: transform;
+  background: linear-gradient(180deg,
+    #030810 0%,
+    #040a14 4%,
+    #060e1c 8%,
+    #081222 12%,
+    #0a1428 16%,
+    #0c1630 20%,
+    #0e1835 24%,
+    #121a38 28%,
+    #181838 32%,
+    #1e1636 36%,
+    #26143a 40%,
+    #301640 44%,
+    #3a1838 48%,
+    #481a30 52%,
+    #582028 56%,
+    #6a2824 60%,
+    #803420 64%,
+    #98441c 68%,
+    #b05820 72%,
+    #c86c24 76%,
+    #d88030 80%,
+    #e49438 84%,
+    #eca840 88%,
+    #f0b848 92%,
+    #f4c450 96%,
+    #f6cc58 100%
+  );
+}
+
+/* ─── Stars ─── */
+.pixel-sky-stars {
+  position: absolute;
+  inset: 0;
+  opacity: calc(1 - var(--sky-scroll) * 1.8);
+}
+
+.pixel-star {
+  position: absolute;
+  background: #fff;
+  border-radius: 0;
+  image-rendering: pixelated;
+  animation: starTwinkle ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+/* ─── Pixel Clouds ─── */
+.pixel-sky-clouds {
+  position: absolute;
+  inset: 0;
+  opacity: calc(0.08 + var(--sky-scroll) * 0.5);
+}
+
+.pixel-cloud {
+  position: absolute;
+  background: rgba(220, 225, 240, 0.10);
+  border-radius: 0;
+  box-shadow:
+    4px 0 0 0 rgba(220,225,240,0.10),
+    -4px 0 0 0 rgba(220,225,240,0.10),
+    8px 0 0 0 rgba(220,225,240,0.06),
+    -8px 0 0 0 rgba(220,225,240,0.06),
+    0 -4px 0 0 rgba(220,225,240,0.08),
+    4px -4px 0 0 rgba(220,225,240,0.06),
+    8px -4px 0 0 rgba(220,225,240,0.04),
+    12px -4px 0 0 rgba(220,225,240,0.06),
+    16px -8px 0 0 rgba(220,225,240,0.04),
+    -4px -4px 0 0 rgba(220,225,240,0.05);
+  will-change: transform;
+}
+
+.pixel-cloud-layer-1 { animation: cloudDriftSlow linear infinite; }
+.pixel-cloud-layer-2 { animation: cloudDriftFast linear infinite; }
+
+@keyframes cloudDriftSlow {
+  0% { transform: translateX(-150px); }
+  100% { transform: translateX(calc(100vw + 150px)); }
+}
+@keyframes cloudDriftFast {
+  0% { transform: translateX(calc(100vw + 150px)); }
+  100% { transform: translateX(-150px); }
+}
+
+/* ─── Particles: Fireflies ─── */
+.pixel-sky-fireflies {
+  position: absolute;
+  inset: 0;
+  opacity: calc(
+    min(
+      clamp(0, (var(--sky-scroll) - 0.2) * 4, 1),
+      clamp(0, (0.75 - var(--sky-scroll)) * 4, 1)
+    )
+  );
+}
+
+.pixel-particle-firefly {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 0;
+  background: #f0c860;
+  box-shadow: 0 0 6px 1px rgba(240,200,96,0.5), 0 0 12px 2px rgba(240,200,96,0.15);
+  animation: fireflyFloat ease-in-out infinite;
+}
+
+@keyframes fireflyFloat {
+  0%, 100% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 0.9; }
+  50% { opacity: 0.5; transform: translate(12px, -18px); }
+  85% { opacity: 0.8; transform: translate(-6px, -30px); }
+}
+
+/* ─── Particles: Dust motes ─── */
+.pixel-sky-dust {
+  position: absolute;
+  inset: 0;
+  opacity: calc(clamp(0, (var(--sky-scroll) - 0.5) * 2.5, 1));
+}
+
+.pixel-particle-dust {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 0;
+  background: rgba(255,220,160,0.6);
+  animation: dustFloat ease-in-out infinite;
+}
+
+@keyframes dustFloat {
+  0%, 100% { opacity: 0; transform: translate(0, 0) scale(1); }
+  25% { opacity: 0.7; transform: translate(4px, -8px) scale(1.2); }
+  50% { opacity: 0.4; transform: translate(10px, -20px) scale(0.8); }
+  75% { opacity: 0.6; transform: translate(6px, -32px) scale(1.1); }
+}
+
+/* ─── Sky responsive ─── */
+@media (max-width: 768px) {
+  .pixel-star:nth-child(n+80) { display: none; }
+  .pixel-sky-fireflies,
+  .pixel-sky-dust { display: none; }
+  .pixel-cloud:nth-child(n+4) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-star { animation: none !important; opacity: 0.5; }
+  .pixel-cloud { animation: none !important; }
+  .pixel-particle-firefly,
+  .pixel-particle-dust { display: none; }
+  .pixel-sky-gradient { transition: none; }
+}
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
@@ -3822,7 +4007,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(180deg, #030810 0%, #061018 20%, #081210 40%, #0c1a0e 70%, #0d140c 100%);
+  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 20%, rgba(8,18,16,0.62) 40%, rgba(12,26,14,0.62) 70%, rgba(13,20,12,0.68) 100%);
 }
 
 .about-opening-lines {
@@ -3906,7 +4091,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: center;
   border-top: 1px solid rgba(100,140,80,0.08);
-  background: linear-gradient(180deg, #0e1e0e 0%, #0d1a0e 50%, #0c160a 100%);
+  background: linear-gradient(180deg, rgba(14,30,14,0.70) 0%, rgba(13,26,14,0.65) 50%, rgba(12,22,10,0.70) 100%);
 }
 
 .about-statement-inner {
@@ -3985,7 +4170,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 80px 24px 120px;
   display: flex;
   justify-content: center;
-  background: linear-gradient(180deg, #0c0b0e 0%, #0e0d12 50%, #0c0b0e 100%);
+  background: linear-gradient(180deg, rgba(12,11,14,0.75) 0%, rgba(14,13,18,0.70) 50%, rgba(12,11,14,0.75) 100%);
 }
 
 .about-demo-container {
@@ -4121,7 +4306,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1000px;
   margin: 0 auto;
   border-top: 1px solid rgba(240,192,96,0.06);
-  background: linear-gradient(180deg, #0e0c08 0%, #120f0a 50%, #0e0c08 100%);
+  background: linear-gradient(180deg, rgba(14,12,8,0.72) 0%, rgba(18,15,10,0.65) 50%, rgba(14,12,8,0.72) 100%);
 }
 
 .about-bento {
@@ -4234,7 +4419,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 80px 24px;
   border-top: 1px solid rgba(240,192,96,0.06);
   border-bottom: 1px solid rgba(240,192,96,0.06);
-  background: linear-gradient(180deg, #0e0c08 0%, #14110c 50%, #0e0c08 100%);
+  background: linear-gradient(180deg, rgba(14,12,8,0.75) 0%, rgba(20,17,12,0.68) 50%, rgba(14,12,8,0.75) 100%);
 }
 
 .about-numbers-inner {
@@ -4279,7 +4464,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .about-audience-section {
   padding: 100px 24px;
-  background: linear-gradient(180deg, #0c100a 0%, #101810 30%, #142014 50%, #101810 70%, #0c100a 100%);
+  background: linear-gradient(180deg, rgba(12,16,10,0.70) 0%, rgba(16,24,16,0.62) 30%, rgba(20,32,20,0.58) 50%, rgba(16,24,16,0.62) 70%, rgba(12,16,10,0.70) 100%);
 }
 
 .about-audience-scroll {
@@ -4324,7 +4509,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── FAQ Accordion ─── */
 
 .about-faq-section {
-  background: linear-gradient(180deg, #080c12 0%, #0a1018 50%, #080c12 100%);
+  background: linear-gradient(180deg, rgba(8,12,18,0.72) 0%, rgba(10,16,24,0.65) 50%, rgba(8,12,18,0.72) 100%);
   padding: 100px 24px;
   border-top: 1px solid rgba(100,140,200,0.06);
 }
@@ -4384,7 +4569,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 140px 24px;
   overflow: hidden;
-  background: linear-gradient(180deg, #0a0c08 0%, #14120a 30%, #201c0c 50%, #14120a 70%, #0e0c08 100%);
+  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(32,28,12,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
 }
 
 .about-final-cta-bg {
@@ -5122,7 +5307,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hiw-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #030810 0%, #081210 10%, #0c1a0e 20%, #0c0b0e 50%, #0e0c08 80%, #0a0c08 100%);
+  background: transparent;
 }
 
 .hiw-hero {
@@ -5131,7 +5316,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 720px;
   margin: 0 auto;
   position: relative;
-  background: linear-gradient(180deg, #030810 0%, #061018 30%, #081210 70%, #0c1a0e 100%);
+  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 30%, rgba(8,18,16,0.62) 70%, rgba(12,26,14,0.68) 100%);
 }
 
 .hiw-hero h1 {
@@ -5351,7 +5536,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 24px;
   position: relative;
   border-top: 1px solid rgba(240,192,96,0.08);
-  background: linear-gradient(180deg, #0a0c08 0%, #14120a 30%, #1a1608 50%, #14120a 70%, #0e0c08 100%);
+  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(26,22,8,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
 }
 
 .hiw-cta::before {
@@ -5553,7 +5738,7 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   height: 48px;
-  background: #0e160e;
+  background: rgba(14,22,14,0.85);
   clip-path: polygon(
     0% 100%, 0% 80%, 3% 55%, 5% 60%, 7% 40%, 9% 35%, 11% 55%, 14% 50%,
     17% 30%, 19% 45%, 22% 35%, 25% 50%, 28% 40%, 31% 55%, 34% 30%,
@@ -5575,7 +5760,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ─── Mountain divider variants ─── */
 .mountain-divider.rocky::before {
-  background: #100e12;
+  background: rgba(16,14,18,0.85);
   clip-path: polygon(
     0% 100%, 0% 70%, 4% 50%, 7% 62%, 10% 35%, 14% 55%, 18% 28%,
     22% 48%, 26% 32%, 30% 55%, 34% 25%, 38% 50%, 42% 30%,
@@ -5589,7 +5774,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mountain-divider.hills::before {
-  background: #121810;
+  background: rgba(18,24,16,0.85);
   clip-path: polygon(
     0% 100%, 0% 60%, 8% 48%, 16% 52%, 28% 40%, 38% 46%,
     50% 38%, 62% 44%, 72% 36%, 82% 42%, 92% 48%, 100% 44%, 100% 100%
@@ -5604,7 +5789,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 100px;
   background:
     radial-gradient(ellipse 60% 100% at 50% 0%, rgba(50,120,40,0.06) 0%, transparent 70%),
-    linear-gradient(180deg, var(--env-canopy) 0%, var(--env-clearing) 100%);
+    linear-gradient(180deg, rgba(7,18,8,0.65) 0%, rgba(13,26,14,0.60) 100%);
   pointer-events: none;
 }
 
@@ -5617,14 +5802,14 @@ h1, h2, h3, h4, h5, h6 {
 .transition-archive {
   height: 80px;
   background:
-    linear-gradient(180deg, var(--env-dungeon) 0%, var(--env-archive) 100%),
+    linear-gradient(180deg, rgba(12,11,14,0.65) 0%, rgba(16,14,10,0.60) 100%),
     radial-gradient(ellipse 40% 80% at 50% 100%, rgba(240,192,96,0.03) 0%, transparent 70%);
   pointer-events: none;
 }
 
 .transition-dawn {
   height: 100px;
-  background: linear-gradient(180deg, var(--env-twilight) 0%, var(--env-dawn) 100%);
+  background: linear-gradient(180deg, rgba(9,13,18,0.60) 0%, rgba(18,16,10,0.55) 100%);
   pointer-events: none;
 }
 
@@ -6112,7 +6297,7 @@ h1, h2, h3, h4, h5, h6 {
   padding-top: 120px;
   padding-bottom: 80px;
   overflow: hidden;
-  background: var(--void);
+  background: transparent;
 }
 
 /* ─── Hero Background: composed game world scene ─── */
@@ -6471,7 +6656,10 @@ h1, h2, h3, h4, h5, h6 {
   padding-left: var(--space-xl);
   padding-right: var(--space-xl);
   position: relative;
-  background: linear-gradient(180deg, #081208 0%, #0e1e0e 50%, #0a1608 100%);
+  background: linear-gradient(180deg,
+    rgba(8,18,8,0.72) 0%,
+    rgba(14,30,14,0.65) 50%,
+    rgba(10,22,8,0.72) 100%);
 }
 
 /* Light shaft from forest canopy */
@@ -6525,14 +6713,14 @@ h1, h2, h3, h4, h5, h6 {
   padding: 20px 0 100px 0;
   position: relative;
   background: linear-gradient(180deg,
-    #0d1a0e 0%,
-    #0b160c 15%,
-    #0a130a 30%,
-    #091008 45%,
-    #080e0a 60%,
-    #0a0c0e 75%,
-    #0c0b0e 90%,
-    #0a090c 100%
+    rgba(13,26,14,0.68) 0%,
+    rgba(11,22,12,0.62) 15%,
+    rgba(10,19,10,0.58) 30%,
+    rgba(9,16,8,0.55) 45%,
+    rgba(8,14,10,0.55) 60%,
+    rgba(10,12,14,0.60) 75%,
+    rgba(12,11,14,0.65) 90%,
+    rgba(10,9,12,0.70) 100%
   );
 }
 
@@ -6712,12 +6900,12 @@ h1, h2, h3, h4, h5, h6 {
   padding: 80px 0 120px;
   position: relative;
   background: linear-gradient(180deg,
-    #0c0b0e 0%,
-    #0e0d12 20%,
-    #100f14 40%,
-    #0e0d12 60%,
-    #0c0b0e 80%,
-    #0a0a0c 100%
+    rgba(12,11,14,0.75) 0%,
+    rgba(14,13,18,0.70) 20%,
+    rgba(16,15,20,0.68) 40%,
+    rgba(14,13,18,0.70) 60%,
+    rgba(12,11,14,0.75) 80%,
+    rgba(10,10,12,0.78) 100%
   );
 }
 
@@ -6871,11 +7059,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 0;
   position: relative;
   background: linear-gradient(180deg,
-    #0e0c08 0%,
-    #120f0a 30%,
-    #14110c 50%,
-    #120f0a 70%,
-    #0e0c08 100%
+    rgba(14,12,8,0.72) 0%,
+    rgba(18,15,10,0.65) 30%,
+    rgba(20,17,12,0.62) 50%,
+    rgba(18,15,10,0.65) 70%,
+    rgba(14,12,8,0.72) 100%
   );
 }
 
@@ -7007,12 +7195,12 @@ h1, h2, h3, h4, h5, h6 {
   border-top: none;
   position: relative;
   background: linear-gradient(180deg,
-    #0c100a 0%,
-    #101810 20%,
-    #142014 40%,
-    #101810 60%,
-    #0c100a 80%,
-    #0a0e0c 100%
+    rgba(12,16,10,0.68) 0%,
+    rgba(16,24,16,0.60) 20%,
+    rgba(20,32,20,0.58) 40%,
+    rgba(16,24,16,0.60) 60%,
+    rgba(12,16,10,0.68) 80%,
+    rgba(10,14,12,0.72) 100%
   );
 }
 
@@ -7154,11 +7342,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 0;
   position: relative;
   background: linear-gradient(180deg,
-    #080c12 0%,
-    #0a1018 30%,
-    #0c1220 50%,
-    #0a1018 70%,
-    #080c12 100%
+    rgba(8,12,18,0.70) 0%,
+    rgba(10,16,24,0.62) 30%,
+    rgba(12,18,32,0.58) 50%,
+    rgba(10,16,24,0.62) 70%,
+    rgba(8,12,18,0.70) 100%
   );
 }
 
@@ -7236,13 +7424,13 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   overflow: hidden;
   background: linear-gradient(180deg,
-    #0a0c08 0%,
-    #14120a 20%,
-    #1a1608 40%,
-    #201c0c 55%,
-    #1a1608 70%,
-    #14120a 85%,
-    #0e0c08 100%
+    rgba(10,12,8,0.60) 0%,
+    rgba(20,18,10,0.50) 20%,
+    rgba(26,22,8,0.45) 40%,
+    rgba(32,28,12,0.42) 55%,
+    rgba(26,22,8,0.45) 70%,
+    rgba(20,18,10,0.50) 85%,
+    rgba(14,12,8,0.60) 100%
   );
 }
 
