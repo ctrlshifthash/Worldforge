@@ -5724,14 +5724,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ─── Scroll Reveal Animations ─── */
-.reveal-section {
+/* No transform on sections — transform breaks background-attachment: fixed */
+.reveal-section > * {
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reveal-section.revealed {
+.reveal-section.revealed > * {
   opacity: 1;
   transform: translateY(0);
 }
@@ -5782,7 +5783,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .reveal-section {
+  .reveal-section > * {
     opacity: 1;
     transform: none;
     transition: none;
