@@ -6,14 +6,14 @@
 :root {
   color-scheme: dark;
 
-  /* ─── Core Palette: Deep Game World ─── */
-  --void:    #080b12;
-  --deep:    #0c1018;
-  --bg:      #0e1219;
-  --surface: #151a28;
-  --raised:  #1c2236;
-  --elevated:#252d45;
-  --hover:   #2e3752;
+  /* ─── Core Palette: Dark Forest Game World ─── */
+  --void:    #060a06;
+  --deep:    #090e08;
+  --bg:      #0b100a;
+  --surface: #121a12;
+  --raised:  #1a2418;
+  --elevated:#222e20;
+  --hover:   #2a3828;
 
   /* ─── Borders ─── */
   --border-dim:    rgba(255,255,255,0.04);
@@ -100,7 +100,7 @@ body {
   background: var(--bg);
 }
 
-/* Subtle pixel grid overlay */
+/* Subtle pixel grid overlay — forest-tinted */
 body::before {
   content: '';
   position: fixed;
@@ -108,8 +108,8 @@ body::before {
   pointer-events: none;
   z-index: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    linear-gradient(rgba(120,180,100,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120,180,100,0.018) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -761,7 +761,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .landing-footer {
   padding: var(--space-2xl) 0;
-  border-top: 2px solid var(--border);
+  border-top: 2px solid rgba(30,68,32,0.15);
   text-align: center;
   background: var(--deep);
 }
@@ -840,7 +840,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: 0 32px;
   height: 56px;
-  background: rgba(8,11,18,0.92);
+  background: rgba(6,12,6,0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
@@ -3024,7 +3024,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: calc(100% - 48px);
   overflow-y: auto;
   padding: var(--space-lg);
-  background: rgba(14,18,25,0.94);
+  background: rgba(9,14,8,0.94);
   backdrop-filter: blur(20px);
   border: 2px solid rgba(139,108,62,0.3);
   border-radius: 0;
@@ -3125,7 +3125,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(-50%);
   z-index: 15;
   padding: var(--space-sm) var(--space-lg);
-  background: rgba(14,18,25,0.92);
+  background: rgba(9,14,8,0.92);
   backdrop-filter: blur(12px);
   border: 2px solid rgba(139,108,62,0.3);
   border-radius: 0;
@@ -3823,6 +3823,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: linear-gradient(180deg, #060a06 0%, #090e08 30%, #0b120a 60%, #0d140c 100%);
 }
 
 .about-opening-lines {
@@ -3835,7 +3836,7 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   width: 1px;
   height: 100%;
-  background: linear-gradient(180deg, transparent 0%, rgba(240,192,96,0.06) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(30,68,32,0.08) 30%, rgba(240,192,96,0.06) 50%, rgba(30,68,32,0.08) 70%, transparent 100%);
   animation: aboutLineFade 6s ease-in-out infinite;
 }
 .about-opening-line:nth-child(1) { left: 10%; }
@@ -3905,7 +3906,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 24px;
   display: flex;
   justify-content: center;
-  border-top: 1px solid var(--border-dim);
+  border-top: 1px solid rgba(30,68,32,0.12);
+  background: linear-gradient(180deg, #0a0f09 0%, #0c120b 50%, #0a0f09 100%);
 }
 
 .about-statement-inner {
@@ -3984,6 +3986,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 80px 24px 120px;
   display: flex;
   justify-content: center;
+  background: linear-gradient(180deg, #090e08 0%, #0b110a 50%, #0d130c 100%);
 }
 
 .about-demo-container {
@@ -4118,7 +4121,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 100px 24px;
   max-width: 1000px;
   margin: 0 auto;
-  border-top: 1px solid var(--border-dim);
+  border-top: 1px solid rgba(30,68,32,0.12);
+  background: linear-gradient(180deg, #0b100a 0%, #0c120b 50%, #0b100a 100%);
 }
 
 .about-bento {
@@ -4229,8 +4233,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .about-numbers {
   padding: 80px 24px;
-  border-top: 1px solid var(--border-dim);
-  border-bottom: 1px solid var(--border-dim);
+  border-top: 1px solid rgba(30,68,32,0.12);
+  border-bottom: 1px solid rgba(30,68,32,0.12);
+  background: linear-gradient(180deg, #0a0f09 0%, #0d130c 50%, #0a0f09 100%);
 }
 
 .about-numbers-inner {
@@ -4275,6 +4280,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .about-audience-section {
   padding: 100px 24px;
+  background: linear-gradient(180deg, #0b100a 0%, #0c120b 50%, #0b100a 100%);
 }
 
 .about-audience-scroll {
@@ -4319,8 +4325,9 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── FAQ Accordion ─── */
 
 .about-faq-section {
+  background: linear-gradient(180deg, #0a0f09 0%, #0c110b 50%, #0a0f09 100%);
   padding: 100px 24px;
-  border-top: 1px solid var(--border-dim);
+  border-top: 1px solid rgba(30,68,32,0.12);
 }
 
 .about-faq-list {
@@ -4378,12 +4385,13 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 120px 24px;
   overflow: hidden;
+  background: linear-gradient(180deg, #0a0f09 0%, #0d130c 40%, #10180f 60%, #0d130c 100%);
 }
 
 .about-final-cta-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(255,107,44,0.08), transparent);
+  background: radial-gradient(ellipse 70% 60% at 50% 60%, rgba(30,68,32,0.12), rgba(240,192,96,0.04), transparent);
   pointer-events: none;
 }
 
@@ -5115,7 +5123,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hiw-page {
   min-height: 100vh;
-  background: var(--bg);
+  background: linear-gradient(180deg, #060a06 0%, #0b100a 5%, #0b100a 95%, #090e08 100%);
 }
 
 .hiw-hero {
@@ -5123,6 +5131,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 24px 48px;
   max-width: 720px;
   margin: 0 auto;
+  background: linear-gradient(180deg, #060a06 0%, #090e08 40%, #0b120a 100%);
 }
 
 .hiw-hero h1 {
@@ -5145,7 +5154,7 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(14,18,25,0.95);
+  background: rgba(9,14,8,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 12px 24px;
@@ -5339,7 +5348,8 @@ h1, h2, h3, h4, h5, h6 {
 .hiw-cta {
   text-align: center;
   padding: 64px 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(30,68,32,0.15);
+  background: linear-gradient(180deg, #0a0f09 0%, #0d130c 40%, #10180f 60%, #0d130c 100%);
 }
 
 .hiw-cta h2 {
@@ -5510,7 +5520,8 @@ h1, h2, h3, h4, h5, h6 {
   background-image: url('/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus/tiles/cobblestone_tiles_brown.png');
   background-size: 128px;
   image-rendering: pixelated;
-  opacity: 0.03;
+  opacity: 0.06;
+  filter: hue-rotate(60deg) saturate(0.6);
   pointer-events: none;
   z-index: 0;
 }
@@ -5540,7 +5551,7 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   height: 48px;
-  background: var(--bg);
+  background: #0e160e;
   clip-path: polygon(
     0% 100%, 0% 80%, 3% 55%, 5% 60%, 7% 40%, 9% 35%, 11% 55%, 14% 50%,
     17% 30%, 19% 45%, 22% 35%, 25% 50%, 28% 40%, 31% 55%, 34% 30%,
@@ -5557,13 +5568,13 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   height: 24px;
-  background: linear-gradient(180deg, transparent, rgba(240,192,96,0.03));
+  background: linear-gradient(180deg, transparent, rgba(30,68,32,0.06));
 }
 
-/* Warm glow — a soft atmospheric band between sections */
+/* Forest glow — atmospheric band between sections */
 .horizon-glow {
   height: 80px;
-  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(240,192,96,0.04) 0%, rgba(240,192,96,0.01) 40%, transparent 70%);
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(30,68,32,0.08) 0%, rgba(240,192,96,0.03) 40%, transparent 70%);
   pointer-events: none;
 }
 
@@ -5600,7 +5611,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .game-scene-panel {
-  background: rgba(6, 8, 14, 0.92);
+  background: rgba(6, 14, 8, 0.92);
   border: 2px solid rgba(240,192,96,0.25);
   padding: 16px 20px;
   display: flex;
@@ -5624,8 +5635,8 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   height: 40%;
-  background: linear-gradient(180deg, #408828 0%, #58a838 40%, #7cc850 100%);
-  opacity: 0.25;
+  background: linear-gradient(180deg, #306820 0%, #488830 40%, #68b048 100%);
+  opacity: 0.35;
   z-index: 0;
 }
 
@@ -5640,7 +5651,8 @@ h1, h2, h3, h4, h5, h6 {
   background-image: url('/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus/tiles/cobblestone_tiles_brown.png');
   background-size: 160px;
   image-rendering: pixelated;
-  opacity: 0.03;
+  opacity: 0.06;
+  filter: hue-rotate(60deg) saturate(0.6);
   pointer-events: none;
   z-index: 0;
 }
@@ -5677,7 +5689,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── NPC Dialogue Box ─── */
 
 .mock-dialogue {
-  background: rgba(6, 8, 14, 0.96);
+  background: rgba(6, 14, 8, 0.96);
   border: 2px solid rgba(240,192,96,0.30);
   border-radius: 0;
   max-width: 340px;
@@ -5733,7 +5745,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Quest Tracker ─── */
 
 .mock-quest {
-  background: rgba(6, 8, 14, 0.92);
+  background: rgba(6, 14, 8, 0.92);
   border: 2px solid rgba(240,192,96,0.20);
   border-radius: 0;
   padding: 14px 18px;
@@ -5804,7 +5816,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 20px;
   padding: 10px 20px;
-  background: rgba(6, 8, 14, 0.92);
+  background: rgba(6, 14, 8, 0.92);
   border-radius: 0;
   border: 2px solid rgba(240,192,96,0.20);
   box-shadow: 0 8px 24px rgba(0,0,0,0.6);
@@ -5897,7 +5909,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Shop / Vendor Panel ─── */
 
 .mock-shop {
-  background: rgba(6, 8, 14, 0.94);
+  background: rgba(6, 14, 8, 0.94);
   border: 2px solid rgba(240,192,96,0.25);
   border-radius: 0;
   overflow: hidden;
@@ -5947,7 +5959,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Build Menu ─── */
 
 .mock-build {
-  background: rgba(6, 8, 14, 0.94);
+  background: rgba(6, 14, 8, 0.94);
   border: 2px solid rgba(54,179,126,0.30);
   border-radius: 0;
   overflow: hidden;
@@ -6100,15 +6112,15 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
   background:
     linear-gradient(180deg,
-      rgba(6,10,14,0.95) 0%,
-      rgba(6,10,14,0.88) 15%,
-      rgba(6,10,14,0.65) 35%,
-      rgba(6,10,14,0.35) 55%,
-      rgba(6,10,14,0.25) 70%,
-      rgba(6,10,14,0.45) 90%,
-      rgba(6,10,14,0.7) 100%
+      rgba(6,10,6,0.95) 0%,
+      rgba(6,10,6,0.88) 15%,
+      rgba(6,10,6,0.65) 35%,
+      rgba(6,10,6,0.35) 55%,
+      rgba(6,10,6,0.25) 70%,
+      rgba(6,10,6,0.45) 90%,
+      rgba(6,10,6,0.7) 100%
     ),
-    radial-gradient(ellipse 90% 70% at 50% 55%, transparent 20%, rgba(6,10,14,0.55) 100%);
+    radial-gradient(ellipse 90% 70% at 50% 55%, transparent 20%, rgba(6,10,6,0.55) 100%);
   pointer-events: none;
 }
 
@@ -6353,6 +6365,8 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 auto;
   padding-left: var(--space-xl);
   padding-right: var(--space-xl);
+  position: relative;
+  background: linear-gradient(180deg, #080d07 0%, #0a0f09 50%, #0b100a 100%);
 }
 
 .statement-text {
@@ -6375,6 +6389,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .journey-section {
   padding: 0 0 80px 0;
+  background: linear-gradient(180deg, #0a0f09 0%, #0c120b 20%, #0e140d 50%, #0c120b 80%, #0a0f09 100%);
 }
 
 .journey-step {
@@ -6523,6 +6538,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .systems-section {
   padding: 60px 0 100px;
+  background: linear-gradient(180deg, #090e08 0%, #0b110a 30%, #0d130c 50%, #0b110a 70%, #090e08 100%);
 }
 
 .systems-header {
@@ -6557,7 +6573,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1100px;
   margin: 0 auto;
   padding: 48px var(--space-xl);
-  border-top: 2px solid var(--border);
+  border-top: 2px solid rgba(30,68,32,0.15);
 }
 
 .system-spread.reverse {
@@ -6638,6 +6654,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .lore-section {
   padding: 100px 0;
+  background: linear-gradient(180deg, #0a0f09 0%, #0c120b 50%, #0a0f09 100%);
 }
 
 .lore-section .container {
@@ -6737,7 +6754,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .htp-section {
   padding: 100px 0;
-  border-top: 2px solid var(--border);
+  border-top: 2px solid rgba(30,68,32,0.2);
+  background: linear-gradient(180deg, #090e08 0%, #0c120b 30%, #0e140d 50%, #0c120b 70%, #0b100a 100%);
 }
 
 .htp-section .container {
@@ -6847,6 +6865,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .community-section {
   padding: 100px 0;
+  background: linear-gradient(180deg, #0a0f09 0%, #0b110a 50%, #0a0f09 100%);
 }
 
 .community-section .container {
@@ -6904,6 +6923,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 140px 0;
   text-align: center;
   overflow: hidden;
+  background: linear-gradient(180deg, #0a0f09 0%, #0d130c 40%, #10180f 60%, #0d130c 100%);
 }
 
 .final-cta-glow {
@@ -6913,7 +6933,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translate(-50%, -50%);
   width: 600px;
   height: 400px;
-  background: radial-gradient(circle, rgba(192,136,152,0.08) 0%, rgba(232,176,96,0.04) 40%, transparent 65%);
+  background: radial-gradient(circle, rgba(30,68,32,0.12) 0%, rgba(240,192,96,0.06) 40%, transparent 65%);
   pointer-events: none;
 }
 

@@ -77,7 +77,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── What's In A World ─── */}
-      <section className="about-statement" style={{ borderTop: '1px solid var(--border-dim)' }}>
+      <section className="about-statement" style={{ borderTop: '1px solid rgba(30,68,32,0.12)' }}>
         <div className="about-statement-inner">
           <h2 className="about-statement-heading">What&apos;s inside a world?</h2>
           <p className="about-big-text">
