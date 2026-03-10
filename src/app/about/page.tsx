@@ -38,7 +38,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mountain-divider" />
+      <div className="section-divider" aria-hidden="true"><span /></div>
 
       {/* ─── What Is Worldforge ─── */}
       <section className="about-statement">
@@ -76,8 +76,10 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
+
       {/* ─── What's In A World ─── */}
-      <section className="about-statement" style={{ borderTop: '1px solid rgba(100,140,80,0.08)' }}>
+      <section className="about-statement about-statement-2">
         <div className="about-statement-inner">
           <h2 className="about-statement-heading">What&apos;s inside a world?</h2>
           <p className="about-big-text">
@@ -141,6 +143,8 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
+
       {/* ─── The AI Demo ─── */}
       <section className="about-demo-section">
         <div className="about-demo-container">
@@ -189,6 +193,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <div className="section-divider" aria-hidden="true"><span /></div>
 
       {/* ─── Bento Feature Grid ─── */}
       <section className="about-bento-section">
@@ -311,6 +317,8 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
+
       {/* ─── Big Numbers ─── */}
       <section className="about-numbers">
         <div className="about-numbers-inner">
@@ -338,6 +346,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <div className="section-divider" aria-hidden="true"><span /></div>
 
       {/* ─── Who It's For — Horizontal Scroll ─── */}
       <section className="about-audience-section">
@@ -375,6 +385,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <div className="section-divider" aria-hidden="true"><span /></div>
 
       {/* ─── FAQ — Accordion Style ─── */}
       <section className="about-faq-section">
@@ -443,7 +455,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mountain-divider hills" />
+      <div className="section-divider" aria-hidden="true"><span /></div>
 
       {/* ─── Final CTA ─── */}
       <section className="about-final-cta">
