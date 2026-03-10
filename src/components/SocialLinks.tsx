@@ -6,9 +6,9 @@ const SOCIALS = [
   {
     name: 'Pump.fun',
     href: '#',
-    img: '/socials/pumpfun.jpg',
+    img: '/socials/pumpfun.png',
     dark: false,
-    scale: '80%',
+    scale: '100%',
   },
   {
     name: 'X',
