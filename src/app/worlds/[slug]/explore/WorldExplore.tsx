@@ -4259,7 +4259,7 @@ export function WorldExplore({
     } catch { /* ignore */ }
     return null;
   })();
-  const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? (isOwner ? 0 : -1));
+  const [chosenCharIndex, setChosenCharIndex] = useState<number>(savedChar?.charIndex ?? -1);
   const [chosenHueShift, setChosenHueShift] = useState<number>(savedChar?.hueShift ?? 0);
   const [chosenDisplayName, setChosenDisplayName] = useState<string>(savedChar?.displayName || playerName);
   const chosenCharRef = useRef({ charIndex: chosenCharIndex, hueShift: chosenHueShift });
