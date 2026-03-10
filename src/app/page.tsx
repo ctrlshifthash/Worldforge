@@ -88,11 +88,11 @@ export default async function LandingPage() {
         <div className="hero-v2-stats">
           <span className="hero-v2-stat"><strong>3</strong> explorable zones</span>
           <span className="hero-v2-stat-sep" />
-          <span className="hero-v2-stat"><strong>22</strong> buildable structures</span>
+          <span className="hero-v2-stat"><strong>28</strong> playable characters</span>
           <span className="hero-v2-stat-sep" />
-          <span className="hero-v2-stat"><strong>8+</strong> named NPCs with dialogue</span>
+          <span className="hero-v2-stat"><strong>25+</strong> NPCs with dialogue</span>
           <span className="hero-v2-stat-sep" />
-          <span className="hero-v2-stat">AI-generated lore</span>
+          <span className="hero-v2-stat"><strong>8</strong> quests &amp; missions</span>
         </div>
 
         <div className="scroll-indicator">
@@ -237,40 +237,44 @@ export default async function LandingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
               {/* NPC dialogue mockup */}
               <div className="mock-dialogue">
-                <div className="mock-dialogue-name">Ada &mdash; Innkeeper</div>
+                <div className="mock-dialogue-name">Helena &mdash; Tavern Keeper</div>
                 <div className="mock-dialogue-text">
-                  You look like you&apos;ve been through a fight. Let me fix you
-                  up &mdash; on the house this time.
+                  Welcome back, traveler. The fire&apos;s warm and I&apos;ve got stew on.
+                  I could use a favor though &mdash; I&apos;m running low on firewood.
                 </div>
                 <div className="mock-dialogue-choices">
                   <div className="mock-choice">
-                    <span className="mock-choice-key">1</span> Thank you, Ada.
+                    <span className="mock-choice-key">1</span> I can gather some for you.
                   </div>
                   <div className="mock-choice">
-                    <span className="mock-choice-key">2</span> Any news from the village?
+                    <span className="mock-choice-key">2</span> What&apos;s happening in town?
                   </div>
                   <div className="mock-choice">
-                    <span className="mock-choice-key">3</span> I&apos;m fine. Just passing through.
+                    <span className="mock-choice-key">3</span> Just here for the warmth.
                   </div>
                 </div>
               </div>
               {/* Quest tracker mockup */}
               <div className="mock-quest">
                 <div className="mock-quest-header">Active Quest</div>
-                <div className="mock-quest-title">Lina&apos;s Lost Sheep</div>
+                <div className="mock-quest-title">Marina&apos;s Lost Necklace</div>
                 <div className="mock-quest-obj done">
                   <span className="mock-quest-marker">&#10003;</span>
-                  Talk to Lina the Shepherd
+                  Search the old well
+                </div>
+                <div className="mock-quest-obj done">
+                  <span className="mock-quest-marker">&#10003;</span>
+                  Search the dock crates
                 </div>
                 <div className="mock-quest-obj active">
                   <span className="mock-quest-marker" />
-                  Find the sheep near the eastern docks
+                  Search the garden flowers
                 </div>
                 <div className="mock-quest-obj active">
                   <span className="mock-quest-marker" />
-                  Return to Lina
+                  Return to Marina
                 </div>
-                <div className="mock-quest-reward">Reward: +20 Gold</div>
+                <div className="mock-quest-reward">Reward: +30 Gold</div>
               </div>
             </div>
           </div>
@@ -406,38 +410,37 @@ export default async function LandingPage() {
         <div className="system-spread reverse">
           <div className="system-text">
             <div className="system-label" style={{ color: 'var(--gold)' }}>NPCs</div>
-            <h3>Named characters with progression-aware dialogue</h3>
+            <h3>25+ named characters with progression-aware dialogue</h3>
             <p>
               Every NPC has a name, a role, and dialogue that changes based on your
-              progress. Ada the Innkeeper heals you when you&apos;re hurt. Dale the
-              Lookout gives orc intel. Edith the Elder guides your next move.
-              Quest-givers remember what you&apos;ve done.
+              progress. Helena the Tavern Keeper offers quests and heals you. Barton
+              the Guard Captain tracks your orc kills. Witch Willow reads your fortune
+              and sells potions. Quest-givers remember what you&apos;ve done.
             </p>
             <ul>
-              <li>8 named hub NPCs + 6 village NPCs + guards</li>
+              <li>8 ambient hub NPCs + 8 building residents with quests</li>
+              <li>6 village NPCs + Witch Willow + 2 grassland guards</li>
               <li>Dialogue choices with 1/2/3 keys</li>
-              <li>Progress-aware: dialogue changes as you advance</li>
-              <li>Vendors with zone-specific inventories</li>
-              <li>Witch Willow sells potions in the village</li>
+              <li>Progress-aware: dialogue reacts to orc kills, bandit clears, quests, buildings</li>
+              <li>28 playable characters with color customization (press C)</li>
             </ul>
           </div>
           <div className="system-visual">
             <div className="mock-dialogue">
-              <div className="mock-dialogue-name">Marta &mdash; Baker</div>
+              <div className="mock-dialogue-name">Witch Willow &mdash; Fortune Teller</div>
               <div className="mock-dialogue-text">
-                The grassland orcs have been quiet since you cleared
-                them out. The village folk are talking about it &mdash;
-                you&apos;ve made quite a name for yourself.
+                The cards whisper of a necklace lost near the village garden&hellip;
+                and of hidden gold along the coast road. Seek them if you dare.
               </div>
               <div className="mock-dialogue-choices">
                 <div className="mock-choice">
-                  <span className="mock-choice-key">1</span> What can you tell me about the village?
+                  <span className="mock-choice-key">1</span> Tell me my fortune.
                 </div>
                 <div className="mock-choice">
-                  <span className="mock-choice-key">2</span> Do you have anything for sale?
+                  <span className="mock-choice-key">2</span> Show me your potions.
                 </div>
                 <div className="mock-choice">
-                  <span className="mock-choice-key">3</span> Just browsing. Thanks, Marta.
+                  <span className="mock-choice-key">3</span> Tell me about this place.
                 </div>
               </div>
             </div>
@@ -448,19 +451,19 @@ export default async function LandingPage() {
         <div className="system-spread">
           <div className="system-text">
             <div className="system-label" style={{ color: '#36B37E' }}>Building</div>
-            <h3>Place, rotate, and persist structures</h3>
+            <h3>Build structures. Attract residents.</h3>
             <p>
               Press B to open the build menu. 22 items across structures, props,
-              and decoration. Each costs wood, stone, or gold. Place anywhere on
-              walkable terrain. Rotate with R. Objects block movement and persist
-              across sessions.
+              and decoration. Each costs wood, stone, or gold. Rotate with R.
+              Buildings persist across sessions &mdash; and attract named NPC
+              residents who move in, offer quests, and react to your progress.
             </p>
             <ul>
-              <li>3 material types: Wood (30), Stone (15), Gold</li>
-              <li>Rotation: 0° / 90° / 180° / 270°</li>
-              <li>Collision-aware placement validation</li>
+              <li>22 items: huts, walls, towers, stalls, fences, torches, and more</li>
+              <li>8 named residents with unique dialogue and quests</li>
+              <li>Milestone rewards at 5, 10, 20, 30 buildings</li>
+              <li>Rotation: 0&deg; / 90&deg; / 180&deg; / 270&deg;</li>
               <li>Saved to database, loaded on enter</li>
-              <li>Y-sorted rendering with canvas rotation</li>
             </ul>
           </div>
           <div className="system-visual">
@@ -490,18 +493,19 @@ export default async function LandingPage() {
         <div className="system-spread reverse">
           <div className="system-text">
             <div className="system-label" style={{ color: 'var(--gold)' }}>Economy &amp; Quests</div>
-            <h3>Gold, shops, and missions that chain across zones</h3>
+            <h3>8 quests, 4 vendors, and a full economy</h3>
             <p>
-              Kill enemies for gold. Complete quests for gold. Buy gear from vendors.
-              The grassland has a full mission chain: visit 5 points of interest,
-              kill 7 orcs, unlock a chest for +75 gold. The village has Marina&apos;s
-              Lost Necklace quest and a witch selling potions.
+              Kill enemies for gold. Complete quests for rewards. Buy gear from vendors.
+              The grassland has a full mission chain. The village has Marina&apos;s
+              Lost Necklace quest and a witch selling potions. Building residents
+              in the hub offer their own quests &mdash; gather firewood for Helena,
+              survey discoveries for Marcus, clear orcs for Barton.
             </p>
             <ul>
-              <li>Gold persists across zones and sessions</li>
-              <li>Vendor shops in every zone</li>
-              <li>Multi-step quest chains with progression tracking</li>
-              <li>Hub objectives guide you to the next zone</li>
+              <li>8 quests across all zones with gold and resource rewards</li>
+              <li>3 material types: Wood, Stone, Gold &mdash; all persist across sessions</li>
+              <li>Vendor shops in every zone + witch potion shop</li>
+              <li>Building residents offer quests tied to your progress</li>
               <li>Death penalty: lose gold, respawn at hub</li>
             </ul>
           </div>
@@ -523,6 +527,15 @@ export default async function LandingPage() {
                   Open the reward chest
                 </div>
                 <div className="mock-quest-reward">Reward: +75 Gold</div>
+              </div>
+              <div className="mock-quest" style={{ opacity: 0.85 }}>
+                <div className="mock-quest-header">Building Quest</div>
+                <div className="mock-quest-title">Helena&apos;s Firewood</div>
+                <div className="mock-quest-obj active">
+                  <span className="mock-quest-marker" />
+                  Gather 5 wood for Helena
+                </div>
+                <div className="mock-quest-reward">Reward: +15 Gold</div>
               </div>
               <div className="mock-shop">
                 <div className="mock-shop-title">Village &mdash; Witch Willow</div>
@@ -657,12 +670,22 @@ export default async function LandingPage() {
             <div className="htp-card">
               <div className="htp-key">E</div>
               <h4>Interact</h4>
-              <p>Talk to NPCs, inspect landmarks, activate shrines.</p>
+              <p>Talk to NPCs, accept quests, inspect landmarks, activate shrines.</p>
             </div>
             <div className="htp-card">
               <div className="htp-key">B</div>
               <h4>Build</h4>
               <p>Open the build menu. R to rotate. Click to place.</p>
+            </div>
+            <div className="htp-card">
+              <div className="htp-key">C</div>
+              <h4>Character</h4>
+              <p>Choose from 28 characters. Customize your color.</p>
+            </div>
+            <div className="htp-card">
+              <div className="htp-key">1 2 3</div>
+              <h4>Dialogue</h4>
+              <p>Pick dialogue options when talking to NPCs.</p>
             </div>
           </div>
 
@@ -670,22 +693,23 @@ export default async function LandingPage() {
             <div className="htp-zone" style={{ borderColor: 'rgba(240,192,96,0.25)', background: 'rgba(240,192,96,0.04)' }}>
               <h4>Hub Zone</h4>
               <p>
-                Your home base. Merchant, campfire, well, townsfolk.
-                Complete objectives here to unlock other zones.
+                Your home base. Merchant, campfire, well, 8 townsfolk NPCs.
+                Place buildings to attract named residents who offer quests.
+                Complete objectives to unlock paths to other zones.
               </p>
             </div>
             <div className="htp-zone" style={{ borderColor: 'rgba(54,179,126,0.25)', background: 'rgba(54,179,126,0.04)' }}>
               <h4>Grassland</h4>
               <p>
-                Wilderness zone. Orc warriors, shrine, vendor camp,
-                8 points of interest. Full combat mission chain.
+                Wilderness zone. 7 orc warriors, combat shrine, vendor camp,
+                8 points of interest. Full mission chain with chest reward.
               </p>
             </div>
             <div className="htp-zone" style={{ borderColor: 'rgba(9,132,227,0.25)', background: 'rgba(9,132,227,0.04)' }}>
               <h4>Seaside Village</h4>
               <p>
-                Peaceful zone. 6 named NPCs, Witch Willow, quests,
-                bandits, wildlife. Find Marina&apos;s lost necklace.
+                Coastal zone. 6 named NPCs, Witch Willow&apos;s potion shop,
+                4 bandits, wildlife, and Marina&apos;s Lost Necklace quest.
               </p>
             </div>
           </div>

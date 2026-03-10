@@ -40,8 +40,9 @@ export default function AboutPage() {
             You can build everything yourself — manually creating characters, locations, factions,
             artifacts, timeline events, and relationships one by one. Or, give AI a concept like
             <em> &ldquo;a world where music is magic&rdquo;</em> and it&apos;ll generate everything
-            in under 30 seconds. Then walk into your world — explore zones, talk to NPCs, fight
-            enemies, complete quests, build structures, and grow your economy.
+            in under 30 seconds. Then walk into your world — explore 3 zones, talk to 25+ named
+            NPCs, fight orcs and bandits, complete 8 quests, build structures that attract residents,
+            customize your character from 28 options, and grow your settlement into a living town.
           </p>
           <p className="about-big-text about-big-text-muted">
             AI is just an option — a starting point. Everything it generates can be edited, deleted,
@@ -220,11 +221,13 @@ export default function AboutPage() {
             <div className="about-bento-icon" style={{ color: '#7B61FF' }}>
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 12h18M12 3v18"/></svg>
             </div>
-            <h3>Explore Mode</h3>
+            <h3>Explore Mode &mdash; A Full Game</h3>
             <p>
-              Walk through your world in a 2D procedurally generated terrain.
-              Entities appear as interactive markers.
-              Open fullscreen to get the immersive experience — it feels like stepping into your own creation.
+              Every world becomes a playable 2D pixel-art game. 3 zones, 25+ NPCs
+              with dialogue, 8 quests, real-time combat with orcs and bandits,
+              vendor shops, a building system, and 28 playable characters to choose
+              from. It&apos;s not just a viewer &mdash; it&apos;s a game you can
+              spend hours in.
             </p>
             <div className="about-bento-explore-mock">
               <div className="about-bento-terrain" />
@@ -292,18 +295,23 @@ export default function AboutPage() {
       <section className="about-numbers">
         <div className="about-numbers-inner">
           <div className="about-number-block">
-            <div className="about-number-value">6</div>
-            <div className="about-number-label">Entity types to populate your world</div>
+            <div className="about-number-value">3</div>
+            <div className="about-number-label">Explorable zones with unique gameplay</div>
+          </div>
+          <div className="about-number-divider" />
+          <div className="about-number-block">
+            <div className="about-number-value">25+</div>
+            <div className="about-number-label">Named NPCs with dialogue and quests</div>
+          </div>
+          <div className="about-number-divider" />
+          <div className="about-number-block">
+            <div className="about-number-value">28</div>
+            <div className="about-number-label">Playable characters with color customization</div>
           </div>
           <div className="about-number-divider" />
           <div className="about-number-block">
             <div className="about-number-value">&lt;30s</div>
             <div className="about-number-label">To generate a complete world with AI</div>
-          </div>
-          <div className="about-number-divider" />
-          <div className="about-number-block">
-            <div className="about-number-value">&infin;</div>
-            <div className="about-number-label">Worlds you can create — no limits</div>
           </div>
         </div>
       </section>
@@ -371,11 +379,11 @@ export default function AboutPage() {
           </details>
           <details className="about-faq-detail">
             <summary>What&apos;s the explore mode?</summary>
-            <p>Explore mode is a full 2D game inside your world. It generates terrain and places your entities as markers you can interact with. Walk around using WASD or arrow keys. But it goes way beyond just walking — there are multiple zones (hub, grassland, village), NPCs with names and dialogue, vendor shops, quests with gold rewards, enemies to fight with real combat, structures you can build and place, wildlife, ambient effects, and a full economy. It&apos;s a playable game, not just a viewer.</p>
+            <p>Explore mode is a full 2D pixel-art game inside your world. There are 3 zones (hub, grassland, village), 25+ named NPCs with progression-aware dialogue, 8 quests with gold and resource rewards, real-time combat against orcs and bandits, 4 vendor shops, a witch selling potions, a building system with 22 placeable structures that attract named NPC residents, 28 playable characters with hue-shift color customization, wildlife, ambient effects, and a full economy with wood, stone, and gold. It&apos;s a complete game, not just a viewer.</p>
           </details>
           <details className="about-faq-detail">
             <summary>Is this a game or a worldbuilding tool?</summary>
-            <p>Both. You get a complete worldbuilding platform — entity library, timeline, connections graph, world map, AI storytelling. But every world also becomes a playable 2D game with zones, combat, NPCs, quests, building, and economy. The lore layer and the game layer are the same world.</p>
+            <p>Both. You get a complete worldbuilding platform — entity library, timeline, connections graph, world map, AI storytelling. But every world also becomes a playable 2D pixel-art game with 3 zones, real-time combat, 25+ NPCs with dialogue and quests, a building system where structures attract named residents, 28 playable characters, vendor shops, and a full economy. The lore layer and the game layer are the same world.</p>
           </details>
           <details className="about-faq-detail">
             <summary>Is it free?</summary>

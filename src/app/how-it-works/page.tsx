@@ -11,7 +11,8 @@ export default function HowItWorksPage() {
         <h1>How Worldforge Works</h1>
         <p className="hiw-hero-sub">
           A complete guide to every feature &mdash; from creating your first world to
-          playing inside it. Worldbuilding, gameplay, AI generation, and everything in between.
+          playing inside it. Worldbuilding, combat, NPCs, quests, building, character customization,
+          AI generation, and everything in between.
         </p>
       </section>
 
@@ -25,6 +26,7 @@ export default function HowItWorksPage() {
           <a href="#timeline" className="hiw-toc-link">Timeline &amp; Eras</a>
           <a href="#views" className="hiw-toc-link">Ways to See Your World</a>
           <a href="#gameplay" className="hiw-toc-link">Gameplay</a>
+          <a href="#characters" className="hiw-toc-link">Characters</a>
           <a href="#building" className="hiw-toc-link">Building</a>
           <a href="#away-mode" className="hiw-toc-link">AI Storytelling</a>
           <a href="#developments" className="hiw-toc-link">Story Review</a>
@@ -259,26 +261,33 @@ export default function HowItWorksPage() {
 
           <h3>NPCs &amp; Dialogue</h3>
           <p>
-            Named NPCs appear across all zones with E-key interaction. Each NPC has progression-aware dialogue &mdash;
+            25+ named NPCs appear across all zones with E-key interaction. Each NPC has progression-aware dialogue &mdash;
             what they say changes based on what you&apos;ve done. Press <strong>1, 2, or 3</strong> for dialogue choices.
           </p>
           <ul className="hiw-list">
-            <li><strong>Hub:</strong> Marta (Baker), Finn (Dockhand), Lina (Shepherd), Oswald (Scholar), Ada (Innkeeper &mdash; heals you),
+            <li><strong>Hub Townsfolk:</strong> Marta (Baker), Finn (Dockhand), Lina (Shepherd), Oswald (Scholar), Ada (Innkeeper &mdash; heals you),
               Rook (Courier), Edith (Elder), Dale (Lookout)</li>
+            <li><strong>Building Residents:</strong> Helena (Tavern Keeper &mdash; quest + heals), Marcus (Archivist &mdash; quest),
+              Greta (Healer), Barton (Guard Captain &mdash; quest), Pip (Trader), Elara (Scholar),
+              Corwin (Builder &mdash; quest), Nessa (Caretaker)</li>
             <li><strong>Village:</strong> Fiona (food shop), Gerald (general shop), Elder Rowan (lore), Marina (quest),
-              Tom (area info), Nana Rose (tea heal), Witch Willow (potions)</li>
+              Tom (area info), Nana Rose (tea heal), Witch Willow (potions + fortunes)</li>
             <li><strong>Guards:</strong> Varn and Drell at the grassland entrance</li>
           </ul>
 
           <h3>Quests</h3>
           <p>
-            NPCs give you quests with gold rewards. Quest progress persists across zone transitions.
+            NPCs give you quests with gold and resource rewards. Quest progress persists across zone transitions and sessions.
           </p>
           <ul className="hiw-list">
             <li><strong>Grassland Mission</strong> &mdash; Visit 5 points of interest &rarr; Kill 7 orcs &rarr; Open reward chest (+75 gold)</li>
-            <li><strong>Lina&apos;s Lost Sheep</strong> &mdash; Talk to Lina &rarr; Find sheep near eastern docks &rarr; Return to Lina (+20 gold)</li>
-            <li><strong>Rook&apos;s Message</strong> &mdash; Talk to Rook &rarr; Deliver message to Elder Rowan in village (+25 gold)</li>
             <li><strong>Marina&apos;s Lost Necklace</strong> &mdash; Search 3 spots &rarr; Find necklace &rarr; Return (+30 gold + chest +25 gold)</li>
+            <li><strong>Helena&apos;s Firewood</strong> &mdash; Gather 5 wood for the Tavern Keeper (+15 gold)</li>
+            <li><strong>Marcus&apos;s Survey</strong> &mdash; Discover 5 landmarks for the Archivist (+20 gold)</li>
+            <li><strong>Barton&apos;s Orc Hunt</strong> &mdash; Defeat 7 orcs for the Guard Captain (+25 gold)</li>
+            <li><strong>Corwin&apos;s Building Goal</strong> &mdash; Place 10 buildings for the Builder (+10 gold, +8 wood, +5 stone)</li>
+            <li><strong>Lina&apos;s Lost Sheep</strong> &mdash; Talk to Lina &rarr; Find sheep near eastern docks &rarr; Return (+20 gold)</li>
+            <li><strong>Rook&apos;s Message</strong> &mdash; Talk to Rook &rarr; Deliver message to Elder Rowan in village (+25 gold)</li>
           </ul>
 
           <h3>Vendors &amp; Economy</h3>
@@ -293,6 +302,20 @@ export default function HowItWorksPage() {
           </ul>
           <p>
             Health potions auto-heal on purchase. Buff items have duration effects.
+          </p>
+
+          <h3 id="characters">Character Customization</h3>
+          <p>
+            Press <strong>C</strong> to open the character picker. Choose from 28 playable characters across two categories:
+          </p>
+          <ul className="hiw-list">
+            <li><strong>Townsfolk</strong> &mdash; 19 animated characters with walk cycles (farmer, merchant, knight, mage, and more)</li>
+            <li><strong>Fantasy Heroes</strong> &mdash; 9 detailed characters (Paladin, Priest, Dwarf, Elf Scout, Skeleton, Swordswoman, Fire Witch, Herbalist, and more)</li>
+          </ul>
+          <p>
+            Each character can be recolored with a <strong>hue-shift slider</strong> or preset color swatches &mdash;
+            giving you hundreds of visual combinations. You can also set a custom display name (up to 20 characters)
+            that appears above your character in the world.
           </p>
 
           <h3>Wildlife &amp; Ambient</h3>
@@ -336,9 +359,26 @@ export default function HowItWorksPage() {
             <li>All placements are saved to the database and loaded when you enter the world</li>
           </ul>
 
+          <h3>Building Residents</h3>
+          <p>
+            Buildings you place attract named NPC residents who move in and become part of the world.
+            Each resident has a unique role, dialogue that reacts to your progress, and some offer quests:
+          </p>
+          <ul className="hiw-list">
+            <li><strong>Helena</strong> (Tavern Keeper) &mdash; Heals you and offers a firewood gathering quest</li>
+            <li><strong>Marcus</strong> (Archivist) &mdash; Tracks your discoveries and offers a survey quest</li>
+            <li><strong>Greta</strong> (Healer) &mdash; Heals you when hurt</li>
+            <li><strong>Barton</strong> (Guard Captain) &mdash; Offers an orc hunting quest</li>
+            <li><strong>Pip</strong> (Trader) &mdash; Comments on the economy and your progress</li>
+            <li><strong>Elara</strong> (Scholar) &mdash; Shares lore and research about your world</li>
+            <li><strong>Corwin</strong> (Builder) &mdash; Offers a building milestone quest</li>
+            <li><strong>Nessa</strong> (Caretaker) &mdash; Watches over the settlement</li>
+          </ul>
+
           <div className="hiw-callout">
             <strong>22 buildable items</strong> across 3 categories. Only the world owner can build &mdash;
-            visitors can see placed objects but can&apos;t modify them.
+            visitors can see placed objects but can&apos;t modify them. Building milestones at 5, 10, 20, and 30
+            structures trigger celebration banners.
           </div>
         </section>
 

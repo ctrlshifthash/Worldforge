@@ -6562,7 +6562,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .htp-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 40px;
 }
