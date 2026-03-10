@@ -6524,15 +6524,13 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 0;
-  width: 44px;
-  height: 44px;
-  border: 2px solid rgba(240,192,96,0.2);
-  background: rgba(10,10,10,0.85);
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: none;
   justify-content: center;
   overflow: hidden;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s,
-              background 0.3s,
               box-shadow 0.3s,
               transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
@@ -6540,16 +6538,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .social-link:hover {
-  width: 140px;
-  border-color: rgba(240,192,96,0.5);
-  background: rgba(20,18,10,0.95);
-  box-shadow: 0 0 20px rgba(240,192,96,0.15), 0 4px 12px rgba(0,0,0,0.4);
+  width: 150px;
   transform: translateX(-4px);
 }
 
 .social-link-icon {
   flex-shrink: 0;
-  width: 40px;
+  width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6557,14 +6552,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .social-link-icon img {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   object-fit: cover;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
 }
 
 .social-link:hover .social-link-icon {
-  transform: scale(1.15);
+  transform: scale(1.2);
+}
+
+.social-link:hover .social-link-icon img {
+  box-shadow: 0 0 16px rgba(240,192,96,0.3), 0 2px 8px rgba(0,0,0,0.5);
 }
 
 .social-link-name {
