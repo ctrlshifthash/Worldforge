@@ -6447,6 +6447,150 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 8px rgba(240,192,96,0.5);
 }
 
+/* ─── CA Badge ─── */
+.ca-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border: 2px solid rgba(240,192,96,0.25);
+  background: rgba(240,192,96,0.06);
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+  cursor: pointer;
+  position: relative;
+  min-width: 320px;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+}
+
+.ca-badge:hover {
+  border-color: rgba(240,192,96,0.5);
+  background: rgba(240,192,96,0.12);
+  box-shadow: 0 0 20px rgba(240,192,96,0.15);
+}
+
+.ca-badge-label {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.ca-badge-address {
+  color: var(--text);
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ca-badge-copied {
+  position: absolute;
+  right: -70px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.45rem;
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  text-shadow: 0 0 10px rgba(240,192,96,0.4);
+}
+
+.ca-badge-copied.show {
+  opacity: 1;
+}
+
+/* ─── Social Links (right side) ─── */
+.social-links {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 44px;
+  height: 44px;
+  border: 2px solid rgba(240,192,96,0.2);
+  background: rgba(10,10,10,0.85);
+  justify-content: center;
+  overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s,
+              background 0.3s,
+              box-shadow 0.3s,
+              transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  position: relative;
+}
+
+.social-link:hover {
+  width: 140px;
+  border-color: rgba(240,192,96,0.5);
+  background: rgba(20,18,10,0.95);
+  box-shadow: 0 0 20px rgba(240,192,96,0.15), 0 4px 12px rgba(0,0,0,0.4);
+  transform: translateX(-4px);
+}
+
+.social-link-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-link:hover .social-link-icon {
+  transform: scale(1.15);
+}
+
+.social-link-name {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s 0.1s;
+}
+
+.social-link:hover .social-link-name {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .social-links {
+    right: 10px;
+    gap: 8px;
+  }
+  .social-link {
+    width: 36px;
+    height: 36px;
+  }
+  .social-link:hover {
+    width: 36px;
+    transform: none;
+  }
+  .social-link-name { display: none; }
+  .ca-badge { min-width: 240px; font-size: 0.42rem; }
+}
+
 .hero-v2-title {
   font-family: var(--font-pixel);
   font-size: clamp(2.2rem, 6vw, 4.2rem);

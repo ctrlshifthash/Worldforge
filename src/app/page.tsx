@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
 import { DemoButton } from '@/components/DemoButton';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { CaBadge } from '@/components/CaBadge';
+import { SocialLinks } from '@/components/SocialLinks';
 
 const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
 const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
@@ -91,12 +93,10 @@ export default async function LandingPage() {
           <div className="hero-world-overlay" />
         </div>
         <div className="hero-v2-glow" />
+        <SocialLinks />
 
         <div className="hero-v2-content">
-          <div className="hero-v2-badge">
-            <span className="hero-v2-badge-dot" />
-            AI-Generated Worlds You Can Play
-          </div>
+          <CaBadge />
 
           <h1 className="hero-v2-title">
             Your World.<br /><em>Alive.</em>
