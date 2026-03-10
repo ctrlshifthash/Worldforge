@@ -1,19 +1,40 @@
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 
+const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
+const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
+const VIL = '/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus';
+
+const HIW_SPRITES = [
+  { src: `${FANTASY}/paladin_01_001.png`, alt: 'Paladin' },
+  { src: `${FANTASY}/priest_01_001.png`, alt: 'Priest' },
+  { src: `${FANTASY}/dwarf_01_008.png`, alt: 'Dwarf' },
+  { src: `${FANTASY}/elf_01_001.png`, alt: 'Elf Scout' },
+  { src: `${FANTASY}/warrior_01_003.png`, alt: 'Swordswoman' },
+  { src: `${FANTASY}/mage_01_005.png`, alt: 'Fire Witch' },
+  { src: `${FANTASY}/elf_02_005.png`, alt: 'Herbalist' },
+  { src: `${FANTASY}/skeleton_01_001.png`, alt: 'Skeleton' },
+  { src: `${FANTASY}/skeleton_01_005.png`, alt: 'Undead' },
+];
+
 export default function HowItWorksPage() {
   return (
     <div className="hiw-page">
       <Navbar />
 
       {/* ─── Hero ─── */}
-      <section className="hiw-hero">
+      <section className="hiw-hero tileset-bg">
         <h1>How Worldforge Works</h1>
         <p className="hiw-hero-sub">
           A complete guide to every feature &mdash; from creating your first world to
           playing inside it. Worldbuilding, combat, NPCs, quests, building, character customization,
           AI generation, and everything in between.
         </p>
+        <div className="sprite-parade" style={{ marginTop: 16 }}>
+          {HIW_SPRITES.map(c => (
+            <img key={c.alt} src={c.src} alt={c.alt} />
+          ))}
+        </div>
       </section>
 
       {/* ─── Table of Contents ─── */}
@@ -246,6 +267,28 @@ export default function HowItWorksPage() {
               Contains 6 named NPCs with dialogue, Witch Willow&apos;s potion shop, quests, bandits, and wildlife.</li>
           </ul>
 
+          {/* Zone scene panels */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 16 }}>
+            <div className="game-scene-panel" style={{ flex: '1 1 180px', height: 90, padding: '10px 14px' }}>
+              <div className="scene-terrain" />
+              <img src={`${GL}/Props/Static props/Cabin/cabin.png`} alt="Cabin" className="sprite-img" style={{ height: 48 }} />
+              <img src={`${GL}/Props/Static props/sheet1-sprites/waterwell - rope.png`} alt="Well" className="sprite-img" style={{ height: 28 }} />
+              <img src={`${FANTASY}/paladin_01_001.png`} alt="Player" className="sprite-img" style={{ height: 32 }} />
+            </div>
+            <div className="game-scene-panel" style={{ flex: '1 1 180px', height: 90, padding: '10px 14px' }}>
+              <div className="scene-terrain" />
+              <img src={`${GL}/Props/Static props/pine-tree.png`} alt="Tree" className="sprite-img" style={{ height: 56 }} />
+              <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc" className="sprite-img" style={{ height: 36 }} />
+              <img src={`${GL}/Props/Animated props/shrine-base-with grass.png`} alt="Shrine" className="sprite-img" style={{ height: 36 }} />
+            </div>
+            <div className="game-scene-panel" style={{ flex: '1 1 180px', height: 90, padding: '10px 14px' }}>
+              <div className="scene-terrain" style={{ background: 'linear-gradient(180deg, #2898b8 0%, #3bbcd8 50%, #c8c078 100%)' }} />
+              <img src={`${VIL}/assets/vegetable_stall.png`} alt="Stall" className="sprite-img" style={{ height: 36 }} />
+              <img src={`${FANTASY}/priest_01_001.png`} alt="NPC" className="sprite-img" style={{ height: 32 }} />
+              <img src={`${FANTASY}/elf_02_005.png`} alt="Herbalist" className="sprite-img" style={{ height: 32 }} />
+            </div>
+          </div>
+
           <h3>Combat</h3>
           <p>
             Press <strong>SPACE</strong> to attack in the direction you&apos;re facing.
@@ -258,6 +301,18 @@ export default function HowItWorksPage() {
             <li><strong>Shrine Buff</strong> &mdash; Clear nearby orcs, press E to activate: +50% damage, &minus;20% damage taken for 45 seconds</li>
             <li><strong>Death</strong> &mdash; You lose gold and respawn at the hub</li>
           </ul>
+
+          {/* Combat scene */}
+          <div className="game-scene-panel" style={{ maxWidth: 360, height: 100, padding: '12px 20px', marginTop: 12, marginBottom: 20 }}>
+            <div className="scene-terrain" />
+            <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc Warrior" className="sprite-img" style={{ height: 48 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', position: 'relative', zIndex: 1 }}>
+              <span className="scene-damage" style={{ color: '#ff4040' }}>−12</span>
+              <span className="scene-damage" style={{ color: '#60c060' }}>+25 HP</span>
+            </div>
+            <img src={`${FANTASY}/warrior_01_003.png`} alt="Player" className="sprite-img" style={{ height: 40 }} />
+            <img src={`${GL}/Characters/orc warrior/orc2/orc melee - anims color2-idle.png`} alt="Orc 2" className="sprite-img" style={{ height: 48 }} />
+          </div>
 
           <h3>NPCs &amp; Dialogue</h3>
           <p>
@@ -318,6 +373,13 @@ export default function HowItWorksPage() {
             that appears above your character in the world.
           </p>
 
+          {/* Fantasy hero parade */}
+          <div className="sprite-parade" style={{ marginTop: 12, marginBottom: 20 }}>
+            {HIW_SPRITES.map(c => (
+              <img key={c.alt} src={c.src} alt={c.alt} />
+            ))}
+          </div>
+
           <h3>Wildlife &amp; Ambient</h3>
           <p>
             Passive animals wander the world: sheep in the hub and grassland, wildlife in the village.
@@ -374,6 +436,16 @@ export default function HowItWorksPage() {
             <li><strong>Corwin</strong> (Builder) &mdash; Offers a building milestone quest</li>
             <li><strong>Nessa</strong> (Caretaker) &mdash; Watches over the settlement</li>
           </ul>
+
+          {/* Structure sprite row */}
+          <div className="structure-row" style={{ marginTop: 12 }}>
+            <img src={`${GL}/Props/Static props/Cabin/cabin.png`} alt="Cabin" />
+            <img src={`${GL}/Props/Static props/sheet2-sprites/watchtower - front.png`} alt="Tower" />
+            <img src={`${GL}/Props/Static props/sheet2-sprites/tent 1.png`} alt="Tent" />
+            <img src={`${GL}/Props/Static props/sheet2-sprites/stronghold - horizontal - on grass.png`} alt="Wall" />
+            <img src={`${GL}/Props/Static props/sheet1-sprites/barrel 1.png`} alt="Barrel" />
+            <img src={`${GL}/Props/Static props/sheet1-sprites/fence - left - right - 1.png`} alt="Fence" />
+          </div>
 
           <div className="hiw-callout">
             <strong>22 buildable items</strong> across 3 categories. Only the world owner can build &mdash;

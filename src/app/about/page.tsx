@@ -1,13 +1,24 @@
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 
+const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
+const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
+
+const ABOUT_SPRITES = [
+  { src: `${FANTASY}/paladin_01_001.png`, alt: 'Paladin' },
+  { src: `${FANTASY}/dwarf_01_008.png`, alt: 'Dwarf' },
+  { src: `${FANTASY}/elf_01_001.png`, alt: 'Elf Scout' },
+  { src: `${FANTASY}/warrior_01_003.png`, alt: 'Swordswoman' },
+  { src: `${FANTASY}/mage_01_005.png`, alt: 'Fire Witch' },
+];
+
 export default function AboutPage() {
   return (
     <div className="about-page">
       <Navbar />
 
       {/* ─── Cinematic Opening ─── */}
-      <section className="about-opening">
+      <section className="about-opening tileset-bg">
         <div className="about-opening-lines">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="about-opening-line" style={{ animationDelay: `${i * 0.3}s` }} />
@@ -48,6 +59,12 @@ export default function AboutPage() {
             AI is just an option — a starting point. Everything it generates can be edited, deleted,
             or expanded. It&apos;s your world, you decide how to build it.
           </p>
+          {/* Character sprite parade */}
+          <div className="sprite-parade" style={{ marginTop: 24, marginBottom: 8 }}>
+            {ABOUT_SPRITES.map(c => (
+              <img key={c.alt} src={c.src} alt={c.alt} />
+            ))}
+          </div>
           <Link href="/play/everhold" className="btn btn-primary" style={{ marginTop: 16, marginRight: 12 }}>
             Enter a World
           </Link>
@@ -229,11 +246,12 @@ export default function AboutPage() {
               from. It&apos;s not just a viewer &mdash; it&apos;s a game you can
               spend hours in.
             </p>
-            <div className="about-bento-explore-mock">
-              <div className="about-bento-terrain" />
-              <div className="about-bento-marker" style={{ left: '25%', top: '40%', background: 'var(--color-character)' }} />
-              <div className="about-bento-marker" style={{ left: '60%', top: '25%', background: 'var(--color-location)' }} />
-              <div className="about-bento-marker" style={{ left: '45%', top: '65%', background: 'var(--color-faction)' }} />
+            <div className="game-scene-panel" style={{ marginTop: 16, height: 100, padding: '12px 20px' }}>
+              <div className="scene-terrain" />
+              <img src={`${GL}/Props/Static props/pine-tree.png`} alt="Pine Tree" className="sprite-img" style={{ height: 64 }} />
+              <img src={`${FANTASY}/paladin_01_001.png`} alt="Player" className="sprite-img" style={{ height: 44 }} />
+              <img src={`${GL}/Props/Static props/Cabin/cabin.png`} alt="Cabin" className="sprite-img" style={{ height: 56 }} />
+              <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc" className="sprite-img" style={{ height: 40 }} />
             </div>
           </div>
 
@@ -295,16 +313,19 @@ export default function AboutPage() {
       <section className="about-numbers">
         <div className="about-numbers-inner">
           <div className="about-number-block">
+            <img src={`${GL}/Props/Static props/pine-tree.png`} alt="" className="sprite-img" style={{ height: 32, marginBottom: 8 }} />
             <div className="about-number-value">3</div>
             <div className="about-number-label">Explorable zones with unique gameplay</div>
           </div>
           <div className="about-number-divider" />
           <div className="about-number-block">
+            <img src={`${FANTASY}/paladin_01_001.png`} alt="" className="sprite-img" style={{ height: 32, marginBottom: 8 }} />
             <div className="about-number-value">25+</div>
             <div className="about-number-label">Named NPCs with dialogue and quests</div>
           </div>
           <div className="about-number-divider" />
           <div className="about-number-block">
+            <img src={`${FANTASY}/elf_01_001.png`} alt="" className="sprite-img" style={{ height: 32, marginBottom: 8 }} />
             <div className="about-number-value">28</div>
             <div className="about-number-label">Playable characters with color customization</div>
           </div>

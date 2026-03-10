@@ -5505,10 +5505,10 @@ h1, h2, h3, h4, h5, h6 {
   content: '';
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(255,107,44,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,107,44,0.02) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-image: url('/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus/tiles/cobblestone_tiles_brown.png');
+  background-size: 128px;
+  image-rendering: pixelated;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 0;
 }
@@ -5521,6 +5521,107 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 500px;
   margin: 0 auto;
   box-shadow: 0 0 10px rgba(240,192,96,0.1);
+}
+
+/* ─── Sprite & Game Asset Display (marketing pages) ─── */
+
+.sprite-img {
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sprite-parade {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px 0 8px;
+}
+
+.sprite-parade img {
+  image-rendering: pixelated;
+  width: 48px;
+  height: auto;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+  transition: transform 0.15s ease;
+}
+
+.sprite-parade img:hover {
+  transform: scale(1.25) translateY(-4px);
+}
+
+.sprite-parade-sm img {
+  width: 36px;
+}
+
+.game-scene-panel {
+  background: rgba(6, 8, 14, 0.92);
+  border: 2px solid rgba(240,192,96,0.25);
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-scene-panel img {
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+}
+
+.scene-terrain {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, #408828 0%, #58a838 40%, #7cc850 100%);
+  opacity: 0.25;
+  z-index: 0;
+}
+
+.tileset-bg {
+  position: relative;
+}
+
+.tileset-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus/tiles/cobblestone_tiles_brown.png');
+  background-size: 160px;
+  image-rendering: pixelated;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scene-damage {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.structure-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+
+.structure-row img {
+  image-rendering: pixelated;
+  height: 48px;
+  width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -5853,6 +5954,13 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-dim);
   text-align: center;
   line-height: 1.1;
+}
+
+.mock-build-cell img {
+  image-rendering: pixelated;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .mock-build-cell-icon {
@@ -6802,4 +6910,10 @@ h1, h2, h3, h4, h5, h6 {
   .hero-v2-badge { font-size: 0.62rem; padding: 5px 14px; }
   .mock-hud { gap: 12px; padding: 8px 14px; }
   .htp-grid { grid-template-columns: 1fr; }
+  .sprite-parade img { width: 36px; }
+  .sprite-parade { gap: 6px; }
+  .game-scene-panel { padding: 10px 12px; gap: 8px; }
+  .game-scene-panel img { max-height: 48px; }
+  .structure-row img { height: 36px; }
+  .structure-row { gap: 10px; }
 }

@@ -3,6 +3,33 @@ import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
 import { DemoButton } from '@/components/DemoButton';
 
+const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
+const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
+const VIL = '/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus';
+
+const HERO_SPRITES = [
+  { src: `${FANTASY}/paladin_01_001.png`, alt: 'Paladin' },
+  { src: `${FANTASY}/priest_01_001.png`, alt: 'Priest' },
+  { src: `${FANTASY}/dwarf_01_008.png`, alt: 'Dwarf' },
+  { src: `${FANTASY}/elf_01_001.png`, alt: 'Elf Scout' },
+  { src: `${FANTASY}/warrior_01_003.png`, alt: 'Swordswoman' },
+  { src: `${FANTASY}/mage_01_005.png`, alt: 'Fire Witch' },
+  { src: `${FANTASY}/elf_02_005.png`, alt: 'Herbalist' },
+  { src: `${FANTASY}/skeleton_01_001.png`, alt: 'Skeleton' },
+  { src: `${FANTASY}/skeleton_01_005.png`, alt: 'Undead' },
+];
+
+const BUILD_ITEMS = [
+  { name: 'Cabin', src: `${GL}/Props/Static props/Cabin/cabin.png` },
+  { name: 'Tower', src: `${GL}/Props/Static props/sheet2-sprites/watchtower - front.png` },
+  { name: 'Tent', src: `${GL}/Props/Static props/sheet2-sprites/tent 1.png` },
+  { name: 'Wall', src: `${GL}/Props/Static props/sheet2-sprites/stronghold - horizontal - on grass.png` },
+  { name: 'Stall', src: `${VIL}/assets/vegetable_stall.png` },
+  { name: 'Well', src: `${GL}/Props/Static props/sheet1-sprites/waterwell - rope.png` },
+  { name: 'Barrel', src: `${GL}/Props/Static props/sheet1-sprites/barrel 1.png` },
+  { name: 'Fence', src: `${GL}/Props/Static props/sheet1-sprites/fence - left - right - 1.png` },
+];
+
 export default async function LandingPage() {
   const worlds = await prisma.world.findMany({
     where: { visibility: 'PUBLIC' },
@@ -22,7 +49,7 @@ export default async function LandingPage() {
           HERO — "Your World. Alive."
           HUD strip below proves this is a real game immediately
           ═══════════════════════════════════════════════════════ */}
-      <section className="hero-v2">
+      <section className="hero-v2 tileset-bg">
         <div className="hero-bg" />
         <div className="hero-v2-glow" />
 
@@ -95,6 +122,13 @@ export default async function LandingPage() {
           <span className="hero-v2-stat"><strong>8</strong> quests &amp; missions</span>
         </div>
 
+        {/* Character sprite parade — real game assets */}
+        <div className="sprite-parade" style={{ position: 'relative', zIndex: 2, marginTop: 16 }}>
+          {HERO_SPRITES.map(c => (
+            <img key={c.alt} src={c.src} alt={c.alt} />
+          ))}
+        </div>
+
         <div className="scroll-indicator">
           <span>Scroll to explore</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -107,7 +141,7 @@ export default async function LandingPage() {
           STATEMENT — One powerful sentence
           ═══════════════════════════════════════════════════════ */}
       <div className="zone-divider" />
-      <section className="statement-section">
+      <section className="statement-section tileset-bg">
         <p className="statement-text">
           Every world you create becomes a <span className="gold">playable 2D game</span> with
           combat, NPCs, quests, building, vendors, wildlife, and
@@ -201,18 +235,28 @@ export default async function LandingPage() {
             </p>
           </div>
           <div className="journey-visual">
-            <div className="mock-hud" style={{ transform: 'scale(0.95)' }}>
-              <div className="mock-hud-hp">
-                <span className="mock-hud-hp-icon">HP</span>
-                <div className="mock-hud-hp-bar">
-                  <div className="mock-hud-hp-fill" style={{ width: '100%' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+              <div className="mock-hud" style={{ transform: 'scale(0.95)' }}>
+                <div className="mock-hud-hp">
+                  <span className="mock-hud-hp-icon">HP</span>
+                  <div className="mock-hud-hp-bar">
+                    <div className="mock-hud-hp-fill" style={{ width: '100%' }} />
+                  </div>
+                  <span className="mock-hud-hp-text">100/100</span>
                 </div>
-                <span className="mock-hud-hp-text">100/100</span>
+                <div className="mock-hud-gold">
+                  <span className="mock-hud-gold-icon" /> 0
+                </div>
+                <span className="mock-hud-zone">Hub Zone</span>
               </div>
-              <div className="mock-hud-gold">
-                <span className="mock-hud-gold-icon" /> 0
+              {/* Game scene — real tileset sprites */}
+              <div className="game-scene-panel" style={{ width: 320, height: 140 }}>
+                <div className="scene-terrain" />
+                <img src={`${GL}/Props/Static props/pine-tree.png`} alt="Pine Tree" style={{ height: 80 }} />
+                <img src={`${FANTASY}/paladin_01_001.png`} alt="Player" style={{ height: 48 }} />
+                <img src={`${GL}/Props/Static props/Cabin/cabin.png`} alt="Cabin" style={{ height: 72 }} />
+                <img src={`${GL}/Props/Static props/sheet1-sprites/waterwell - rope.png`} alt="Well" style={{ height: 40 }} />
               </div>
-              <span className="mock-hud-zone">Hub Zone</span>
             </div>
           </div>
         </div>
@@ -234,7 +278,16 @@ export default async function LandingPage() {
             </p>
           </div>
           <div className="journey-visual">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+              {/* Combat scene — real orc sprites */}
+              <div className="game-scene-panel" style={{ width: 300, height: 100 }}>
+                <div className="scene-terrain" />
+                <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc Warrior" style={{ height: 48 }} />
+                <span className="scene-damage" style={{ color: '#ff4040' }}>-12</span>
+                <img src={`${FANTASY}/warrior_01_003.png`} alt="Player" style={{ height: 44 }} />
+                <span className="scene-damage" style={{ color: '#60c060' }}>+25 HP</span>
+                <img src={`${GL}/Characters/orc warrior/orc2/orc melee - anims color2-idle.png`} alt="Orc Warrior" style={{ height: 48 }} />
+              </div>
               {/* NPC dialogue mockup */}
               <div className="mock-dialogue">
                 <div className="mock-dialogue-name">Helena &mdash; Tavern Keeper</div>
@@ -299,7 +352,7 @@ export default async function LandingPage() {
           </div>
           <div className="journey-visual">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
-              {/* Build menu mockup */}
+              {/* Build menu mockup — real structure sprites */}
               <div className="mock-build">
                 <div className="mock-build-tabs">
                   <span className="mock-build-tab active">Structures</span>
@@ -307,15 +360,15 @@ export default async function LandingPage() {
                   <span className="mock-build-tab">Decor</span>
                 </div>
                 <div className="mock-build-grid">
-                  {['Hut', 'Wall', 'Tower', 'Gate', 'Stall', 'Forge', 'Well', 'Fence'].map(name => (
-                    <div key={name} className="mock-build-cell">
-                      <div className="mock-build-cell-icon" />
-                      <span className="mock-build-cell-label">{name}</span>
+                  {BUILD_ITEMS.map(item => (
+                    <div key={item.name} className="mock-build-cell">
+                      <img src={item.src} alt={item.name} />
+                      <span className="mock-build-cell-label">{item.name}</span>
                     </div>
                   ))}
                 </div>
                 <div className="mock-build-cost">
-                  <span>Wooden Hut</span>
+                  <span>Wooden Cabin</span>
                   <span style={{ color: '#8B6914' }}>8 Wood, 2 Stone</span>
                 </div>
               </div>
@@ -388,19 +441,17 @@ export default async function LandingPage() {
                 </div>
                 <div className="mock-hud-gold"><span className="mock-hud-gold-icon" /> 85</div>
               </div>
-              <div className="mock-dialogue" style={{ maxWidth: 280 }}>
-                <div className="mock-dialogue-name" style={{ color: '#e06060', borderColor: 'rgba(224,96,96,0.15)' }}>
-                  Orc Warrior
+              {/* Combat scene — real orc sprites */}
+              <div className="game-scene-panel" style={{ padding: '16px 24px', gap: 16 }}>
+                <div className="scene-terrain" />
+                <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc Warrior" className="sprite-img" style={{ height: 52 }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                  <span className="scene-damage" style={{ color: '#ff4040' }}>−12</span>
+                  <span className="scene-damage" style={{ color: '#ff4040' }}>−8</span>
+                  <span className="scene-damage" style={{ color: '#60c060' }}>+25 HP</span>
+                  <span className="scene-damage" style={{ color: '#e8c86a' }}>+10g</span>
                 </div>
-                <div className="mock-dialogue-text" style={{ fontSize: '0.78rem', padding: '10px 14px' }}>
-                  <span style={{ color: '#e06060', fontWeight: 700 }}>−12</span>
-                  <span style={{ color: 'var(--text-dim)', margin: '0 6px' }}>|</span>
-                  <span style={{ color: '#e06060', fontWeight: 700 }}>−8</span>
-                  <span style={{ color: 'var(--text-dim)', margin: '0 6px' }}>|</span>
-                  <span style={{ color: '#60c060', fontWeight: 700 }}>+25 HP</span>
-                  <span style={{ color: 'var(--text-dim)', margin: '0 6px' }}>|</span>
-                  <span style={{ color: 'var(--gold)', fontWeight: 700 }}>+10g</span>
-                </div>
+                <img src={`${GL}/Characters/orc warrior/orc2/orc melee - anims color2-idle.png`} alt="Orc Warrior 2" className="sprite-img" style={{ height: 52 }} />
               </div>
             </div>
           </div>
@@ -426,22 +477,30 @@ export default async function LandingPage() {
             </ul>
           </div>
           <div className="system-visual">
-            <div className="mock-dialogue">
-              <div className="mock-dialogue-name">Witch Willow &mdash; Fortune Teller</div>
-              <div className="mock-dialogue-text">
-                The cards whisper of a necklace lost near the village garden&hellip;
-                and of hidden gold along the coast road. Seek them if you dare.
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+              <div className="mock-dialogue">
+                <div className="mock-dialogue-name">Witch Willow &mdash; Fortune Teller</div>
+                <div className="mock-dialogue-text">
+                  The cards whisper of a necklace lost near the village garden&hellip;
+                  and of hidden gold along the coast road. Seek them if you dare.
+                </div>
+                <div className="mock-dialogue-choices">
+                  <div className="mock-choice">
+                    <span className="mock-choice-key">1</span> Tell me my fortune.
+                  </div>
+                  <div className="mock-choice">
+                    <span className="mock-choice-key">2</span> Show me your potions.
+                  </div>
+                  <div className="mock-choice">
+                    <span className="mock-choice-key">3</span> Tell me about this place.
+                  </div>
+                </div>
               </div>
-              <div className="mock-dialogue-choices">
-                <div className="mock-choice">
-                  <span className="mock-choice-key">1</span> Tell me my fortune.
-                </div>
-                <div className="mock-choice">
-                  <span className="mock-choice-key">2</span> Show me your potions.
-                </div>
-                <div className="mock-choice">
-                  <span className="mock-choice-key">3</span> Tell me about this place.
-                </div>
+              {/* NPC character parade */}
+              <div className="sprite-parade sprite-parade-sm" style={{ padding: '8px 0 0' }}>
+                {HERO_SPRITES.slice(0, 5).map(c => (
+                  <img key={c.alt} src={c.src} alt={c.alt} />
+                ))}
               </div>
             </div>
           </div>
@@ -474,10 +533,10 @@ export default async function LandingPage() {
                 <span className="mock-build-tab">Decor</span>
               </div>
               <div className="mock-build-grid">
-                {['Hut', 'Wall', 'Tower', 'Gate', 'Stall', 'Forge', 'Well', 'Fence'].map(n => (
-                  <div key={n} className="mock-build-cell">
-                    <div className="mock-build-cell-icon" />
-                    <span className="mock-build-cell-label">{n}</span>
+                {BUILD_ITEMS.map(item => (
+                  <div key={item.name} className="mock-build-cell">
+                    <img src={item.src} alt={item.name} />
+                    <span className="mock-build-cell-label">{item.name}</span>
                   </div>
                 ))}
               </div>
@@ -697,6 +756,12 @@ export default async function LandingPage() {
                 Place buildings to attract named residents who offer quests.
                 Complete objectives to unlock paths to other zones.
               </p>
+              <div className="game-scene-panel" style={{ marginTop: 12, height: 80, padding: '10px 16px' }}>
+                <div className="scene-terrain" />
+                <img src={`${GL}/Props/Static props/Cabin/cabin.png`} alt="Cabin" className="sprite-img" style={{ height: 48 }} />
+                <img src={`${GL}/Props/Static props/sheet1-sprites/waterwell - rope.png`} alt="Well" className="sprite-img" style={{ height: 32 }} />
+                <img src={`${FANTASY}/paladin_01_001.png`} alt="Player" className="sprite-img" style={{ height: 36 }} />
+              </div>
             </div>
             <div className="htp-zone" style={{ borderColor: 'rgba(54,179,126,0.25)', background: 'rgba(54,179,126,0.04)' }}>
               <h4>Grassland</h4>
@@ -704,6 +769,12 @@ export default async function LandingPage() {
                 Wilderness zone. 7 orc warriors, combat shrine, vendor camp,
                 8 points of interest. Full mission chain with chest reward.
               </p>
+              <div className="game-scene-panel" style={{ marginTop: 12, height: 80, padding: '10px 16px' }}>
+                <div className="scene-terrain" />
+                <img src={`${GL}/Props/Static props/pine-tree.png`} alt="Pine Tree" className="sprite-img" style={{ height: 56 }} />
+                <img src={`${GL}/Characters/orc warrior/orc1/orc melee - anims-idle.png`} alt="Orc" className="sprite-img" style={{ height: 36 }} />
+                <img src={`${GL}/Props/Animated props/shrine-base-with grass.png`} alt="Shrine" className="sprite-img" style={{ height: 40 }} />
+              </div>
             </div>
             <div className="htp-zone" style={{ borderColor: 'rgba(9,132,227,0.25)', background: 'rgba(9,132,227,0.04)' }}>
               <h4>Seaside Village</h4>
@@ -711,6 +782,12 @@ export default async function LandingPage() {
                 Coastal zone. 6 named NPCs, Witch Willow&apos;s potion shop,
                 4 bandits, wildlife, and Marina&apos;s Lost Necklace quest.
               </p>
+              <div className="game-scene-panel" style={{ marginTop: 12, height: 80, padding: '10px 16px' }}>
+                <div className="scene-terrain" style={{ background: 'linear-gradient(180deg, #2898b8 0%, #3bbcd8 50%, #c8c078 100%)' }} />
+                <img src={`${VIL}/assets/vegetable_stall.png`} alt="Market" className="sprite-img" style={{ height: 40 }} />
+                <img src={`${FANTASY}/priest_01_001.png`} alt="NPC" className="sprite-img" style={{ height: 36 }} />
+                <img src={`${FANTASY}/elf_02_005.png`} alt="Herbalist" className="sprite-img" style={{ height: 36 }} />
+              </div>
             </div>
           </div>
         </div>
