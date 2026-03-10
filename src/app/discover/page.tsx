@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
+import { WorldCardScene } from './WorldCardScene';
+import { OnlineCounts } from './OnlineCounts';
 
 export default async function DiscoverPage() {
   const worlds = await prisma.world.findMany({
@@ -12,9 +14,12 @@ export default async function DiscoverPage() {
     orderBy: { updatedAt: 'desc' },
   });
 
+  const slugs = worlds.map(w => w.slug);
+
   return (
     <>
       <Navbar />
+      <OnlineCounts slugs={slugs} />
       <div className="page-container">
         <div className="discover-header">
           <div>
@@ -38,6 +43,7 @@ export default async function DiscoverPage() {
             {worlds.map((world) => (
               <div key={world.id} className="discover-card">
                 <div className="world-card-bg" style={{ background: world.coverGradient }} />
+                <WorldCardScene slug={world.slug} />
                 <div className="world-card-overlay" />
                 <div className="discover-card-content">
                   <div className="discover-card-top">
@@ -55,6 +61,7 @@ export default async function DiscoverPage() {
                     <div className="discover-card-stats">
                       <span><strong>{world._count.entities}</strong> entities</span>
                       <span><strong>{world._count.events}</strong> events</span>
+                      <span className="discover-card-online" data-slug={world.slug} />
                     </div>
                   </div>
 

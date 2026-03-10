@@ -3738,6 +3738,49 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1rem;
 }
 
+/* ── World card pixel-art scene ── */
+.world-card-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.world-card-sprite {
+  position: absolute;
+  image-rendering: pixelated;
+  pointer-events: none;
+  width: auto;
+}
+
+/* ── Online player badge ── */
+.discover-card-online {
+  display: none;
+}
+.discover-card-online.has-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #4ade80;
+  font-size: 0.75rem;
+}
+.discover-card-online.has-online strong {
+  color: #4ade80;
+}
+.online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+  animation: online-pulse 2s ease-in-out infinite;
+}
+@keyframes online-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 @media (max-width: 768px) {
   .discover-page { padding: var(--space-lg); }
   .discover-grid { grid-template-columns: 1fr; }

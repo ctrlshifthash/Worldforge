@@ -40,6 +40,11 @@ const httpServer = createServer((req, res) => {
     for (const room of rooms.values()) totalPlayers += room.size;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, players: totalPlayers }));
+  } else if (req.url === '/rooms') {
+    const counts: Record<string, number> = {};
+    for (const [slug, room] of rooms) counts[slug] = room.size;
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(counts));
   } else {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Worldforge Multiplayer Server');
