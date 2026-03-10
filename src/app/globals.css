@@ -6557,10 +6557,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .social-link-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
   display: block;
+}
+
+.social-link-icon--dark {
+  background: #1a1a2e;
 }
 
 .social-link:hover .social-link-icon {

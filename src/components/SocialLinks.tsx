@@ -6,27 +6,32 @@ const SOCIALS = [
   {
     name: 'Pump.fun',
     href: '#',
-    img: 'https://static.wixstatic.com/media/e2da02_f4e8abcf31d04d96a78f997107f092a3~mv2.jpg',
+    img: '/socials/pumpfun.jpg',
+    dark: false,
   },
   {
     name: 'X',
     href: '#',
-    img: 'https://static.wixstatic.com/media/e2da02_7248f73ef41b4355afd7394c08b66bca~mv2.png',
+    img: '/socials/x.png',
+    dark: false,
   },
   {
     name: 'GitHub',
     href: '#',
-    img: 'https://static.wixstatic.com/media/e2da02_54130f69a18e424cb3f9e81f6d12aaab~mv2.png',
+    img: '/socials/github.png',
+    dark: false,
   },
   {
     name: 'GitBook',
     href: '#',
-    img: 'https://static.wixstatic.com/media/e2da02_c1e9f4c9699e45a6a63580f4ed6db40c~mv2.png',
+    img: '/socials/gitbook.png',
+    dark: true,
   },
   {
     name: 'Medium',
     href: '#',
-    img: 'https://static.wixstatic.com/media/e2da02_f1515d12f45d4c7b9a27f0fbb76412ad~mv2.png',
+    img: '/socials/medium.png',
+    dark: true,
   },
 ];
 
@@ -42,7 +47,7 @@ export function SocialLinks() {
           className="social-link"
           title={s.name}
         >
-          <span className="social-link-icon">
+          <span className={`social-link-icon${s.dark ? ' social-link-icon--dark' : ''}`}>
             <img src={s.img} alt={s.name} width={44} height={44} />
           </span>
           <span className="social-link-name">{s.name}</span>
