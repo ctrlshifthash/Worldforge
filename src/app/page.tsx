@@ -179,6 +179,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           STATEMENT — One powerful sentence
           ═══════════════════════════════════════════════════════ */}
+      <div className="section-divider" aria-hidden="true"><span /></div>
       <section className="statement-section reveal-section">
         <p className="statement-text">
           Every world you create becomes a <span className="gold">playable 2D game</span> with
@@ -187,6 +188,7 @@ export default async function LandingPage() {
           you can explore, edit, and grow.
         </p>
       </section>
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           THE JOURNEY — Narrative walkthrough: Describe → Generate → Enter → Play
           Alternating panels, each visually unique
@@ -431,6 +433,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           GAME SYSTEMS — Editorial spreads proving each system is real
           Each system has a game-UI mockup as its visual
@@ -652,6 +655,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           LORE LAYER — The worldbuilding tools under the game
           Bento layout, not uniform cards
@@ -737,6 +741,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           HOW TO PLAY — Quick controls reference
           ═══════════════════════════════════════════════════════ */}
@@ -825,6 +830,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           COMMUNITY — Real worlds from the database
           ═══════════════════════════════════════════════════════ */}
@@ -882,6 +888,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
           FINAL CTA
           ═══════════════════════════════════════════════════════ */}

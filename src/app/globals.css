@@ -5723,6 +5723,63 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 12px rgba(240,192,96,0.08);
 }
 
+/* ─── Section Dividers ─── */
+.section-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.7) 0%,
+    rgba(0,0,0,0.85) 40%,
+    rgba(0,0,0,0.85) 60%,
+    rgba(0,0,0,0.7) 100%);
+  overflow: hidden;
+}
+
+/* Horizontal lines */
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  max-width: 280px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212,175,96,0.5) 50%, rgba(212,175,96,0.25) 100%);
+}
+
+.section-divider::after {
+  background: linear-gradient(270deg, transparent 0%, rgba(212,175,96,0.5) 50%, rgba(212,175,96,0.25) 100%);
+}
+
+/* Center diamond ornament */
+.section-divider > span {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 0 16px;
+  background: rgba(212,175,96,0.6);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  box-shadow:
+    0 0 8px rgba(212,175,96,0.3),
+    0 0 20px rgba(212,175,96,0.1);
+}
+
+/* Subtle shimmer animation */
+@keyframes dividerShimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.section-divider > span {
+  animation: dividerShimmer 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-divider > span { animation: none; }
+}
+
 /* ─── Scroll Reveal Animations ─── */
 /* No transform on sections — transform breaks background-attachment: fixed */
 .reveal-section > * {
