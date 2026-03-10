@@ -8,7 +8,7 @@ const SOCIALS = [
     href: '#',
     img: '/socials/pumpfun.jpg',
     dark: false,
-    scale: '100%',
+    scale: '80%',
   },
   {
     name: 'X',
@@ -29,7 +29,7 @@ const SOCIALS = [
     href: '#',
     img: '/socials/gitbook.png',
     dark: true,
-    scale: '100%',
+    scale: '115%',
   },
   {
     name: 'Medium',

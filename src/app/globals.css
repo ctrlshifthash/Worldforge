@@ -6453,14 +6453,14 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 10px;
   padding: 10px 24px;
-  border: 2px solid rgba(240,192,96,0.25);
-  background: rgba(240,192,96,0.06);
+  border: 2px solid var(--gold-dim);
+  background: var(--gold);
   font-family: var(--font-pixel);
   font-size: 0.5rem;
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--void);
   cursor: pointer;
   position: absolute;
   top: 20px;
@@ -6468,23 +6468,24 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(-50%);
   z-index: 10;
   min-width: 320px;
-  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  box-shadow: 0 4px 0 #7a5010, 0 0 20px rgba(232,176,96,0.12);
+  transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+  text-shadow: none;
 }
 
 .ca-badge:hover {
-  border-color: rgba(240,192,96,0.5);
-  background: rgba(240,192,96,0.12);
-  box-shadow: 0 0 20px rgba(240,192,96,0.15);
+  background: var(--gold-bright);
+  box-shadow: 0 4px 0 #7a5010, 0 0 30px rgba(232,176,96,0.25);
+  transform: translateX(-50%) translateY(-1px);
 }
 
 .ca-badge-label {
-  color: var(--gold);
+  color: var(--void);
   flex-shrink: 0;
 }
 
 .ca-badge-address {
-  color: var(--text);
+  color: var(--void);
   letter-spacing: 0.02em;
   overflow: hidden;
   text-overflow: ellipsis;
