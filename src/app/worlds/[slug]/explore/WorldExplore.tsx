@@ -7377,56 +7377,6 @@ export function WorldExplore({
           }
         }
 
-        // Combat timer ticks
-        if (playerAtkCooldownRef.current > 0) playerAtkCooldownRef.current -= dt;
-        if (playerAtkAnimRef.current > 0) playerAtkAnimRef.current -= dt;
-        if (playerHurtFlashRef.current > 0) playerHurtFlashRef.current -= dt;
-        if (pvpInvincibleRef.current > 0) pvpInvincibleRef.current -= dt;
-        damageNumbersRef.current = damageNumbersRef.current
-          .map(d => ({ ...d, timer: d.timer - dt, y: d.y - 30 * dt }))
-          .filter(d => d.timer > 0);
-        if (shrineBuffRef.current.active) {
-          shrineBuffRef.current.timer -= dt;
-          if (shrineBuffRef.current.timer <= 0) shrineBuffRef.current.active = false;
-        }
-
-        // ── PvP: process incoming damage events ──
-        while (mp.pvpEventsRef.current.length > 0) {
-          const evt = mp.pvpEventsRef.current.shift()!;
-          if (evt.type === 'damage_taken' && pvpInvincibleRef.current <= 0) {
-            const hasDefense = buffsRef.current.some(b => b.effect === 'defense' && b.remaining > 0);
-            let dmg = evt.amount;
-            if (hasDefense) dmg = Math.floor(dmg * 0.7);
-            if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 0.8);
-            healthRef.current = Math.max(0, healthRef.current - dmg);
-            setPlayerHealth(healthRef.current);
-            playerHurtFlashRef.current = 0.3;
-            damageNumbersRef.current.push({
-              x: playerRef.current.x * TILE_SIZE + 16,
-              y: playerRef.current.y * TILE_SIZE - 16,
-              text: `-${dmg}`, color: '#ff3030', timer: 1.0,
-            });
-            if (healthRef.current <= 0) {
-              // PvP death
-              mp.sendDeath('', evt.attackerName);
-              const goldBefore = playerGoldRef.current;
-              const goldAfter = Math.floor(goldBefore * 0.8);
-              const goldLost = goldBefore - goldAfter;
-              healthRef.current = MAX_HEALTH;
-              staminaRef.current = MAX_STAMINA;
-              const p = playerRef.current;
-              if (inHub) { p.x = 55; p.y = 45; }
-              else if (inVillage) { p.x = 1; p.y = 12; }
-              else { p.x = 40; p.y = GL_H - 3; }
-              p.facing = 'down'; p.moving = false;
-              playerGoldRef.current = goldAfter;
-              setPlayerGold(goldAfter);
-              pvpInvincibleRef.current = 2; // 2 seconds invincibility
-              zoneBannerRef.current = goldLost > 0 ? `Slain by ${evt.attackerName}! -${goldLost} Gold` : `Slain by ${evt.attackerName}!`;
-              zoneBannerTimer.current = 3;
-            }
-          }
-        }
       }
 
       // ── Village NPC animation + patrol ──
@@ -7646,6 +7596,54 @@ export function WorldExplore({
             playerGoldRef.current = Math.min(playerGoldRef.current + coin.gold, resourceCapRef.current.gold);
             setPlayerGold(playerGoldRef.current);
             damageNumbersRef.current.push({ x: coin.x * TILE_SIZE + 16, y: coin.y * TILE_SIZE - 16, text: `+${coin.gold}G`, color: '#e8c86a', timer: 1.5 });
+          }
+        }
+      }
+
+      // ── Combat timer ticks (ALL zones) ──
+      if (playerAtkCooldownRef.current > 0) playerAtkCooldownRef.current -= dt;
+      if (playerAtkAnimRef.current > 0) playerAtkAnimRef.current -= dt;
+      if (playerHurtFlashRef.current > 0) playerHurtFlashRef.current -= dt;
+      if (pvpInvincibleRef.current > 0) pvpInvincibleRef.current -= dt;
+      if (shrineBuffRef.current.active) {
+        shrineBuffRef.current.timer -= dt;
+        if (shrineBuffRef.current.timer <= 0) shrineBuffRef.current.active = false;
+      }
+
+      // ── PvP: process incoming damage events ──
+      while (mp.pvpEventsRef.current.length > 0) {
+        const evt = mp.pvpEventsRef.current.shift()!;
+        if (evt.type === 'damage_taken' && pvpInvincibleRef.current <= 0) {
+          const hasDefense = buffsRef.current.some(b => b.effect === 'defense' && b.remaining > 0);
+          let dmg = evt.amount;
+          if (hasDefense) dmg = Math.floor(dmg * 0.7);
+          if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 0.8);
+          healthRef.current = Math.max(0, healthRef.current - dmg);
+          setPlayerHealth(healthRef.current);
+          playerHurtFlashRef.current = 0.3;
+          damageNumbersRef.current.push({
+            x: playerRef.current.x * TILE_SIZE + 16,
+            y: playerRef.current.y * TILE_SIZE - 16,
+            text: `-${dmg}`, color: '#ff3030', timer: 1.0,
+          });
+          if (healthRef.current <= 0) {
+            // PvP death
+            mp.sendDeath('', evt.attackerName);
+            const goldBefore = playerGoldRef.current;
+            const goldAfter = Math.floor(goldBefore * 0.8);
+            const goldLost = goldBefore - goldAfter;
+            healthRef.current = MAX_HEALTH;
+            staminaRef.current = MAX_STAMINA;
+            const p = playerRef.current;
+            if (inHub) { p.x = 55; p.y = 45; }
+            else if (inVillage) { p.x = 1; p.y = 12; }
+            else { p.x = 40; p.y = GL_H - 3; }
+            p.facing = 'down'; p.moving = false;
+            playerGoldRef.current = goldAfter;
+            setPlayerGold(goldAfter);
+            pvpInvincibleRef.current = 2;
+            zoneBannerRef.current = goldLost > 0 ? `Slain by ${evt.attackerName}! -${goldLost} Gold` : `Slain by ${evt.attackerName}!`;
+            zoneBannerTimer.current = 3;
           }
         }
       }

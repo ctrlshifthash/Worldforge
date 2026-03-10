@@ -193,7 +193,7 @@ wss.on('connection', (ws) => {
 
         case 'damage': {
           if (!currentRoom) return;
-          broadcast(currentRoom, null, {
+          broadcast(currentRoom, playerId, {
             type: 'player_damage',
             targetId: msg.targetId,
             attackerId: playerId,
