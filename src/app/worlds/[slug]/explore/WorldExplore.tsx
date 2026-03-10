@@ -2293,14 +2293,34 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
       56 * TILE_SIZE - 8, 29 * TILE_SIZE + 4, 48, 24);
   });
 
-  // ── Northern Pass — zone exit gate (future zone connection) ──
-  // Marble pillars flanking the north road with visible glow
+  // ── Northern Pass — major zone exit gate ──
+  // Ground light pool beneath the gate opening
+  fix(56, 18, () => {
+    const gcx = 56 * TILE_SIZE + 16;
+    const gcy = 18 * TILE_SIZE + 20;
+    const groundGlow = ctx.createRadialGradient(gcx, gcy, 2, gcx, gcy, 52);
+    groundGlow.addColorStop(0, 'rgba(200,164,78,0.18)');
+    groundGlow.addColorStop(0.5, 'rgba(200,164,78,0.08)');
+    groundGlow.addColorStop(1, 'rgba(200,164,78,0)');
+    ctx.fillStyle = groundGlow;
+    ctx.fillRect(gcx - 52, gcy - 32, 104, 64);
+  });
+  // Marble pillars flanking the north road with strong glow
   [[55, 18], [57, 18]].forEach(([gx, gy]) => {
     fix(gx, gy, () => {
-      ctx.fillStyle = 'rgba(200,164,78,0.15)';
+      // Pillar halo
+      ctx.fillStyle = 'rgba(200,164,78,0.22)';
       ctx.beginPath();
-      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 24, 0, Math.PI * 2);
+      ctx.arc(gx * TILE_SIZE + 16, gy * TILE_SIZE + 16, 28, 0, Math.PI * 2);
       ctx.fill();
+      // Light beam extending upward from pillar
+      const beamX = gx * TILE_SIZE + 12;
+      const beamGrad = ctx.createLinearGradient(beamX + 4, gy * TILE_SIZE - 40, beamX + 4, gy * TILE_SIZE + 10);
+      beamGrad.addColorStop(0, 'rgba(200,164,78,0)');
+      beamGrad.addColorStop(0.5, 'rgba(200,164,78,0.12)');
+      beamGrad.addColorStop(1, 'rgba(200,164,78,0.04)');
+      ctx.fillStyle = beamGrad;
+      ctx.fillRect(beamX, gy * TILE_SIZE - 40, 8, 56);
       const ms = MARBLE_PILLAR_SPRITE;
       ctx.drawImage(ga.marbleFence, ms.sx, ms.sy, ms.sw, ms.sh,
         gx * TILE_SIZE + 6, gy * TILE_SIZE - 16, 18, 52);
@@ -2328,21 +2348,29 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
       WOODEN_FENCE_SPRITE.sw, WOODEN_FENCE_SPRITE.sh,
       59 * TILE_SIZE - 8, 18 * TILE_SIZE + 4, 48, 24);
   });
-  // "Northern Pass" label — large, bright, visible
+  // "Northern Pass" label — large destination marker with subtitle
   items.push({ x: 56, y: 18, draw: () => {
-    ctx.font = '700 11px Inter, sans-serif';
+    const cx = 56 * TILE_SIZE + 16;
+    const ly = 18 * TILE_SIZE + TILE_SIZE + 2;
+    // Main label
+    ctx.font = '700 13px Inter, sans-serif';
     ctx.textAlign = 'center';
-    const lbl = '\u25B2 Northern Pass \u25B2';
+    const lbl = '\u25B2 Northern Pass';
     const lm = ctx.measureText(lbl);
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    const badgeW = Math.max(lm.width + 20, 100);
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
     ctx.beginPath();
-    ctx.roundRect(56 * TILE_SIZE + 16 - lm.width / 2 - 8, 18 * TILE_SIZE + TILE_SIZE + 4, lm.width + 16, 18, 4);
+    ctx.roundRect(cx - badgeW / 2, ly, badgeW, 30, 5);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(200,164,78,0.4)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(200,164,78,0.5)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
-    ctx.fillStyle = 'rgba(200,164,78,0.95)';
-    ctx.fillText(lbl, 56 * TILE_SIZE + 16, 18 * TILE_SIZE + TILE_SIZE + 18);
+    ctx.fillStyle = '#c8a44e';
+    ctx.fillText(lbl, cx, ly + 14);
+    // Subtitle
+    ctx.font = '500 8px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(200,164,78,0.6)';
+    ctx.fillText('\u2192 Grassland Zone', cx, ly + 25);
   }});
   // Signpost at gate
   fix(56, 19, () => {
@@ -9054,38 +9082,58 @@ export function WorldExplore({
       if (inHub) {
         const t = timeRef.current;
 
-        // ── Northern Pass beacon (tile 56, 18) ──
+        // ── Northern Pass beacon (tile 56, 18) — strong, unmissable ──
         const npCx = 56 * TILE_SIZE + 16;
         const npCy = 18 * TILE_SIZE + 16;
-        const npPulse = 0.25 + Math.sin(t * 2.5) * 0.15;
-        const npGrad = ctx.createRadialGradient(npCx, npCy, 6, npCx, npCy, 56);
+        const npPulse = 0.35 + Math.sin(t * 2.5) * 0.2;
+        // Large radial glow
+        const npGrad = ctx.createRadialGradient(npCx, npCy, 8, npCx, npCy, 96);
         npGrad.addColorStop(0, `rgba(200,164,78,${npPulse})`);
+        npGrad.addColorStop(0.4, `rgba(200,164,78,${npPulse * 0.5})`);
         npGrad.addColorStop(1, 'rgba(200,164,78,0)');
         ctx.fillStyle = npGrad;
-        ctx.fillRect(npCx - 56, npCy - 56, 112, 112);
-        // Pillar glow rings
+        ctx.fillRect(npCx - 96, npCy - 96, 192, 192);
+        // Pillar glow rings — thick and bright
         for (const px of [55, 57]) {
           const pillarX = px * TILE_SIZE + 16;
-          const ringR = 12 + Math.sin(t * 3) * 3;
-          ctx.strokeStyle = `rgba(200,164,78,${0.3 + Math.sin(t * 2.5) * 0.15})`;
-          ctx.lineWidth = 1.5;
+          // Outer ring
+          const ringR = 16 + Math.sin(t * 3) * 4;
+          ctx.strokeStyle = `rgba(200,164,78,${0.4 + Math.sin(t * 2.5) * 0.2})`;
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
           ctx.arc(pillarX, npCy, ringR, 0, Math.PI * 2);
           ctx.stroke();
+          // Inner glow dot
+          ctx.fillStyle = `rgba(255,220,120,${0.3 + Math.sin(t * 4) * 0.15})`;
+          ctx.beginPath();
+          ctx.arc(pillarX, npCy - 10, 4, 0, Math.PI * 2);
+          ctx.fill();
         }
-        // Animated upward chevrons
-        for (let i = 0; i < 3; i++) {
-          const yOff = ((t * 30 + i * 20) % 60) - 30;
-          const chAlpha = Math.max(0, 0.55 - Math.abs(yOff) / 45);
+        // Animated upward chevrons — larger, more visible
+        for (let i = 0; i < 4; i++) {
+          const yOff = ((t * 35 + i * 16) % 64) - 32;
+          const chAlpha = Math.max(0, 0.7 - Math.abs(yOff) / 40);
           if (chAlpha > 0) {
             ctx.strokeStyle = `rgba(200,164,78,${chAlpha})`;
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(npCx - 7, npCy - yOff + 4);
-            ctx.lineTo(npCx, npCy - yOff - 4);
-            ctx.lineTo(npCx + 7, npCy - yOff + 4);
+            ctx.moveTo(npCx - 10, npCy - yOff + 5);
+            ctx.lineTo(npCx, npCy - yOff - 5);
+            ctx.lineTo(npCx + 10, npCy - yOff + 5);
             ctx.stroke();
           }
+        }
+        // Floating sparkle particles
+        for (let i = 0; i < 5; i++) {
+          const angle = t * 0.8 + i * (Math.PI * 2 / 5);
+          const sparkR = 24 + Math.sin(t * 1.5 + i * 2) * 12;
+          const sx = npCx + Math.cos(angle) * sparkR;
+          const sy = npCy + Math.sin(angle) * sparkR * 0.6;
+          const sparkAlpha = 0.4 + Math.sin(t * 3 + i) * 0.3;
+          ctx.fillStyle = `rgba(255,220,120,${sparkAlpha})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+          ctx.fill();
         }
 
         // ── Seaside Village beacon (tile 96, 45) ──
@@ -9728,9 +9776,9 @@ export function WorldExplore({
           }
 
           // Zone exits (pulsing markers with labels)
-          const exits: { x: number; y: number; label: string; color: string }[] = [];
+          const exits: { x: number; y: number; label: string; color: string; primary?: boolean }[] = [];
           if (zoneRef.current === 'hub') {
-            exits.push({ x: 56, y: 18, label: 'Grassland', color: '#e8c86a' });
+            exits.push({ x: 56, y: 18, label: 'Grassland', color: '#e8c86a', primary: true });
             exits.push({ x: 96, y: 45, label: 'Village', color: '#80c8e0' });
           } else if (zoneRef.current === 'grassland') {
             exits.push({ x: 40, y: 59, label: 'Hub', color: '#e8c86a' });
@@ -9741,25 +9789,43 @@ export function WorldExplore({
           for (const ex of exits) {
             const exx = mmX + ex.x * scaleX;
             const exy = mmY + ex.y * scaleY;
-            // Outer glow ring
+            const isPrimary = ex.primary;
+            // Outer glow ring (larger for primary)
             ctx.strokeStyle = ex.color;
-            ctx.globalAlpha = exitPulse * 0.4;
-            ctx.lineWidth = 1;
+            ctx.globalAlpha = exitPulse * (isPrimary ? 0.6 : 0.4);
+            ctx.lineWidth = isPrimary ? 1.5 : 1;
             ctx.beginPath();
-            ctx.arc(exx, exy, 6, 0, Math.PI * 2);
+            ctx.arc(exx, exy, isPrimary ? 8 : 6, 0, Math.PI * 2);
             ctx.stroke();
-            // Inner dot
+            // Second ring for primary
+            if (isPrimary) {
+              ctx.globalAlpha = exitPulse * 0.2;
+              ctx.beginPath();
+              ctx.arc(exx, exy, 12, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+            // Inner dot (larger for primary)
             ctx.globalAlpha = 0.6 + exitPulse * 0.4;
             ctx.fillStyle = ex.color;
             ctx.beginPath();
-            ctx.arc(exx, exy, 3, 0, Math.PI * 2);
+            ctx.arc(exx, exy, isPrimary ? 4 : 3, 0, Math.PI * 2);
             ctx.fill();
             // Label
-            ctx.globalAlpha = 0.85;
-            ctx.font = '600 7px Inter, sans-serif';
+            ctx.globalAlpha = isPrimary ? 1 : 0.85;
+            ctx.font = isPrimary ? '700 8px Inter, sans-serif' : '600 7px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillStyle = ex.color;
-            ctx.fillText(ex.label, exx, exy - 8);
+            ctx.fillText(ex.label, exx, exy - (isPrimary ? 10 : 8));
+            // Directional arrow for primary (upward triangle)
+            if (isPrimary) {
+              ctx.globalAlpha = 0.7 + exitPulse * 0.3;
+              ctx.beginPath();
+              ctx.moveTo(exx - 3, exy - 5);
+              ctx.lineTo(exx, exy - 9);
+              ctx.lineTo(exx + 3, exy - 5);
+              ctx.closePath();
+              ctx.fill();
+            }
           }
           ctx.globalAlpha = 1;
 
