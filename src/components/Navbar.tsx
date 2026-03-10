@@ -22,10 +22,10 @@ export async function Navbar() {
 
       <div className="navbar-center">
         <Link href="/" className="navbar-link">Home</Link>
+        <Link href="/about" className="navbar-link">About</Link>
+        <Link href="/how-it-works" className="navbar-link">How It Works</Link>
         <Link href="/play/everhold" className="navbar-link">Play</Link>
         <Link href="/discover" className="navbar-link">Discover</Link>
-        <Link href="/how-it-works" className="navbar-link">How It Works</Link>
-        <Link href="/about" className="navbar-link">About</Link>
         {session && <Link href="/dashboard" className="navbar-link">Dashboard</Link>}
       </div>
 
