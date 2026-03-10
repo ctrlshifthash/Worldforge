@@ -444,56 +444,132 @@ const AMBIENT_CHATTER: Array<{ a: string; b: string; lines: [string, string][] }
   { a: 'village_student', b: 'village_youth', lines: [['Think the witch is watching us?', 'She is always watching us.']] },
 ];
 
-// ─── Entity building identity system ───
-// Deterministic roles assigned per entity via hashString(id)
-const BUILDING_PURPOSES = [
-  { role: 'tavern',      flavor: 'A warm hearth crackles inside. Locals share stories over mugs of ale.' },
-  { role: 'library',     flavor: 'Dusty shelves line the walls. Scrolls and tomes hold forgotten knowledge.' },
-  { role: 'workshop',    flavor: 'Tools hang from pegs. The workbench bears marks of years of craftsmanship.' },
-  { role: 'guild hall',  flavor: 'A banner hangs above the door. Tradespeople gather here to plan and negotiate.' },
-  { role: 'market house', flavor: 'Crates and sacks fill the entrance. Goods from distant lands pass through here.' },
-  { role: 'watchtower',  flavor: 'The upper floor offers a commanding view of the surrounding land.' },
-  { role: 'chapel',      flavor: 'Soft light filters through colored glass. The air carries a sense of peace.' },
-  { role: 'residence',   flavor: 'A lived-in home. Personal belongings suggest someone of importance dwells here.' },
-  { role: 'archive',     flavor: 'Old records and maps cover the walls. This place preserves the town\'s history.' },
-  { role: 'storehouse',  flavor: 'Barrels and crates are stacked neatly. The town\'s reserves are kept safe here.' },
-] as const;
+// ─── Building resident NPC system ───
+// Each LOCATION entity gets a deterministic named NPC via hashString(entity.id).
+// Residents have dialogue, quests, and progression-aware reactions.
+interface BuildingResident {
+  name: string;
+  role: string;
+  greeting: string;
+  flavor: string;
+  topics: string[];
+  healAmount?: number;
+  questId?: string;
+  questOffer?: string;
+  questCheck?: 'wood5' | 'discover5' | 'orcs7' | 'build10';
+  questReward?: { gold?: number; wood?: number; stone?: number };
+  questDone?: string;
+  questComplete?: string;
+}
 
-const BUILDING_OCCUPANTS = [
-  'A retired sailor watches from the window, pipe in hand.',
-  'An elderly scholar tends to worn books inside.',
-  'The sound of hammering echoes from within.',
-  'A merchant arranges wares behind the counter.',
-  'Candles flicker through stained glass windows.',
-  'The smell of fresh bread wafts from the doorway.',
-  'A watchful guard leans against the doorframe.',
-  'Faded curtains sway gently in the breeze.',
-  'A young apprentice sweeps the entrance.',
-  'Voices murmur behind the heavy door.',
-  'An old cat sleeps on the windowsill.',
-  'Drying herbs hang from the rafters inside.',
-] as const;
-
-const REVISIT_OBSERVATIONS = [
-  'You notice details you missed before.',
-  'Something about this place feels different today.',
-  'The air here carries old memories.',
-  'You feel more connected to this place now.',
-  'A new perspective reveals hidden character.',
-  'The walls seem to hold stories untold.',
-  'Time has treated this place with quiet dignity.',
-] as const;
-
-const BUILDING_HINTS = [
-  'You overhear a rumor about treasure hidden in the grasslands to the north.',
-  'A faded note mentions the shrine by the lake — it may hold restorative power.',
-  'An old map fragment shows paths leading to the Seaside Village through the south gate.',
-  'Someone scratched directions to a hermit\'s dwelling by the lake on the wall.',
-  'A merchant\'s ledger hints at lucrative trade routes along the coast road.',
-  'Graffiti on the back wall warns: "Beware the orcs beyond the Northern Pass."',
-  'A travel log mentions a vendor camp deep in the grasslands that sells useful supplies.',
-  'An old diary entry describes ruins to the south that predate the settlement.',
-] as const;
+const BUILDING_RESIDENTS: BuildingResident[] = [
+  {
+    name: 'Helena', role: 'Tavern Keeper',
+    greeting: 'Welcome, traveler. Pull up a chair — the fire\'s warm and the ale is cold.',
+    flavor: 'The hearth crackles and voices murmur over wooden mugs.',
+    topics: [
+      'Travelers from the grasslands say the orcs are getting bolder. The Northern Pass isn\'t safe.',
+      'We used to get merchant ships at the docks every week. Now it\'s mostly fishermen and drifters.',
+      'The old ruins to the south? Nobody goes there after dark. Strange lights, they say.',
+      'If you\'re heading north, stock up first. The pass is no place for the unprepared.',
+    ],
+    healAmount: 8,
+    questId: 'helena_firewood', questOffer: 'I\'m running low on firewood for the hearth. Could you gather 5 wood for the inn? I\'ll pay well for it.',
+    questCheck: 'wood5', questReward: { gold: 15 },
+    questDone: 'That\'s the wood I needed! The hearth will burn bright tonight. Here — you\'ve earned this.',
+    questComplete: 'The fire burns strong thanks to you. Warm yourself anytime.',
+  },
+  {
+    name: 'Marcus', role: 'Archivist',
+    greeting: 'Ah, a curious soul. This archive holds more than dusty paper — it holds memory itself.',
+    flavor: 'Scrolls and ledgers are stacked to the ceiling. Ink stains mark the desk.',
+    topics: [
+      'Every building in this settlement has a story. Most people walk past without reading the signs.',
+      'I\'ve been cataloging the ruins to the south. The runes predate anything else in this region.',
+      'There\'s an old travel log that mentions a scholar\'s path through the grasslands — dangerous but rewarding.',
+      'The Seaside Village through the south gate has its own history. Elder Rowan there knows more than anyone.',
+    ],
+    questId: 'marcus_survey', questOffer: 'I\'m mapping every notable place in the settlement. Could you discover at least 5 named locations and report back? Knowledge deserves reward.',
+    questCheck: 'discover5', questReward: { gold: 20 },
+    questDone: 'Remarkable work! Your discoveries fill gaps in my records. Take this — scholars pay for good data.',
+    questComplete: 'Your survey expanded our records considerably. The archive is richer for it.',
+  },
+  {
+    name: 'Greta', role: 'Healer',
+    greeting: 'Come in, come in. You look like you could use some rest.',
+    flavor: 'Drying herbs hang from the rafters. A mortar and pestle sit on the workbench.',
+    topics: [
+      'The shrine by the lake has real power — don\'t dismiss it as superstition.',
+      'If you\'re wounded in the grasslands, the vendor camp sells health potions. Expensive, but worth it.',
+      'Father Cedric near the lake knows ancient healing arts. Seek him if you\'re badly hurt.',
+      'The well water here is clean and restorative. Don\'t overlook simple remedies.',
+    ],
+    healAmount: 12,
+  },
+  {
+    name: 'Barton', role: 'Guard Captain',
+    greeting: 'State your business. Oh — you\'re the one helping around town. At ease.',
+    flavor: 'A weapon rack lines the wall. Maps with red markings cover the table.',
+    topics: [
+      'Seven orc warriors and a shaman are dug in north of the pass. We don\'t have the troops to push them out.',
+      'The grassland shrine could turn the tide against the orcs, but it\'s deep in enemy territory.',
+      'Bandits in the Seaside Village have been disrupting trade. Someone needs to deal with them.',
+      'These walls need more watchtowers. Build some and I\'ll sleep easier.',
+    ],
+    questId: 'barton_orcs', questOffer: 'Those orc warriors north of the pass are a threat to every soul here. Clear all seven and the shaman, and I\'ll see you rewarded from the guard coffers.',
+    questCheck: 'orcs7', questReward: { gold: 25 },
+    questDone: 'Every last one of them. You\'ve done what a dozen guards couldn\'t. Take this — you\'ve earned the town\'s gratitude.',
+    questComplete: 'The Northern Pass is safe thanks to you. The guards remember what you did.',
+  },
+  {
+    name: 'Pip', role: 'Trader',
+    greeting: 'Buying? Selling? Or just browsing? Everything has a price, friend.',
+    flavor: 'Crates and sacks fill the entrance. Ledgers and scales sit on the counter.',
+    topics: [
+      'Gold coins turn up in the strangest places around town. Keep your eyes down when you walk.',
+      'The coast road used to be the main trade artery. It could be again, with enough investment.',
+      'Build more structures and merchants will follow. Nobody trades in a ghost town.',
+      'The vendor in the grasslands charges a premium — you\'re paying for convenience and risk.',
+    ],
+  },
+  {
+    name: 'Elara', role: 'Scholar',
+    greeting: 'Another visitor. Good — this place needs more people asking questions.',
+    flavor: 'Books and artifacts crowd the shelves. Star charts hang on the walls.',
+    topics: [
+      'The named places in this settlement each have a history older than the buildings themselves.',
+      'I\'ve traced connections between the ruins here and the dark cave in the grasslands. Same builders, centuries apart.',
+      'The witch in the Seaside Village — Willow — knows things nobody should. Her potions are genuine.',
+      'Every faction and group that passed through left marks. You just need to know where to look.',
+    ],
+  },
+  {
+    name: 'Corwin', role: 'Builder',
+    greeting: 'Ah, another pair of hands! This settlement won\'t build itself.',
+    flavor: 'Blueprints and measuring tools cover every surface. Sawdust coats the floor.',
+    topics: [
+      'Wood for frames, stone for foundations. That\'s the secret to good building.',
+      'Start with cabins and fences. Once you\'ve placed ten structures, the real options open up.',
+      'The merchant in town square sells wood and stone if you\'re short. Not cheap, but reliable.',
+      'Every structure you place makes this settlement stronger. The NPCs notice — trust me.',
+    ],
+    questId: 'corwin_build', questOffer: 'This town needs more structures. Place at least 10 buildings and I\'ll share some of my best materials with you.',
+    questCheck: 'build10', questReward: { gold: 10, wood: 8, stone: 5 },
+    questDone: 'Now THAT\'S a settlement worth living in! Here — some premium materials for a fellow builder.',
+    questComplete: 'You\'ve shaped this place into something real. Every beam and stone tells a story.',
+  },
+  {
+    name: 'Nessa', role: 'Caretaker',
+    greeting: 'Welcome. This place stays standing because someone cares for it. That someone is me.',
+    flavor: 'Everything is tidy and well-maintained. A broom rests against the doorframe.',
+    topics: [
+      'The well and campfire in town are free healing — don\'t forget about them when you\'re low.',
+      'I keep the paths clear and the buildings swept. Small things matter in a growing town.',
+      'More buildings means more work for me, but I don\'t mind. It means the town is alive.',
+      'Check every corner of the settlement. People leave things behind — coins, resources, stories.',
+    ],
+  },
+];
 
 function nextAmbientCooldown() {
   return AMBIENT_SPEECH_MIN_COOLDOWN + Math.random() * (AMBIENT_SPEECH_MAX_COOLDOWN - AMBIENT_SPEECH_MIN_COOLDOWN);
@@ -4424,6 +4500,8 @@ export function WorldExplore({
         unlocked: [...unlockedItemsRef.current],
         discoveries: [...discoveriesRef.current],
         buildingMilestones: [...buildingMilestonesRef.current],
+        questFlags: [...questFlagsRef.current],
+        entityVisits: Object.fromEntries(entityVisitRef.current),
         minimapOpen: minimapOpenRef.current,
         ts: Date.now(),
       };
@@ -4485,6 +4563,10 @@ export function WorldExplore({
       // Discoveries & milestones
       if (d.discoveries?.length) d.discoveries.forEach((v: string) => discoveriesRef.current.add(v));
       if (d.buildingMilestones?.length) d.buildingMilestones.forEach((v: number) => buildingMilestonesRef.current.add(v));
+      if (d.questFlags?.length) d.questFlags.forEach((v: string) => questFlagsRef.current.add(v));
+      if (d.entityVisits && typeof d.entityVisits === 'object') {
+        for (const [k, v] of Object.entries(d.entityVisits)) entityVisitRef.current.set(k, v as number);
+      }
       if (d.minimapOpen != null) minimapOpenRef.current = d.minimapOpen;
     } catch { /* corrupt save data — start fresh */ }
   }, [SAVE_KEY]);
@@ -5469,7 +5551,7 @@ export function WorldExplore({
         }
         else if (nearbyEntity && !inspecting) {
           setInspecting(nearbyEntity);
-          // ── Rich entity interaction ──
+          // ── Rich entity interaction with named residents ──
           const eType = nearbyEntity.type;
           const eTitle = nearbyEntity.title;
           const eSummary = nearbyEntity.summary || 'An intriguing place.';
@@ -5478,123 +5560,177 @@ export function WorldExplore({
           const isFirstVisit = !discoveriesRef.current.has(discoveryId);
           const h = hashString(nearbyEntity.id);
 
-          // Track visit count
+          // Track visit count (persisted)
           const prevVisits = entityVisitRef.current.get(nearbyEntity.id) || 0;
           const visits = prevVisits + 1;
           entityVisitRef.current.set(nearbyEntity.id, visits);
 
-          // Building identity (deterministic per entity)
-          const purpose = BUILDING_PURPOSES[h % BUILDING_PURPOSES.length];
-          const occupant = BUILDING_OCCUPANTS[h % BUILDING_OCCUPANTS.length];
+          // Building resident (deterministic per entity)
+          const resident = BUILDING_RESIDENTS[h % BUILDING_RESIDENTS.length];
+          const pp = playerRef.current;
 
           let dialogSpeaker = eTitle;
           let dialogText = '';
 
-          if (isFirstVisit) {
-            // ── First visit: rich discovery ──
-            if (eType === 'LOCATION') {
-              const roleArticle = purpose.role === 'archive' || purpose.role === 'residence' ? 'an' : 'a';
-              dialogText = `You discover ${eTitle}, ${roleArticle} ${purpose.role}. ${shortSummary} ${occupant}`;
-            } else if (eType === 'CHARACTER') {
-              dialogText = `You meet ${eTitle} for the first time. ${shortSummary}`;
-            } else if (eType === 'FACTION' || eType === 'GROUP') {
-              dialogText = `You find the headquarters of ${eTitle}. ${shortSummary} Their influence stretches across the town.`;
-            } else if (eType === 'EVENT') {
-              dialogText = `This place bears the marks of ${eTitle}. ${shortSummary}`;
+          if (eType === 'LOCATION' && resident) {
+            dialogSpeaker = `${resident.name} (${resident.role})`;
+
+            if (isFirstVisit) {
+              // ── First visit: meet the resident ──
+              dialogText = `${resident.greeting} This is ${eTitle}. ${shortSummary}`;
+
+              // Discovery rewards
+              discoveriesRef.current.add(discoveryId);
+              zoneBannerRef.current = `Discovered: ${eTitle}`;
+              zoneBannerTimer.current = 2.5;
+              if (!coinsCollectedRef.current.has(discoveryId)) {
+                coinsCollectedRef.current.add(discoveryId);
+                playerGoldRef.current = Math.min(playerGoldRef.current + 5, resourceCapRef.current.gold);
+                setPlayerGold(playerGoldRef.current);
+                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: '+5G', color: '#e8c86a', timer: 1.5 });
+              }
+
+              // Progression hint after 3 entity discoveries
+              const entityDiscoveries = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
+              if (entityDiscoveries === 3 && !discoveriesRef.current.has('hub_explore_hint')) {
+                discoveriesRef.current.add('hub_explore_hint');
+                setTimeout(() => {
+                  glDialogRef.current = { speaker: 'Inner Voice', text: 'You\'ve explored several sites. The Northern Pass leads to dangerous grasslands \u2014 orcs await. The South Gate opens toward the Seaside Village.', timer: 8 };
+                }, 3000);
+              }
             } else {
-              dialogText = `${shortSummary} ${purpose.flavor}`;
-            }
+              // ── Revisit: resident dialogue with quest/progression logic ──
+              const qf = questFlagsRef.current;
+              const qId = resident.questId;
+              const bldg = buildingCountRef.current;
+              const orcK = orcsKilledRef.current;
+              const entityDisc = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
+              const glDone = orcK >= 7;
+              const svDone = svBanditsKilledRef.current >= 4;
 
-            // Discovery rewards
-            discoveriesRef.current.add(discoveryId);
-            zoneBannerRef.current = `Discovered: ${eTitle}`;
-            zoneBannerTimer.current = 2.5;
-            const reward = eType === 'LOCATION' ? 5 : eType === 'CHARACTER' ? 3 : 4;
-            if (!coinsCollectedRef.current.has(discoveryId)) {
-              coinsCollectedRef.current.add(discoveryId);
-              playerGoldRef.current = Math.min(playerGoldRef.current + reward, resourceCapRef.current.gold);
-              setPlayerGold(playerGoldRef.current);
-              const pp = playerRef.current;
-              damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: `+${reward}G`, color: '#e8c86a', timer: 1.5 });
-            }
+              // Priority 1: Quest logic (offer → check → done → complete)
+              if (qId && !qf.has(`${qId}_done`)) {
+                if (!qf.has(`${qId}_started`)) {
+                  // Offer the quest
+                  dialogText = resident.questOffer!;
+                  qf.add(`${qId}_started`);
+                } else {
+                  // Check quest progress
+                  let questMet = false;
+                  if (resident.questCheck === 'wood5') questMet = playerWoodRef.current >= 5;
+                  else if (resident.questCheck === 'discover5') questMet = entityDisc >= 5;
+                  else if (resident.questCheck === 'orcs7') questMet = glDone;
+                  else if (resident.questCheck === 'build10') questMet = bldg >= 10;
 
-            // Progression hint after 3 entity discoveries
-            const entityDiscoveries = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
-            if (entityDiscoveries === 3 && !discoveriesRef.current.has('hub_explore_hint')) {
-              discoveriesRef.current.add('hub_explore_hint');
-              setTimeout(() => {
-                glDialogRef.current = { speaker: 'Inner Voice', text: 'You\'ve explored several sites. The Northern Pass leads to dangerous grasslands \u2014 orcs await. The South Gate opens toward the Seaside Village.', timer: 8 };
-              }, 3000);
+                  if (questMet) {
+                    // Complete the quest — give rewards
+                    dialogText = resident.questDone!;
+                    qf.add(`${qId}_done`);
+                    const rw = resident.questReward;
+                    if (rw?.gold) {
+                      playerGoldRef.current = Math.min(playerGoldRef.current + rw.gold, resourceCapRef.current.gold);
+                      setPlayerGold(playerGoldRef.current);
+                      damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: `+${rw.gold}G`, color: '#e8c86a', timer: 1.5 });
+                    }
+                    if (rw?.wood) {
+                      playerWoodRef.current = Math.min(playerWoodRef.current + rw.wood, resourceCapRef.current.wood);
+                      setPlayerWood(playerWoodRef.current);
+                      damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 24, y: pp.y * TILE_SIZE - 8, text: `+${rw.wood}W`, color: '#8b6914', timer: 1.5 });
+                    }
+                    if (rw?.stone) {
+                      playerStoneRef.current = Math.min(playerStoneRef.current + rw.stone, resourceCapRef.current.stone);
+                      setPlayerStone(playerStoneRef.current);
+                      damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 8, y: pp.y * TILE_SIZE - 8, text: `+${rw.stone}S`, color: '#808080', timer: 1.5 });
+                    }
+                    // Deduct cost for wood quest
+                    if (resident.questCheck === 'wood5') {
+                      playerWoodRef.current = Math.max(0, playerWoodRef.current - 5);
+                      setPlayerWood(playerWoodRef.current);
+                    }
+                    zoneBannerRef.current = `Quest Complete: ${resident.name}`;
+                    zoneBannerTimer.current = 2.5;
+                  } else {
+                    // Quest in progress — give a hint
+                    if (resident.questCheck === 'wood5') dialogText = `Still need that firewood. You have ${playerWoodRef.current} wood — I need at least 5.`;
+                    else if (resident.questCheck === 'discover5') dialogText = `You\'ve found ${entityDisc} named places so far. I need records of at least 5 for the survey.`;
+                    else if (resident.questCheck === 'orcs7') dialogText = `${orcK} orcs down. Keep fighting — clear all seven warriors and the shaman.`;
+                    else if (resident.questCheck === 'build10') dialogText = `${bldg} structures placed so far. Keep building — I want to see at least 10.`;
+                  }
+                }
+              }
+
+              // Priority 2: Progression-aware dialogue (if no quest text was set)
+              if (!dialogText) {
+                if (glDone && svDone && bldg >= 15) {
+                  dialogText = `This settlement has become something remarkable. ${resident.name === 'Barton' ? 'The roads are secure.' : resident.name === 'Helena' ? 'The inn is always full now.' : resident.name === 'Corwin' ? 'Every building stands proud.' : 'You\'ve done real good here.'}`;
+                } else if (glDone && svDone) {
+                  dialogText = `Both the grasslands and village are safe now. ${resident.flavor} The town can finally breathe.`;
+                } else if (glDone) {
+                  dialogText = `Word is the orcs are finished. ${resident.topics[0]} But the Seaside Village still needs help — bandits, I hear.`;
+                } else if (svDone) {
+                  dialogText = `The village roads are safe again. ${resident.topics[1]} The Northern Pass still holds danger though.`;
+                } else if (bldg >= 10) {
+                  dialogText = `${bldg} structures now — impressive work. ${resident.topics[h % resident.topics.length]}`;
+                } else {
+                  // Cycle through entity facts and resident topics
+                  const facts = nearbyEntity.facts || [];
+                  const allLines = [
+                    ...facts.map(f => `${f.label}: ${f.value}`),
+                    ...resident.topics,
+                    `${resident.flavor} ${qId && qf.has(`${qId}_done`) ? (resident.questComplete || '') : ''}`.trim(),
+                  ].filter(Boolean);
+                  const lineIdx = (visits - 1) % allLines.length;
+                  dialogText = allLines[lineIdx];
+                }
+              }
+
+              // ── Healing effect for healer/tavern residents ──
+              if (resident.healAmount && healthRef.current < MAX_HEALTH) {
+                const heal = resident.healAmount;
+                healthRef.current = Math.min(MAX_HEALTH, healthRef.current + heal);
+                setPlayerHealth(healthRef.current);
+                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: `+${heal} HP`, color: '#60c060', timer: 1.2 });
+              }
             }
           } else {
-            // ── Revisit: cycle through facts, purpose, hints ──
-            const facts = nearbyEntity.facts || [];
-            // Phase 0: facts from the entity's data
-            // Phase 1: building purpose/flavor
-            // Phase 2: occupant detail + observation
-            // Phase 3: world hint (cross-reference)
-            const totalPhases = facts.length + 3;
-            const phase = (visits - 1) % totalPhases; // visits starts at 1 for first revisit after discovery
-
-            if (phase < facts.length) {
-              // Surface a fact from the entity data
-              const fact = facts[phase];
-              dialogText = `${fact.label}: ${fact.value}`;
-            } else if (phase === facts.length) {
-              // Building purpose flavor
-              if (eType === 'LOCATION') {
-                dialogText = `${purpose.flavor} ${REVISIT_OBSERVATIONS[h % REVISIT_OBSERVATIONS.length]}`;
-              } else if (eType === 'CHARACTER') {
-                dialogText = `${eTitle} nods in recognition. ${shortSummary}`;
+            // ── Non-LOCATION entities (CHARACTER, FACTION, EVENT, etc.) ──
+            if (isFirstVisit) {
+              if (eType === 'CHARACTER') {
+                dialogText = `You meet ${eTitle} for the first time. ${shortSummary}`;
               } else if (eType === 'FACTION' || eType === 'GROUP') {
-                dialogText = `The presence of ${eTitle} is felt here. ${purpose.flavor}`;
+                dialogText = `You find the headquarters of ${eTitle}. ${shortSummary}`;
+              } else if (eType === 'EVENT') {
+                dialogText = `This place bears the marks of ${eTitle}. ${shortSummary}`;
               } else {
                 dialogText = shortSummary;
               }
-            } else if (phase === facts.length + 1) {
-              // Occupant/atmosphere detail
-              if (eType === 'LOCATION') {
-                dialogText = `${occupant} ${REVISIT_OBSERVATIONS[(h + 3) % REVISIT_OBSERVATIONS.length]}`;
-              } else {
-                dialogText = `${REVISIT_OBSERVATIONS[(h + 2) % REVISIT_OBSERVATIONS.length]} ${shortSummary}`;
+
+              discoveriesRef.current.add(discoveryId);
+              zoneBannerRef.current = `Discovered: ${eTitle}`;
+              zoneBannerTimer.current = 2.5;
+              const reward = eType === 'CHARACTER' ? 3 : 4;
+              if (!coinsCollectedRef.current.has(discoveryId)) {
+                coinsCollectedRef.current.add(discoveryId);
+                playerGoldRef.current = Math.min(playerGoldRef.current + reward, resourceCapRef.current.gold);
+                setPlayerGold(playerGoldRef.current);
+                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: `+${reward}G`, color: '#e8c86a', timer: 1.5 });
+              }
+
+              const entityDiscoveries = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
+              if (entityDiscoveries === 3 && !discoveriesRef.current.has('hub_explore_hint')) {
+                discoveriesRef.current.add('hub_explore_hint');
+                setTimeout(() => {
+                  glDialogRef.current = { speaker: 'Inner Voice', text: 'You\'ve explored several sites. The Northern Pass leads to dangerous grasslands \u2014 orcs await. The South Gate opens toward the Seaside Village.', timer: 8 };
+                }, 3000);
               }
             } else {
-              // World hint — reference other undiscovered locations
-              const unvisited = placedRef.current.filter(pe => !discoveriesRef.current.has(`entity_${pe.entity.id}`));
-              if (unvisited.length > 0) {
-                const hintTarget = unvisited[h % unvisited.length];
-                dialogText = `${BUILDING_HINTS[h % BUILDING_HINTS.length]} You overhear someone mention "${hintTarget.entity.title}" nearby.`;
+              // Revisit non-LOCATION: cycle through facts + summary
+              const facts = nearbyEntity.facts || [];
+              if (facts.length > 0) {
+                const factIdx = (visits - 1) % facts.length;
+                dialogText = `${facts[factIdx].label}: ${facts[factIdx].value}`;
               } else {
-                dialogText = `${BUILDING_HINTS[h % BUILDING_HINTS.length]} You\'ve explored every corner of this settlement.`;
-              }
-            }
-
-            // ── Functional effects on revisit ──
-            const pp = playerRef.current;
-            const effectType = h % 4; // 0=heal, 1=hint (no effect), 2=gold, 3=resource
-            if (eType === 'LOCATION' || eType === 'FACTION') {
-              if (effectType === 0 && healthRef.current < MAX_HEALTH) {
-                // Tavern/chapel feel — heal 5 HP
-                healthRef.current = Math.min(MAX_HEALTH, healthRef.current + 5);
-                setPlayerHealth(healthRef.current);
-                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+5 HP', color: '#60c060', timer: 1.2 });
-              } else if (effectType === 2 && visits % 3 === 0) {
-                // Market house feel — small gold every 3rd visit
-                playerGoldRef.current = Math.min(playerGoldRef.current + 2, resourceCapRef.current.gold);
-                setPlayerGold(playerGoldRef.current);
-                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+2G', color: '#e8c86a', timer: 1.2 });
-              } else if (effectType === 3 && visits % 4 === 0) {
-                // Storehouse/workshop — small resource bonus every 4th visit
-                const giveWood = h % 2 === 0;
-                if (giveWood) {
-                  playerWoodRef.current = Math.min(playerWoodRef.current + 1, resourceCapRef.current.wood);
-                  setPlayerWood(playerWoodRef.current);
-                  damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+1 Wood', color: '#8b6914', timer: 1.2 });
-                } else {
-                  playerStoneRef.current = Math.min(playerStoneRef.current + 1, resourceCapRef.current.stone);
-                  setPlayerStone(playerStoneRef.current);
-                  damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+1 Stone', color: '#808080', timer: 1.2 });
-                }
+                dialogText = shortSummary;
               }
             }
           }
