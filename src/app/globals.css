@@ -1,43 +1,37 @@
 /* ═══════════════════════════════════════════════════════════
    WORLDFORGE — Design System
-   Twilight pixel-fantasy aesthetic. Dusk palette, cinematic depth.
+   Pixel-art indie game aesthetic. Dark world, retro UI.
    ═══════════════════════════════════════════════════════════ */
 
 :root {
   color-scheme: dark;
 
-  /* ─── Core Palette: Twilight Fantasy ─── */
-  --void:    #08081a;
-  --deep:    #0c0c20;
-  --bg:      #0e0e22;
-  --surface: #161634;
-  --raised:  #1e1e42;
-  --elevated:#282852;
-  --hover:   #323264;
+  /* ─── Core Palette: Deep Game World ─── */
+  --void:    #080b12;
+  --deep:    #0c1018;
+  --bg:      #0e1219;
+  --surface: #151a28;
+  --raised:  #1c2236;
+  --elevated:#252d45;
+  --hover:   #2e3752;
 
-  /* ─── Borders: Lavender-tinted ─── */
-  --border-dim:    rgba(140,130,190,0.06);
-  --border:        rgba(140,130,190,0.12);
-  --border-bright: rgba(140,130,190,0.22);
+  /* ─── Borders ─── */
+  --border-dim:    rgba(255,255,255,0.04);
+  --border:        rgba(255,255,255,0.08);
+  --border-bright: rgba(255,255,255,0.15);
 
   /* ─── Text: Warm Parchment Tones ─── */
   --text:      #e8e0d4;
-  --text-soft:  #b0a8a0;
-  --text-muted: #7878a0;
-  --text-dim:   #505078;
+  --text-soft:  #b0a898;
+  --text-muted: #706c64;
+  --text-dim:   #4a4640;
 
-  /* ─── Accent: Torch Amber ─── */
-  --gold:       #e8b060;
+  /* ─── Accent: Warm Game Gold ─── */
+  --gold:       #f0c060;
   --gold-bright:#ffd480;
-  --gold-dim:   #c89030;
-  --gold-wash:  rgba(232,176,96,0.06);
-  --gold-glow:  rgba(232,176,96,0.18);
-
-  /* ─── Accent: Dusk Pink (from the hero sky) ─── */
-  --dusk:       #c08898;
-  --dusk-soft:  #a07888;
-  --dusk-wash:  rgba(192,136,152,0.08);
-  --dusk-glow:  rgba(192,136,152,0.15);
+  --gold-dim:   #d4a030;
+  --gold-wash:  rgba(240,192,96,0.06);
+  --gold-glow:  rgba(240,192,96,0.20);
 
   /* ─── Entity Colors ─── */
   --color-character: #FF6B2C;
@@ -70,11 +64,11 @@
   --radius-xl:  8px;
   --radius-full: 9999px;
 
-  /* ─── Shadows: Twilight glow ─── */
-  --shadow-sm:  0 2px 8px rgba(8,8,26,0.6);
-  --shadow-md:  0 8px 24px rgba(8,8,26,0.7);
-  --shadow-lg:  0 16px 48px rgba(8,8,26,0.8);
-  --shadow-gold: 0 0 20px rgba(232,176,96,0.12), 0 0 60px rgba(192,136,152,0.06);
+  /* ─── Shadows: Glow effects ─── */
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md:  0 8px 24px rgba(0,0,0,0.6);
+  --shadow-lg:  0 16px 48px rgba(0,0,0,0.7);
+  --shadow-gold: 0 0 20px rgba(240,192,96,0.15), 0 0 60px rgba(240,192,96,0.05);
 
   /* ─── Transitions ─── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -229,15 +223,15 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--surface);
   border: 2px solid var(--border-bright);
   color: var(--text);
-  box-shadow: 0 4px 0 rgba(8,8,26,0.5);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.5);
 }
 .btn-secondary:hover {
-  border-color: var(--dusk);
-  color: var(--dusk);
-  box-shadow: 0 4px 0 rgba(8,8,26,0.5), 0 0 15px var(--dusk-glow);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 0 15px var(--gold-glow);
 }
 .btn-secondary:active {
-  box-shadow: 0 1px 0 rgba(8,8,26,0.5);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5);
   transform: translateY(2px);
 }
 
@@ -846,9 +840,9 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   padding: 0 32px;
   height: 56px;
-  background: rgba(10,10,26,0.92);
+  background: rgba(8,11,18,0.92);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(140,130,190,0.10);
+  border-bottom: 1px solid var(--border);
 }
 
 .navbar-brand {
@@ -1185,9 +1179,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .world-card:hover {
-  border-color: var(--dusk);
+  border-color: var(--gold-dim);
   transform: translateY(-2px);
-  box-shadow: 0 0 25px var(--dusk-glow);
+  box-shadow: 0 0 25px var(--gold-glow);
 }
 
 .world-card-bg {
@@ -3841,7 +3835,7 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   width: 1px;
   height: 100%;
-  background: linear-gradient(180deg, transparent 0%, rgba(192,136,152,0.06) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(240,192,96,0.06) 50%, transparent 100%);
   animation: aboutLineFade 6s ease-in-out infinite;
 }
 .about-opening-line:nth-child(1) { left: 10%; }
@@ -4142,7 +4136,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .about-bento-card:hover {
-  border-color: var(--dusk-soft);
+  border-color: var(--gold-dim);
 }
 
 .about-bento-wide {
@@ -5151,7 +5145,7 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(14,14,34,0.95);
+  background: rgba(14,18,25,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 12px 24px;
@@ -5524,18 +5518,18 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Zone Divider (game zone transition motif) ─── */
 
 .zone-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent 5%, var(--dusk-soft) 35%, var(--gold-dim) 50%, var(--dusk-soft) 65%, transparent 95%);
+  height: 2px;
+  background: linear-gradient(90deg, transparent 5%, var(--gold-dim) 50%, transparent 95%);
   max-width: 500px;
   margin: 0 auto;
-  box-shadow: 0 0 12px rgba(192,136,152,0.08);
+  box-shadow: 0 0 12px rgba(240,192,96,0.08);
 }
 
-/* Mountain silhouette divider — CSS polygon inspired by the hero image */
+/* Tree-line silhouette divider — game world landscape separator */
 .mountain-divider {
   position: relative;
   width: 100%;
-  height: 60px;
+  height: 48px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -5545,12 +5539,15 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 48px;
   background: var(--bg);
   clip-path: polygon(
-    0% 100%, 0% 65%, 5% 50%, 10% 55%, 15% 35%, 20% 45%, 28% 20%, 33% 38%,
-    38% 30%, 42% 45%, 48% 25%, 52% 40%, 58% 15%, 63% 35%, 68% 28%,
-    72% 42%, 78% 30%, 82% 50%, 88% 38%, 92% 55%, 95% 45%, 100% 60%, 100% 100%
+    0% 100%, 0% 80%, 3% 55%, 5% 60%, 7% 40%, 9% 35%, 11% 55%, 14% 50%,
+    17% 30%, 19% 45%, 22% 35%, 25% 50%, 28% 40%, 31% 55%, 34% 30%,
+    37% 45%, 40% 35%, 43% 50%, 46% 25%, 49% 40%, 52% 35%, 55% 50%,
+    58% 30%, 61% 45%, 64% 40%, 67% 55%, 70% 35%, 73% 50%, 76% 30%,
+    79% 45%, 82% 40%, 85% 55%, 88% 35%, 91% 50%, 94% 40%, 97% 55%,
+    100% 45%, 100% 100%
   );
 }
 .mountain-divider::after {
@@ -5559,14 +5556,14 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40px;
-  background: linear-gradient(180deg, transparent, rgba(192,136,152,0.04));
+  height: 24px;
+  background: linear-gradient(180deg, transparent, rgba(240,192,96,0.03));
 }
 
-/* Horizon glow — a soft atmospheric band between sections */
+/* Warm glow — a soft atmospheric band between sections */
 .horizon-glow {
-  height: 120px;
-  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(192,136,152,0.05) 0%, rgba(232,176,96,0.02) 40%, transparent 70%);
+  height: 80px;
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(240,192,96,0.04) 0%, rgba(240,192,96,0.01) 40%, transparent 70%);
   pointer-events: none;
 }
 
@@ -5603,8 +5600,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .game-scene-panel {
-  background: rgba(10, 10, 28, 0.92);
-  border: 1px solid rgba(140,130,190,0.20);
+  background: rgba(6, 8, 14, 0.92);
+  border: 2px solid rgba(240,192,96,0.25);
   padding: 16px 20px;
   display: flex;
   align-items: flex-end;
@@ -5612,7 +5609,7 @@ h1, h2, h3, h4, h5, h6 {
   gap: 12px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(8,8,26,0.5);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .game-scene-panel img {
@@ -5643,10 +5640,9 @@ h1, h2, h3, h4, h5, h6 {
   background-image: url('/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus/tiles/cobblestone_tiles_brown.png');
   background-size: 160px;
   image-rendering: pixelated;
-  opacity: 0.025;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 0;
-  filter: hue-rotate(220deg) saturate(0.3);
 }
 
 .scene-damage {
@@ -5681,11 +5677,11 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── NPC Dialogue Box ─── */
 
 .mock-dialogue {
-  background: rgba(10, 10, 28, 0.96);
-  border: 1px solid rgba(232,176,96,0.25);
+  background: rgba(6, 8, 14, 0.96);
+  border: 2px solid rgba(240,192,96,0.30);
   border-radius: 0;
   max-width: 340px;
-  box-shadow: 0 12px 40px rgba(8,8,26,0.7), 0 0 20px rgba(232,176,96,0.06);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(240,192,96,0.08);
   font-family: var(--font-body);
 }
 
@@ -5808,10 +5804,10 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 20px;
   padding: 10px 20px;
-  background: rgba(10, 10, 28, 0.92);
+  background: rgba(6, 8, 14, 0.92);
   border-radius: 0;
-  border: 1px solid rgba(140,130,190,0.15);
-  box-shadow: 0 8px 24px rgba(8,8,26,0.6);
+  border: 2px solid rgba(240,192,96,0.20);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
 }
 
 .mock-hud-hp {
@@ -5901,12 +5897,12 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Shop / Vendor Panel ─── */
 
 .mock-shop {
-  background: rgba(10, 10, 28, 0.94);
-  border: 1px solid rgba(232,176,96,0.18);
+  background: rgba(6, 8, 14, 0.94);
+  border: 2px solid rgba(240,192,96,0.25);
   border-radius: 0;
   overflow: hidden;
   max-width: 260px;
-  box-shadow: 0 8px 32px rgba(8,8,26,0.6);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 
 .mock-shop-title {
@@ -5951,12 +5947,12 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Build Menu ─── */
 
 .mock-build {
-  background: rgba(10, 10, 28, 0.94);
-  border: 1px solid rgba(54,179,126,0.22);
+  background: rgba(6, 8, 14, 0.94);
+  border: 2px solid rgba(54,179,126,0.30);
   border-radius: 0;
   overflow: hidden;
   max-width: 300px;
-  box-shadow: 0 8px 32px rgba(8,8,26,0.6);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 
 .mock-build-tabs {
@@ -6066,16 +6062,36 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--void);
 }
 
-/* ─── Hero Background: pixel-art landscape ─── */
-.hero-world-bg {
+/* ─── Hero Background: composed game world scene ─── */
+.hero-world-scene {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url('/hero-bg.png');
-  background-size: cover;
-  background-position: center 40%;
-  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.hero-world-terrain {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    #060a0e 0%,
+    #081008 12%,
+    #0c1a0e 28%,
+    #122812 42%,
+    #183618 56%,
+    #1e4420 68%,
+    #234e24 78%,
+    #285828 86%,
+    #1e4420 94%,
+    #142e14 100%
+  );
+}
+
+.hero-world-scene img {
+  position: absolute;
   image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
 }
 
 .hero-world-overlay {
@@ -6084,25 +6100,26 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
   background:
     linear-gradient(180deg,
-      rgba(8,8,26,0.70) 0%,
-      rgba(8,8,26,0.40) 20%,
-      rgba(8,8,26,0.15) 45%,
-      rgba(8,8,26,0.10) 60%,
-      rgba(8,8,26,0.30) 80%,
-      rgba(8,8,26,0.75) 100%
+      rgba(6,10,14,0.95) 0%,
+      rgba(6,10,14,0.88) 15%,
+      rgba(6,10,14,0.65) 35%,
+      rgba(6,10,14,0.35) 55%,
+      rgba(6,10,14,0.25) 70%,
+      rgba(6,10,14,0.45) 90%,
+      rgba(6,10,14,0.7) 100%
     ),
-    radial-gradient(ellipse 80% 60% at 50% 50%, transparent 30%, rgba(8,8,26,0.45) 100%);
+    radial-gradient(ellipse 90% 70% at 50% 55%, transparent 20%, rgba(6,10,14,0.55) 100%);
   pointer-events: none;
 }
 
 .hero-v2-glow {
   position: absolute;
-  top: 5%;
-  left: 30%;
+  top: -5%;
+  left: 50%;
   transform: translateX(-50%);
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(232,176,96,0.08) 0%, rgba(192,136,152,0.04) 50%, transparent 70%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(240,192,96,0.10) 0%, rgba(240,192,96,0.04) 40%, transparent 65%);
   pointer-events: none;
   z-index: 2;
 }
@@ -6122,15 +6139,14 @@ h1, h2, h3, h4, h5, h6 {
   gap: 8px;
   padding: 8px 20px;
   border-radius: 0;
-  border: 1px solid rgba(192,136,152,0.25);
-  background: rgba(10,10,28,0.40);
-  backdrop-filter: blur(8px);
+  border: 2px solid rgba(240,192,96,0.25);
+  background: rgba(240,192,96,0.06);
   font-family: var(--font-pixel);
   font-size: 0.5rem;
   font-weight: 400;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--dusk);
+  color: var(--gold);
   margin-bottom: 36px;
 }
 
@@ -6140,7 +6156,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 0;
   background: var(--gold);
   animation: pulseGlow 2s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(232,176,96,0.4);
+  box-shadow: 0 0 8px rgba(240,192,96,0.5);
 }
 
 .hero-v2-title {
@@ -6151,7 +6167,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.02em;
   color: var(--text);
   margin-bottom: 28px;
-  text-shadow: 0 0 40px rgba(192,136,152,0.10), 0 0 80px rgba(8,8,26,0.4);
+  text-shadow: 0 0 40px rgba(240,192,96,0.15);
 }
 
 .hero-v2-title em {
@@ -6765,7 +6781,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .htp-card:hover {
-  border-color: var(--dusk-soft);
+  border-color: var(--gold-dim);
 }
 
 .htp-key {
@@ -6965,6 +6981,7 @@ h1, h2, h3, h4, h5, h6 {
   .hero-cta-option { max-width: 100%; }
   .hero-v2-cta .btn { width: 100%; }
   .hero-v2-stats { flex-direction: column; gap: 8px; }
+  .hero-world-scene img { filter: brightness(0.55) saturate(0.7); }
   .hero-hud-strip { overflow-x: auto; justify-content: flex-start; padding: 0 var(--space-xl); }
   .mock-hud { white-space: nowrap; }
 
