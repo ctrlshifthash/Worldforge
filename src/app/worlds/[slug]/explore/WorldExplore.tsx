@@ -4373,6 +4373,7 @@ export function WorldExplore({
   const playerAtkAnimRef = useRef(0);
   const damageNumbersRef = useRef<DamageNumber[]>([]);
   const playerHurtFlashRef = useRef(0);
+  const pvpInvincibleRef = useRef(0); // PvP invincibility timer after respawn
   const orcsKilledRef = useRef(0);
   const shrineBuffRef = useRef({ active: false, timer: 0 });
   const dialogChoicesRef = useRef<{ options: { label: string; action: string }[]; active: boolean }>({ options: [], active: false });
@@ -5080,10 +5081,47 @@ export function WorldExplore({
         }
       }
 
+      // ── SPACE: hub PvP only ──
+      if (k === ' ' && zoneRef.current === 'hub' && !shopOpen && !inspecting && playerAtkCooldownRef.current <= 0) {
+        playerAtkCooldownRef.current = PLAYER_ATK_COOLDOWN;
+        playerAtkAnimRef.current = 0.35;
+        const fd0: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+        mp.sendAttack(playerRef.current.x * TILE_SIZE, playerRef.current.y * TILE_SIZE, fd0[playerRef.current.facing] ?? 0, zoneRef.current);
+        const p = playerRef.current;
+        for (const rp of mp.playersRef.current.values()) {
+          if (rp.zone !== zoneRef.current || rp.hp <= 0) continue;
+          const rpTileX = rp.x / TILE_SIZE;
+          const rpTileY = rp.y / TILE_SIZE;
+          const dx = rpTileX - p.x;
+          const dy = rpTileY - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > PLAYER_ATK_RANGE) continue;
+          let inCone = false;
+          if (p.facing === 'right' && dx > 0) inCone = true;
+          if (p.facing === 'left' && dx < 0) inCone = true;
+          if (p.facing === 'down' && dy > 0) inCone = true;
+          if (p.facing === 'up' && dy < 0) inCone = true;
+          if (dist < 0.8) inCone = true;
+          if (inCone) {
+            let dmg = PLAYER_ATK_DAMAGE;
+            const hasStr = buffsRef.current.some(b => b.effect === 'strength' && b.remaining > 0);
+            if (hasStr) dmg = Math.floor(dmg * 1.5);
+            mp.sendDamage(rp.id, dmg);
+            rp.hp = Math.max(0, rp.hp - dmg);
+            damageNumbersRef.current.push({
+              x: rp.x + 16, y: rp.y - 16,
+              text: `-${dmg}`, color: '#ff6060', timer: 1.0,
+            });
+          }
+        }
+      }
+
       // ── SPACE: melee attack ──
       if (k === ' ' && zoneRef.current === 'grassland' && !glShopOpen && !inspecting && playerAtkCooldownRef.current <= 0) {
         playerAtkCooldownRef.current = PLAYER_ATK_COOLDOWN;
         playerAtkAnimRef.current = 0.35;
+        const facingDir: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+        mp.sendAttack(playerRef.current.x * TILE_SIZE, playerRef.current.y * TILE_SIZE, facingDir[playerRef.current.facing] ?? 0, zoneRef.current);
 
         const p = playerRef.current;
         for (const orc of orcsRef.current) {
@@ -5192,12 +5230,42 @@ export function WorldExplore({
             }
           }
         }
+
+        // PvP: hit remote players (grassland)
+        for (const rp of mp.playersRef.current.values()) {
+          if (rp.zone !== zoneRef.current || rp.hp <= 0) continue;
+          const rpTileX = rp.x / TILE_SIZE;
+          const rpTileY = rp.y / TILE_SIZE;
+          const pvpDx = rpTileX - p.x;
+          const pvpDy = rpTileY - p.y;
+          const pvpDist = Math.sqrt(pvpDx * pvpDx + pvpDy * pvpDy);
+          if (pvpDist > PLAYER_ATK_RANGE) continue;
+          let pvpCone = false;
+          if (p.facing === 'right' && pvpDx > 0) pvpCone = true;
+          if (p.facing === 'left' && pvpDx < 0) pvpCone = true;
+          if (p.facing === 'down' && pvpDy > 0) pvpCone = true;
+          if (p.facing === 'up' && pvpDy < 0) pvpCone = true;
+          if (pvpDist < 0.8) pvpCone = true;
+          if (pvpCone) {
+            let dmg = PLAYER_ATK_DAMAGE;
+            if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 1.5);
+            const hasStr = buffsRef.current.some(b => b.effect === 'strength' && b.remaining > 0);
+            if (hasStr) dmg = Math.floor(dmg * 1.5);
+            mp.sendDamage(rp.id, dmg);
+            rp.hp = Math.max(0, rp.hp - dmg);
+            damageNumbersRef.current.push({
+              x: rp.x + 16, y: rp.y - 16,
+              text: `-${dmg}`, color: '#ff6060', timer: 1.0,
+            });
+          }
+        }
       }
 
       // ── SPACE: village hunt ──
       if (k === ' ' && zoneRef.current === 'village' && !svFoodShopOpen && !svGenShopOpen && !svWitchShopOpen && playerAtkCooldownRef.current <= 0) {
         playerAtkCooldownRef.current = PLAYER_ATK_COOLDOWN;
         playerAtkAnimRef.current = 0.35;
+        { const fd: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 }; mp.sendAttack(playerRef.current.x * TILE_SIZE, playerRef.current.y * TILE_SIZE, fd[playerRef.current.facing] ?? 0, zoneRef.current); }
 
         const p = playerRef.current;
         for (const animal of svAnimalsRef.current) {
@@ -5307,6 +5375,35 @@ export function WorldExplore({
                 zoneBannerTimer.current = 4;
               }
             }
+          }
+        }
+
+        // PvP: hit remote players
+        for (const rp of mp.playersRef.current.values()) {
+          if (rp.zone !== zoneRef.current || rp.hp <= 0) continue;
+          const rpTileX = rp.x / TILE_SIZE;
+          const rpTileY = rp.y / TILE_SIZE;
+          const dx = rpTileX - p.x;
+          const dy = rpTileY - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > PLAYER_ATK_RANGE) continue;
+          let inCone = false;
+          if (p.facing === 'right' && dx > 0) inCone = true;
+          if (p.facing === 'left' && dx < 0) inCone = true;
+          if (p.facing === 'down' && dy > 0) inCone = true;
+          if (p.facing === 'up' && dy < 0) inCone = true;
+          if (dist < 0.8) inCone = true;
+          if (inCone) {
+            let dmg = PLAYER_ATK_DAMAGE;
+            if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 1.5);
+            const hasStr = buffsRef.current.some(b => b.effect === 'strength' && b.remaining > 0);
+            if (hasStr) dmg = Math.floor(dmg * 1.5);
+            mp.sendDamage(rp.id, dmg);
+            rp.hp = Math.max(0, rp.hp - dmg);
+            damageNumbersRef.current.push({
+              x: rp.x + 16, y: rp.y - 16,
+              text: `-${dmg}`, color: '#ff6060', timer: 1.0,
+            });
           }
         }
       }
@@ -7284,12 +7381,51 @@ export function WorldExplore({
         if (playerAtkCooldownRef.current > 0) playerAtkCooldownRef.current -= dt;
         if (playerAtkAnimRef.current > 0) playerAtkAnimRef.current -= dt;
         if (playerHurtFlashRef.current > 0) playerHurtFlashRef.current -= dt;
+        if (pvpInvincibleRef.current > 0) pvpInvincibleRef.current -= dt;
         damageNumbersRef.current = damageNumbersRef.current
           .map(d => ({ ...d, timer: d.timer - dt, y: d.y - 30 * dt }))
           .filter(d => d.timer > 0);
         if (shrineBuffRef.current.active) {
           shrineBuffRef.current.timer -= dt;
           if (shrineBuffRef.current.timer <= 0) shrineBuffRef.current.active = false;
+        }
+
+        // ── PvP: process incoming damage events ──
+        while (mp.pvpEventsRef.current.length > 0) {
+          const evt = mp.pvpEventsRef.current.shift()!;
+          if (evt.type === 'damage_taken' && pvpInvincibleRef.current <= 0) {
+            const hasDefense = buffsRef.current.some(b => b.effect === 'defense' && b.remaining > 0);
+            let dmg = evt.amount;
+            if (hasDefense) dmg = Math.floor(dmg * 0.7);
+            if (shrineBuffRef.current.active) dmg = Math.floor(dmg * 0.8);
+            healthRef.current = Math.max(0, healthRef.current - dmg);
+            setPlayerHealth(healthRef.current);
+            playerHurtFlashRef.current = 0.3;
+            damageNumbersRef.current.push({
+              x: playerRef.current.x * TILE_SIZE + 16,
+              y: playerRef.current.y * TILE_SIZE - 16,
+              text: `-${dmg}`, color: '#ff3030', timer: 1.0,
+            });
+            if (healthRef.current <= 0) {
+              // PvP death
+              mp.sendDeath('', evt.attackerName);
+              const goldBefore = playerGoldRef.current;
+              const goldAfter = Math.floor(goldBefore * 0.8);
+              const goldLost = goldBefore - goldAfter;
+              healthRef.current = MAX_HEALTH;
+              staminaRef.current = MAX_STAMINA;
+              const p = playerRef.current;
+              if (inHub) { p.x = 55; p.y = 45; }
+              else if (inVillage) { p.x = 1; p.y = 12; }
+              else { p.x = 40; p.y = GL_H - 3; }
+              p.facing = 'down'; p.moving = false;
+              playerGoldRef.current = goldAfter;
+              setPlayerGold(goldAfter);
+              pvpInvincibleRef.current = 2; // 2 seconds invincibility
+              zoneBannerRef.current = goldLost > 0 ? `Slain by ${evt.attackerName}! -${goldLost} Gold` : `Slain by ${evt.attackerName}!`;
+              zoneBannerTimer.current = 3;
+            }
+          }
         }
       }
 
@@ -8933,7 +9069,7 @@ export function WorldExplore({
       }});
 
       // Player attack slash arc
-      if (playerAtkAnimRef.current > 0 && zoneRef.current === 'grassland') {
+      if (playerAtkAnimRef.current > 0) {
         allDrawables.push({ y: p.y + 0.001, fn: () => {
           const progress = 1 - (playerAtkAnimRef.current / 0.35);
           const px = p.x * TILE_SIZE + TILE_SIZE / 2;
@@ -9129,6 +9265,27 @@ export function WorldExplore({
             ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, rpx + 2, rpy - 4, 28, 32);
             if (hasHue) ctx.filter = 'none';
           }
+          // Attack arc visual
+          if (rp.attackAnim > 0) {
+            const progress = 1 - (rp.attackAnim / 0.35);
+            const arcX = rpx + TILE_SIZE / 2;
+            const arcY = rpy + TILE_SIZE / 2;
+            const reach = TILE_SIZE * 1.5;
+            let startA = 0, endA = 0, aox = 0, aoy = 0;
+            switch (rp.dir) {
+              case 2: startA = -0.8; endA = 0.8; aox = 8; break; // right
+              case 1: startA = Math.PI - 0.8; endA = Math.PI + 0.8; aox = -8; break; // left
+              case 0: startA = Math.PI / 2 - 0.8; endA = Math.PI / 2 + 0.8; aoy = 8; break; // down
+              case 3: startA = -Math.PI / 2 - 0.8; endA = -Math.PI / 2 + 0.8; aoy = -8; break; // up
+            }
+            const sweep = startA + (endA - startA) * progress;
+            const r = reach * (0.5 + progress * 0.5);
+            ctx.strokeStyle = `rgba(255,100,100,${0.8 - progress * 0.8})`;
+            ctx.lineWidth = 3 - progress * 2;
+            ctx.beginPath();
+            ctx.arc(arcX + aox, arcY + aoy, r, startA, sweep);
+            ctx.stroke();
+          }
           // Name label
           ctx.font = '600 7px Inter, sans-serif';
           ctx.textAlign = 'center';
@@ -9141,6 +9298,19 @@ export function WorldExplore({
           ctx.fill();
           ctx.fillStyle = '#80d0ff';
           ctx.fillText(rp.name, nlx, nly);
+          // Health bar (only show if not full)
+          if (rp.hp < 100) {
+            const hbW = 24;
+            const hbH = 3;
+            const hbX = rpx + 16 - hbW / 2;
+            const hbY = nly + 4;
+            const hpPct = Math.max(0, rp.hp / 100);
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(hbX - 1, hbY - 1, hbW + 2, hbH + 2);
+            const hpColor = hpPct > 0.5 ? '#40c040' : hpPct > 0.25 ? '#c0c040' : '#c04040';
+            ctx.fillStyle = hpColor;
+            ctx.fillRect(hbX, hbY, hbW * hpPct, hbH);
+          }
         }});
       }
 

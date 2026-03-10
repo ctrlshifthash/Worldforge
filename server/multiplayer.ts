@@ -173,6 +173,46 @@ wss.on('connection', (ws) => {
           });
           break;
         }
+
+        case 'attack': {
+          if (!currentRoom) return;
+          const room = rooms.get(currentRoom);
+          const player = room?.get(playerId);
+          if (!player) return;
+
+          broadcast(currentRoom, playerId, {
+            type: 'player_attack',
+            playerId,
+            x: msg.x,
+            y: msg.y,
+            dir: msg.dir ?? 0,
+            zone: player.state.zone,
+          });
+          break;
+        }
+
+        case 'damage': {
+          if (!currentRoom) return;
+          broadcast(currentRoom, null, {
+            type: 'player_damage',
+            targetId: msg.targetId,
+            attackerId: playerId,
+            attackerName: rooms.get(currentRoom)?.get(playerId)?.state.name || 'Unknown',
+            amount: msg.amount ?? 0,
+          });
+          break;
+        }
+
+        case 'death': {
+          if (!currentRoom) return;
+          broadcast(currentRoom, null, {
+            type: 'player_death',
+            playerId,
+            killerId: msg.killerId,
+            killerName: msg.killerName || 'Unknown',
+          });
+          break;
+        }
       }
     } catch {
       // Ignore malformed messages

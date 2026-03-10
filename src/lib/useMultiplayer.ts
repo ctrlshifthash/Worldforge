@@ -18,6 +18,8 @@ export interface RemotePlayer {
   frame: number;
   charIndex: number;
   hueShift: number;
+  hp: number;        // PvP health (100 max)
+  attackAnim: number; // countdown for remote attack arc visual
 }
 
 export interface ChatMessage {
@@ -25,6 +27,12 @@ export interface ChatMessage {
   playerName: string;
   message: string;
   time: number;
+}
+
+export interface PvPEvent {
+  type: 'damage_taken' | 'killed';
+  attackerName: string;
+  amount: number;
 }
 
 // ─── Hook ───
@@ -43,6 +51,7 @@ export function useMultiplayer(
   const connectedRef = useRef(false);
   const chatRef = useRef<ChatMessage[]>([]);
   const onlineCountRef = useRef(0);
+  const pvpEventsRef = useRef<PvPEvent[]>([]);
 
   // Track last sent state for throttling
   const lastSentRef = useRef({ x: 0, y: 0, dir: 0, zone: '', time: 0 });
@@ -91,6 +100,8 @@ export function useMultiplayer(
                 targetX: p.x,
                 targetY: p.y,
                 hueShift: p.hueShift ?? 0,
+                hp: 100,
+                attackAnim: 0,
               });
             }
             onlineCountRef.current = playersRef.current.size + 1;
@@ -103,6 +114,8 @@ export function useMultiplayer(
                 targetX: msg.player.x,
                 targetY: msg.player.y,
                 hueShift: msg.player.hueShift ?? 0,
+                hp: 100,
+                attackAnim: 0,
               });
               onlineCountRef.current = playersRef.current.size + 1;
             }
@@ -136,6 +149,42 @@ export function useMultiplayer(
               chatRef.current = chatRef.current.slice(-50);
             }
             break;
+
+          // ─── PvP Messages ───
+
+          case 'player_attack': {
+            const rp = playersRef.current.get(msg.playerId);
+            if (rp) {
+              rp.attackAnim = 0.35; // match player attack animation duration
+            }
+            break;
+          }
+
+          case 'player_damage': {
+            if (msg.targetId === myIdRef.current) {
+              // Local player was hit
+              pvpEventsRef.current.push({
+                type: 'damage_taken',
+                attackerName: msg.attackerName || 'Unknown',
+                amount: msg.amount ?? 0,
+              });
+            } else {
+              // Remote player was hit — update their HP
+              const rp = playersRef.current.get(msg.targetId);
+              if (rp) {
+                rp.hp = Math.max(0, rp.hp - (msg.amount ?? 0));
+              }
+            }
+            break;
+          }
+
+          case 'player_death': {
+            const rp = playersRef.current.get(msg.playerId);
+            if (rp) {
+              rp.hp = 100; // reset on death
+            }
+            break;
+          }
         }
       } catch {
         // Ignore parse errors
@@ -182,12 +231,31 @@ export function useMultiplayer(
     ws.send(JSON.stringify({ type: 'chat', message: message.slice(0, 200) }));
   }, []);
 
+  const sendAttack = useCallback((x: number, y: number, dir: number, zone: string) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'attack', x, y, dir, zone }));
+  }, []);
+
+  const sendDamage = useCallback((targetId: string, amount: number) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'damage', targetId, amount }));
+  }, []);
+
+  const sendDeath = useCallback((killerId: string, killerName: string) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: 'death', killerId, killerName }));
+  }, []);
+
   // Interpolate remote player positions (call each frame)
   const interpolatePlayers = useCallback((dt: number) => {
     const lerpSpeed = 10; // Higher = snappier
     for (const rp of playersRef.current.values()) {
       rp.x += (rp.targetX - rp.x) * Math.min(lerpSpeed * dt, 1);
       rp.y += (rp.targetY - rp.y) * Math.min(lerpSpeed * dt, 1);
+      if (rp.attackAnim > 0) rp.attackAnim = Math.max(0, rp.attackAnim - dt);
     }
   }, []);
 
@@ -199,8 +267,12 @@ export function useMultiplayer(
     connectedRef,
     chatRef,
     onlineCountRef,
+    pvpEventsRef,
     sendMove,
     sendChat,
+    sendAttack,
+    sendDamage,
+    sendDeath,
     interpolatePlayers,
   };
 }
