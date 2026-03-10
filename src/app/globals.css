@@ -6548,14 +6548,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .social-link-icon {
-  font-size: 18px;
   flex-shrink: 0;
   width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.social-link-icon img {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: cover;
 }
 
 .social-link:hover .social-link-icon {
