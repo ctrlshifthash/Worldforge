@@ -6548,7 +6548,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #c8a23c;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.15);
   overflow: hidden;
@@ -6558,10 +6558,6 @@ h1, h2, h3, h4, h5, h6 {
 .social-link-icon img {
   display: block;
   object-fit: contain;
-}
-
-.social-link-icon--dark {
-  background: #1a1a2e;
 }
 
 .social-link:hover .social-link-icon {
