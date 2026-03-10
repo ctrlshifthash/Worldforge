@@ -115,11 +115,13 @@ body {
 }
 
 /* Marketing pages: deep night sky to match animated sky gradient */
-body:has(.landing),
+body:has(.landing) {
+  background: #030810;
+}
 body:has(.about-page),
 body:has(.hiw-page),
 body:has(.discover-page) {
-  background: #030810;
+  background: var(--bg);
 }
 
 
@@ -4007,7 +4009,8 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 20%, rgba(8,18,16,0.62) 40%, rgba(12,26,14,0.62) 70%, rgba(13,20,12,0.68) 100%);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 
 .about-opening-lines {
@@ -4090,8 +4093,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 120px 24px;
   display: flex;
   justify-content: center;
-  border-top: 1px solid rgba(100,140,80,0.08);
-  background: linear-gradient(180deg, rgba(14,30,14,0.70) 0%, rgba(13,26,14,0.65) 50%, rgba(12,22,10,0.70) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .about-statement-inner {
@@ -4170,7 +4172,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 80px 24px 120px;
   display: flex;
   justify-content: center;
-  background: linear-gradient(180deg, rgba(12,11,14,0.75) 0%, rgba(14,13,18,0.70) 50%, rgba(12,11,14,0.75) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .about-demo-container {
@@ -4305,8 +4307,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 100px 24px;
   max-width: 1000px;
   margin: 0 auto;
-  border-top: 1px solid rgba(240,192,96,0.06);
-  background: linear-gradient(180deg, rgba(14,12,8,0.72) 0%, rgba(18,15,10,0.65) 50%, rgba(14,12,8,0.72) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .about-bento {
@@ -4417,9 +4418,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .about-numbers {
   padding: 80px 24px;
-  border-top: 1px solid rgba(240,192,96,0.06);
-  border-bottom: 1px solid rgba(240,192,96,0.06);
-  background: linear-gradient(180deg, rgba(14,12,8,0.75) 0%, rgba(20,17,12,0.68) 50%, rgba(14,12,8,0.75) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .about-numbers-inner {
@@ -4464,7 +4464,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .about-audience-section {
   padding: 100px 24px;
-  background: linear-gradient(180deg, rgba(12,16,10,0.70) 0%, rgba(16,24,16,0.62) 30%, rgba(20,32,20,0.58) 50%, rgba(16,24,16,0.62) 70%, rgba(12,16,10,0.70) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .about-audience-scroll {
@@ -4509,9 +4509,8 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── FAQ Accordion ─── */
 
 .about-faq-section {
-  background: linear-gradient(180deg, rgba(8,12,18,0.72) 0%, rgba(10,16,24,0.65) 50%, rgba(8,12,18,0.72) 100%);
   padding: 100px 24px;
-  border-top: 1px solid rgba(100,140,200,0.06);
+  border-top: 1px solid var(--border);
 }
 
 .about-faq-list {
@@ -4569,7 +4568,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 140px 24px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(32,28,12,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .about-final-cta-bg {
@@ -5316,7 +5315,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 720px;
   margin: 0 auto;
   position: relative;
-  background: linear-gradient(180deg, rgba(3,8,16,0.78) 0%, rgba(6,16,24,0.68) 30%, rgba(8,18,16,0.62) 70%, rgba(12,26,14,0.68) 100%);
+  border-bottom: 1px solid var(--border);
 }
 
 .hiw-hero h1 {
@@ -5339,7 +5338,7 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(9,14,8,0.95);
+  background: rgba(11,16,10,0.97);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 12px 24px;
@@ -5535,8 +5534,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 120px 24px;
   position: relative;
-  border-top: 1px solid rgba(240,192,96,0.08);
-  background: linear-gradient(180deg, rgba(10,12,8,0.60) 0%, rgba(20,18,10,0.50) 30%, rgba(26,22,8,0.45) 50%, rgba(20,18,10,0.50) 70%, rgba(14,12,8,0.60) 100%);
+  border-top: 1px solid var(--border);
 }
 
 .hiw-cta::before {
