@@ -29,7 +29,7 @@ const SOCIALS = [
     href: '#',
     img: '/socials/gitbook.png',
     dark: true,
-    scale: '115%',
+    scale: '200%',
   },
   {
     name: 'Medium',
