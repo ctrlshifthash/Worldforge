@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Navbar } from '@/components/Navbar';
 import { DemoButton } from '@/components/DemoButton';
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
 const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
@@ -73,6 +74,7 @@ export default async function LandingPage() {
 
   return (
     <div className="landing">
+      <ScrollReveal />
       <Navbar />
 
       {/* ═══════════════════════════════════════════════════════
@@ -177,8 +179,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           STATEMENT — One powerful sentence
           ═══════════════════════════════════════════════════════ */}
-      <div className="mountain-divider" />
-      <section className="statement-section">
+      <section className="statement-section reveal-section">
         <p className="statement-text">
           Every world you create becomes a <span className="gold">playable 2D game</span> with
           combat, NPCs, quests, building, vendors, wildlife, and
@@ -186,13 +187,11 @@ export default async function LandingPage() {
           you can explore, edit, and grow.
         </p>
       </section>
-      <div className="transition-clearing" />
-
       {/* ═══════════════════════════════════════════════════════
           THE JOURNEY — Narrative walkthrough: Describe → Generate → Enter → Play
           Alternating panels, each visually unique
           ═══════════════════════════════════════════════════════ */}
-      <section className="journey-section">
+      <section className="journey-section reveal-section">
 
         {/* Step 1: Describe */}
         <div className="journey-step">
@@ -432,13 +431,11 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="mountain-divider rocky" />
-
       {/* ═══════════════════════════════════════════════════════
           GAME SYSTEMS — Editorial spreads proving each system is real
           Each system has a game-UI mockup as its visual
           ═══════════════════════════════════════════════════════ */}
-      <section className="systems-section">
+      <section className="systems-section reveal-section">
         <div className="systems-header">
           <h2>Everything a world needs.</h2>
           <p>
@@ -655,13 +652,11 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="transition-archive" />
-
       {/* ═══════════════════════════════════════════════════════
           LORE LAYER — The worldbuilding tools under the game
           Bento layout, not uniform cards
           ═══════════════════════════════════════════════════════ */}
-      <section className="lore-section">
+      <section className="lore-section reveal-section">
         <div className="container">
           <div className="lore-header">
             <h2>Deep worldbuilding under every game.</h2>
@@ -745,7 +740,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           HOW TO PLAY — Quick controls reference
           ═══════════════════════════════════════════════════════ */}
-      <section className="htp-section">
+      <section className="htp-section reveal-section">
         <div className="container">
           <div className="htp-header">
             <h2>How to Play</h2>
@@ -833,7 +828,7 @@ export default async function LandingPage() {
       {/* ═══════════════════════════════════════════════════════
           COMMUNITY — Real worlds from the database
           ═══════════════════════════════════════════════════════ */}
-      <section className="community-section">
+      <section className="community-section reveal-section">
         <div className="container">
           <div className="community-header">
             <h2>Worlds built by players.</h2>
@@ -887,13 +882,10 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <div className="mountain-divider hills" />
-      <div className="transition-dawn" />
-
       {/* ═══════════════════════════════════════════════════════
           FINAL CTA
           ═══════════════════════════════════════════════════════ */}
-      <section className="final-cta">
+      <section className="final-cta reveal-section">
         <div className="final-cta-glow" />
         <div className="final-cta-shimmer" />
         <div className="container">
