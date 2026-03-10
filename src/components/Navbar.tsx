@@ -1,5 +1,14 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { getSession } from '@/lib/auth';
+
+const NAV_SOCIALS = [
+  { name: 'Pump.fun', href: 'https://pump.fun/coin/', img: '/socials/pumpfun.png' },
+  { name: 'X', href: 'https://x.com/PlayWorldforge', img: '/socials/x.png' },
+  { name: 'GitHub', href: 'https://github.com/PlayWorldforge/Worldforge', img: '/socials/github.png' },
+  { name: 'GitBook', href: 'https://worldforge.gitbook.io/worldforge', img: '/socials/gitbook.png' },
+  { name: 'Medium', href: 'https://medium.com/@Worldforge', img: '/socials/medium.png' },
+];
 
 export async function Navbar() {
   const session = await getSession();
@@ -21,6 +30,13 @@ export async function Navbar() {
       </div>
 
       <div className="navbar-right">
+        <div className="navbar-socials">
+          {NAV_SOCIALS.map((s) => (
+            <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer" className="navbar-social" title={s.name}>
+              <img src={s.img} alt={s.name} width={20} height={20} />
+            </a>
+          ))}
+        </div>
         {session ? (
           <Link href="/dashboard" className="navbar-user">
             <div className="navbar-avatar">

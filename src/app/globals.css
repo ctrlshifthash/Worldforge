@@ -1070,6 +1070,39 @@ h1, h2, h3, h4, h5, h6 {
   gap: var(--space-md);
 }
 
+.navbar-socials {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+
+.navbar-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.navbar-social:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.navbar-social img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .navbar-socials { display: none; }
+}
+
 .navbar-link {
   color: var(--text-muted);
   font-size: 0.82rem;

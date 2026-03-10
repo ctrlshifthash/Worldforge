@@ -4,7 +4,6 @@ import { Navbar } from '@/components/Navbar';
 import { DemoButton } from '@/components/DemoButton';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { CaBadge } from '@/components/CaBadge';
-import { SocialLinks } from '@/components/SocialLinks';
 
 const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
 const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
@@ -94,7 +93,6 @@ export default async function LandingPage() {
         </div>
         <div className="hero-v2-glow" />
         <CaBadge />
-        <SocialLinks />
 
         <div className="hero-v2-content">
 
