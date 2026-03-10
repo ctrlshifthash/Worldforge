@@ -3855,7 +3855,7 @@ function drawPlayer(ctx: CanvasRenderingContext2D, x: number, y: number, player:
 
 // ─── Draw entity ───
 
-function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: GameAssets, isNearby: boolean, time: number) {
+function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: GameAssets, isNearby: boolean, time: number, discovered: boolean = false) {
   const px = pe.tileX * TILE_SIZE;
   const py = pe.tileY * TILE_SIZE;
 
@@ -3925,18 +3925,32 @@ function drawEntitySprite(ctx: CanvasRenderingContext2D, pe: PlacedEntity, ga: G
     ctx.fillText('[E]', px + TILE_SIZE / 2, py - 10);
   }
 
-  // Label
+  // Label with discovery indicator
   ctx.font = '600 10px Inter, sans-serif';
   ctx.textAlign = 'center';
   const label = pe.entity.title;
   const m = ctx.measureText(label);
   const lx = px + TILE_SIZE / 2;
   const ly = py + TILE_SIZE + 16;
+  const badgeW = discovered ? 12 : 0;
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.beginPath();
-  ctx.roundRect(lx - m.width / 2 - 5, ly - 9, m.width + 10, 14, 3);
+  ctx.roundRect(lx - m.width / 2 - 5 - badgeW / 2, ly - 9, m.width + 10 + badgeW, 14, 3);
   ctx.fill();
-  ctx.fillStyle = isNearby ? '#FF6B2C' : 'rgba(255,255,255,0.85)';
+  if (discovered) {
+    ctx.fillStyle = 'rgba(80,200,80,0.7)';
+    ctx.font = '600 8px Inter, sans-serif';
+    ctx.fillText('\u2713', lx - m.width / 2 - 3, ly);
+    ctx.font = '600 10px Inter, sans-serif';
+  } else if (!isNearby) {
+    // Undiscovered pulse — subtle glow to draw attention
+    const newPulse = 0.4 + Math.sin(time * 3 + hashString(pe.entity.id) * 0.1) * 0.3;
+    ctx.fillStyle = `rgba(255,200,80,${newPulse})`;
+    ctx.font = '700 7px Inter, sans-serif';
+    ctx.fillText('NEW', lx + m.width / 2 + 2, ly - 1);
+    ctx.font = '600 10px Inter, sans-serif';
+  }
+  ctx.fillStyle = isNearby ? '#FF6B2C' : discovered ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.9)';
   ctx.fillText(label, lx, ly);
 }
 
@@ -5371,7 +5385,61 @@ export function WorldExplore({
             }
           }
         }
-        else if (nearbyEntity && !inspecting) setInspecting(nearbyEntity);
+        else if (nearbyEntity && !inspecting) {
+          setInspecting(nearbyEntity);
+          // ── Meaningful entity interaction ──
+          const eType = nearbyEntity.type;
+          const eTitle = nearbyEntity.title;
+          const eSummary = nearbyEntity.summary || 'An intriguing place.';
+          const shortSummary = eSummary.length > 140 ? eSummary.slice(0, 137) + '...' : eSummary;
+          const discoveryId = `entity_${nearbyEntity.id}`;
+          const isFirstVisit = !discoveriesRef.current.has(discoveryId);
+
+          // Type-appropriate dialogue
+          let dialogSpeaker = eTitle;
+          let dialogText = shortSummary;
+          if (eType === 'CHARACTER') {
+            dialogSpeaker = eTitle;
+            dialogText = isFirstVisit
+              ? `You meet ${eTitle}. ${shortSummary}`
+              : shortSummary;
+          } else if (eType === 'FACTION' || eType === 'GROUP') {
+            dialogText = isFirstVisit
+              ? `You find traces of ${eTitle}. ${shortSummary}`
+              : `${eTitle}: ${shortSummary}`;
+          } else if (eType === 'EVENT') {
+            dialogText = isFirstVisit
+              ? `This place bears marks of an event: ${shortSummary}`
+              : shortSummary;
+          }
+
+          // Show dialogue
+          glDialogRef.current = { speaker: dialogSpeaker, text: dialogText, timer: 7 };
+
+          // First visit: discovery banner + gold reward
+          if (isFirstVisit) {
+            discoveriesRef.current.add(discoveryId);
+            zoneBannerRef.current = `Discovered: ${eTitle}`;
+            zoneBannerTimer.current = 2.5;
+            const reward = eType === 'LOCATION' ? 5 : eType === 'CHARACTER' ? 3 : 4;
+            if (!coinsCollectedRef.current.has(discoveryId)) {
+              coinsCollectedRef.current.add(discoveryId);
+              playerGoldRef.current = Math.min(playerGoldRef.current + reward, resourceCapRef.current.gold);
+              setPlayerGold(playerGoldRef.current);
+              const pp = playerRef.current;
+              damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: `+${reward}G`, color: '#e8c86a', timer: 1.5 });
+            }
+
+            // Progression hint after discovering multiple entities
+            const entityDiscoveries = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
+            if (entityDiscoveries === 3 && !discoveriesRef.current.has('hub_explore_hint')) {
+              discoveriesRef.current.add('hub_explore_hint');
+              setTimeout(() => {
+                glDialogRef.current = { speaker: 'Inner Voice', text: 'You\'ve explored several sites. The Northern Pass leads to dangerous grasslands \u2014 orcs await. The South Gate opens toward the Seaside Village.', timer: 8 };
+              }, 3000);
+            }
+          }
+        }
         // Grassland E-key interactions
         else if (zoneRef.current === 'grassland') {
           const px = playerRef.current.x, py = playerRef.current.y;
@@ -7281,7 +7349,8 @@ export function WorldExplore({
       if (inHub) {
         for (const pe of placedRef.current) {
           const isNear = nearbyEntityRef.current?.id === pe.entity.id;
-          allDrawables.push({ y: pe.tileY, fn: () => drawEntitySprite(ctx, pe, ga, isNear, timeRef.current) });
+          const disc = discoveriesRef.current.has(`entity_${pe.entity.id}`);
+          allDrawables.push({ y: pe.tileY, fn: () => drawEntitySprite(ctx, pe, ga, isNear, timeRef.current, disc) });
         }
         // Townsfolk rendering (GuttyKreum tilemap)
         const ppx = p.x, ppy = p.y;
@@ -9620,6 +9689,25 @@ export function WorldExplore({
           }
           ctx.globalAlpha = 1;
 
+          // Placed entities on minimap (hub only)
+          if (zoneRef.current === 'hub') {
+            for (const pe of placedRef.current) {
+              const eDisc = discoveriesRef.current.has(`entity_${pe.entity.id}`);
+              const ex = mmX + pe.tileX * scaleX;
+              const ey = mmY + pe.tileY * scaleY;
+              if (eDisc) {
+                ctx.fillStyle = 'rgba(80,200,80,0.6)';
+                ctx.fillRect(ex - 1, ey - 1, 3, 3);
+              } else {
+                const ePulse = 0.4 + Math.sin(timeRef.current * 3) * 0.3;
+                ctx.fillStyle = `rgba(255,200,80,${ePulse})`;
+                ctx.beginPath();
+                ctx.arc(ex, ey, 2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+          }
+
           // Zone exits (pulsing markers with labels)
           const exits: { x: number; y: number; label: string; color: string }[] = [];
           if (zoneRef.current === 'hub') {
@@ -9949,13 +10037,31 @@ export function WorldExplore({
       )}
 
       {/* Entity inspect panel */}
-      {inspecting && (
+      {inspecting && (() => {
+        const eColor = ENTITY_COLORS[inspecting.type] || inspecting.accent;
+        const isDiscovered = discoveriesRef.current.has(`entity_${inspecting.id}`);
+        const typeLabel: Record<string, string> = {
+          LOCATION: 'Landmark', CHARACTER: 'Person of Interest', FACTION: 'Organization',
+          EVENT: 'Historical Event', GROUP: 'Group', ITEM: 'Artifact',
+        };
+        const flavorHints: Record<string, string> = {
+          LOCATION: 'This place holds secrets for those who look closely.',
+          CHARACTER: 'Speaking with the locals reveals much about this land.',
+          FACTION: 'Their influence can be felt throughout the region.',
+          EVENT: 'The echoes of this event still shape the world today.',
+          GROUP: 'Their presence here is unmistakable.',
+          ITEM: 'Artifacts like this are rare and valuable.',
+        };
+        return (
         <div className="explore-panel">
           <div className="explore-panel-header">
             <div>
-              <div className="explore-panel-type" style={{ color: ENTITY_COLORS[inspecting.type] || inspecting.accent }}>
-                <span className="entity-dot" style={{ background: ENTITY_COLORS[inspecting.type] || inspecting.accent }} />
-                {inspecting.type}
+              <div className="explore-panel-type" style={{ color: eColor, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="entity-dot" style={{ background: eColor }} />
+                {typeLabel[inspecting.type] || inspecting.type}
+                {isDiscovered && (
+                  <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'rgba(80,200,80,0.15)', color: '#60c060', fontWeight: 600, border: '1px solid rgba(80,200,80,0.3)' }}>Discovered</span>
+                )}
               </div>
               <h3 className="explore-panel-title">{inspecting.title}</h3>
             </div>
@@ -9977,8 +10083,12 @@ export function WorldExplore({
               {inspecting.tags.map(tag => <span key={tag} className="entity-tag">{tag}</span>)}
             </div>
           )}
+          <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 4, background: `${eColor}11`, border: `1px solid ${eColor}22`, fontSize: 9, color: `${eColor}cc`, fontStyle: 'italic', lineHeight: 1.4 }}>
+            {flavorHints[inspecting.type] || 'There is more to discover in this world.'}
+          </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Build menu panel */}
       {buildMenuOpen && isOwner && (() => {
