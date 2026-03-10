@@ -141,6 +141,8 @@ import {
   SHEEP_FW,
   SHEEP_FH,
   SHEEP_COLS,
+  FANTASY_SELECTABLE,
+  FANTASY_SPRITE_KEYS,
 } from '@/lib/tileAtlas';
 
 // ─── Types ───
@@ -441,6 +443,57 @@ const AMBIENT_CHATTER: Array<{ a: string; b: string; lines: [string, string][] }
   { a: 'guard_north_1', b: 'guard_north_2', lines: [['Quiet watch so far.', 'Too quiet for my taste.']] },
   { a: 'village_student', b: 'village_youth', lines: [['Think the witch is watching us?', 'She is always watching us.']] },
 ];
+
+// ─── Entity building identity system ───
+// Deterministic roles assigned per entity via hashString(id)
+const BUILDING_PURPOSES = [
+  { role: 'tavern',      flavor: 'A warm hearth crackles inside. Locals share stories over mugs of ale.' },
+  { role: 'library',     flavor: 'Dusty shelves line the walls. Scrolls and tomes hold forgotten knowledge.' },
+  { role: 'workshop',    flavor: 'Tools hang from pegs. The workbench bears marks of years of craftsmanship.' },
+  { role: 'guild hall',  flavor: 'A banner hangs above the door. Tradespeople gather here to plan and negotiate.' },
+  { role: 'market house', flavor: 'Crates and sacks fill the entrance. Goods from distant lands pass through here.' },
+  { role: 'watchtower',  flavor: 'The upper floor offers a commanding view of the surrounding land.' },
+  { role: 'chapel',      flavor: 'Soft light filters through colored glass. The air carries a sense of peace.' },
+  { role: 'residence',   flavor: 'A lived-in home. Personal belongings suggest someone of importance dwells here.' },
+  { role: 'archive',     flavor: 'Old records and maps cover the walls. This place preserves the town\'s history.' },
+  { role: 'storehouse',  flavor: 'Barrels and crates are stacked neatly. The town\'s reserves are kept safe here.' },
+] as const;
+
+const BUILDING_OCCUPANTS = [
+  'A retired sailor watches from the window, pipe in hand.',
+  'An elderly scholar tends to worn books inside.',
+  'The sound of hammering echoes from within.',
+  'A merchant arranges wares behind the counter.',
+  'Candles flicker through stained glass windows.',
+  'The smell of fresh bread wafts from the doorway.',
+  'A watchful guard leans against the doorframe.',
+  'Faded curtains sway gently in the breeze.',
+  'A young apprentice sweeps the entrance.',
+  'Voices murmur behind the heavy door.',
+  'An old cat sleeps on the windowsill.',
+  'Drying herbs hang from the rafters inside.',
+] as const;
+
+const REVISIT_OBSERVATIONS = [
+  'You notice details you missed before.',
+  'Something about this place feels different today.',
+  'The air here carries old memories.',
+  'You feel more connected to this place now.',
+  'A new perspective reveals hidden character.',
+  'The walls seem to hold stories untold.',
+  'Time has treated this place with quiet dignity.',
+] as const;
+
+const BUILDING_HINTS = [
+  'You overhear a rumor about treasure hidden in the grasslands to the north.',
+  'A faded note mentions the shrine by the lake — it may hold restorative power.',
+  'An old map fragment shows paths leading to the Seaside Village through the south gate.',
+  'Someone scratched directions to a hermit\'s dwelling by the lake on the wall.',
+  'A merchant\'s ledger hints at lucrative trade routes along the coast road.',
+  'Graffiti on the back wall warns: "Beware the orcs beyond the Northern Pass."',
+  'A travel log mentions a vendor camp deep in the grasslands that sells useful supplies.',
+  'An old diary entry describes ruins to the south that predate the settlement.',
+] as const;
 
 function nextAmbientCooldown() {
   return AMBIENT_SPEECH_MIN_COOLDOWN + Math.random() * (AMBIENT_SPEECH_MAX_COOLDOWN - AMBIENT_SPEECH_MIN_COOLDOWN);
@@ -4193,6 +4246,7 @@ export function WorldExplore({
   const buffsRef = useRef<ActiveBuff[]>([]);
   buffsRef.current = activeBuffs;
   const placedRef = useRef<PlacedEntity[]>([]);
+  const entityVisitRef = useRef<Map<string, number>>(new Map());
   const goldAccumRef = useRef(0);
   const playerGoldRef = useRef(50);
   playerGoldRef.current = playerGold;
@@ -5415,37 +5469,43 @@ export function WorldExplore({
         }
         else if (nearbyEntity && !inspecting) {
           setInspecting(nearbyEntity);
-          // ── Meaningful entity interaction ──
+          // ── Rich entity interaction ──
           const eType = nearbyEntity.type;
           const eTitle = nearbyEntity.title;
           const eSummary = nearbyEntity.summary || 'An intriguing place.';
           const shortSummary = eSummary.length > 140 ? eSummary.slice(0, 137) + '...' : eSummary;
           const discoveryId = `entity_${nearbyEntity.id}`;
           const isFirstVisit = !discoveriesRef.current.has(discoveryId);
+          const h = hashString(nearbyEntity.id);
 
-          // Type-appropriate dialogue
+          // Track visit count
+          const prevVisits = entityVisitRef.current.get(nearbyEntity.id) || 0;
+          const visits = prevVisits + 1;
+          entityVisitRef.current.set(nearbyEntity.id, visits);
+
+          // Building identity (deterministic per entity)
+          const purpose = BUILDING_PURPOSES[h % BUILDING_PURPOSES.length];
+          const occupant = BUILDING_OCCUPANTS[h % BUILDING_OCCUPANTS.length];
+
           let dialogSpeaker = eTitle;
-          let dialogText = shortSummary;
-          if (eType === 'CHARACTER') {
-            dialogSpeaker = eTitle;
-            dialogText = isFirstVisit
-              ? `You meet ${eTitle}. ${shortSummary}`
-              : shortSummary;
-          } else if (eType === 'FACTION' || eType === 'GROUP') {
-            dialogText = isFirstVisit
-              ? `You find traces of ${eTitle}. ${shortSummary}`
-              : `${eTitle}: ${shortSummary}`;
-          } else if (eType === 'EVENT') {
-            dialogText = isFirstVisit
-              ? `This place bears marks of an event: ${shortSummary}`
-              : shortSummary;
-          }
+          let dialogText = '';
 
-          // Show dialogue
-          glDialogRef.current = { speaker: dialogSpeaker, text: dialogText, timer: 7 };
-
-          // First visit: discovery banner + gold reward
           if (isFirstVisit) {
+            // ── First visit: rich discovery ──
+            if (eType === 'LOCATION') {
+              const roleArticle = purpose.role === 'archive' || purpose.role === 'residence' ? 'an' : 'a';
+              dialogText = `You discover ${eTitle}, ${roleArticle} ${purpose.role}. ${shortSummary} ${occupant}`;
+            } else if (eType === 'CHARACTER') {
+              dialogText = `You meet ${eTitle} for the first time. ${shortSummary}`;
+            } else if (eType === 'FACTION' || eType === 'GROUP') {
+              dialogText = `You find the headquarters of ${eTitle}. ${shortSummary} Their influence stretches across the town.`;
+            } else if (eType === 'EVENT') {
+              dialogText = `This place bears the marks of ${eTitle}. ${shortSummary}`;
+            } else {
+              dialogText = `${shortSummary} ${purpose.flavor}`;
+            }
+
+            // Discovery rewards
             discoveriesRef.current.add(discoveryId);
             zoneBannerRef.current = `Discovered: ${eTitle}`;
             zoneBannerTimer.current = 2.5;
@@ -5458,7 +5518,7 @@ export function WorldExplore({
               damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 16, text: `+${reward}G`, color: '#e8c86a', timer: 1.5 });
             }
 
-            // Progression hint after discovering multiple entities
+            // Progression hint after 3 entity discoveries
             const entityDiscoveries = [...discoveriesRef.current].filter(d => d.startsWith('entity_')).length;
             if (entityDiscoveries === 3 && !discoveriesRef.current.has('hub_explore_hint')) {
               discoveriesRef.current.add('hub_explore_hint');
@@ -5466,7 +5526,80 @@ export function WorldExplore({
                 glDialogRef.current = { speaker: 'Inner Voice', text: 'You\'ve explored several sites. The Northern Pass leads to dangerous grasslands \u2014 orcs await. The South Gate opens toward the Seaside Village.', timer: 8 };
               }, 3000);
             }
+          } else {
+            // ── Revisit: cycle through facts, purpose, hints ──
+            const facts = nearbyEntity.facts || [];
+            // Phase 0: facts from the entity's data
+            // Phase 1: building purpose/flavor
+            // Phase 2: occupant detail + observation
+            // Phase 3: world hint (cross-reference)
+            const totalPhases = facts.length + 3;
+            const phase = (visits - 1) % totalPhases; // visits starts at 1 for first revisit after discovery
+
+            if (phase < facts.length) {
+              // Surface a fact from the entity data
+              const fact = facts[phase];
+              dialogText = `${fact.label}: ${fact.value}`;
+            } else if (phase === facts.length) {
+              // Building purpose flavor
+              if (eType === 'LOCATION') {
+                dialogText = `${purpose.flavor} ${REVISIT_OBSERVATIONS[h % REVISIT_OBSERVATIONS.length]}`;
+              } else if (eType === 'CHARACTER') {
+                dialogText = `${eTitle} nods in recognition. ${shortSummary}`;
+              } else if (eType === 'FACTION' || eType === 'GROUP') {
+                dialogText = `The presence of ${eTitle} is felt here. ${purpose.flavor}`;
+              } else {
+                dialogText = shortSummary;
+              }
+            } else if (phase === facts.length + 1) {
+              // Occupant/atmosphere detail
+              if (eType === 'LOCATION') {
+                dialogText = `${occupant} ${REVISIT_OBSERVATIONS[(h + 3) % REVISIT_OBSERVATIONS.length]}`;
+              } else {
+                dialogText = `${REVISIT_OBSERVATIONS[(h + 2) % REVISIT_OBSERVATIONS.length]} ${shortSummary}`;
+              }
+            } else {
+              // World hint — reference other undiscovered locations
+              const unvisited = placedRef.current.filter(pe => !discoveriesRef.current.has(`entity_${pe.entity.id}`));
+              if (unvisited.length > 0) {
+                const hintTarget = unvisited[h % unvisited.length];
+                dialogText = `${BUILDING_HINTS[h % BUILDING_HINTS.length]} You overhear someone mention "${hintTarget.entity.title}" nearby.`;
+              } else {
+                dialogText = `${BUILDING_HINTS[h % BUILDING_HINTS.length]} You\'ve explored every corner of this settlement.`;
+              }
+            }
+
+            // ── Functional effects on revisit ──
+            const pp = playerRef.current;
+            const effectType = h % 4; // 0=heal, 1=hint (no effect), 2=gold, 3=resource
+            if (eType === 'LOCATION' || eType === 'FACTION') {
+              if (effectType === 0 && healthRef.current < MAX_HEALTH) {
+                // Tavern/chapel feel — heal 5 HP
+                healthRef.current = Math.min(MAX_HEALTH, healthRef.current + 5);
+                setPlayerHealth(healthRef.current);
+                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+5 HP', color: '#60c060', timer: 1.2 });
+              } else if (effectType === 2 && visits % 3 === 0) {
+                // Market house feel — small gold every 3rd visit
+                playerGoldRef.current = Math.min(playerGoldRef.current + 2, resourceCapRef.current.gold);
+                setPlayerGold(playerGoldRef.current);
+                damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+2G', color: '#e8c86a', timer: 1.2 });
+              } else if (effectType === 3 && visits % 4 === 0) {
+                // Storehouse/workshop — small resource bonus every 4th visit
+                const giveWood = h % 2 === 0;
+                if (giveWood) {
+                  playerWoodRef.current = Math.min(playerWoodRef.current + 1, resourceCapRef.current.wood);
+                  setPlayerWood(playerWoodRef.current);
+                  damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+1 Wood', color: '#8b6914', timer: 1.2 });
+                } else {
+                  playerStoneRef.current = Math.min(playerStoneRef.current + 1, resourceCapRef.current.stone);
+                  setPlayerStone(playerStoneRef.current);
+                  damageNumbersRef.current.push({ x: pp.x * TILE_SIZE + 16, y: pp.y * TILE_SIZE - 20, text: '+1 Stone', color: '#808080', timer: 1.2 });
+                }
+              }
+            }
           }
+
+          glDialogRef.current = { speaker: dialogSpeaker, text: dialogText, timer: 7 };
         }
         // Grassland E-key interactions
         else if (zoneRef.current === 'grassland') {
@@ -8613,21 +8746,53 @@ export function WorldExplore({
           // Owner uses the original character spritesheet
           drawPlayer(ctx, px, py, p, ga.character);
         } else {
-          // Other players use chosen GuttyKreum character
-          const charIdx = Math.max(0, chosenCharRef.current.charIndex) % 17;
-          const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
-          const dirRow = dirMap[p.facing] ?? 0;
-          const frame = p.moving ? p.animFrame % GK_COLS : 0;
-          const sx = frame * GK_FRAME;
-          const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+          const ci = Math.max(0, chosenCharRef.current.charIndex);
           // Shadow
           ctx.fillStyle = 'rgba(0,0,0,0.18)';
           ctx.beginPath();
           ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, 10, 4, 0, 0, Math.PI * 2);
           ctx.fill();
-          // Sprite (use hue-shifted canvas if available)
-          const src = hueCanvasRef.current || ga.npcTilemap;
-          ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+          if (ci >= 100) {
+            // Fantasy RPG sprite (static chibi)
+            const fIdx = ci - 100;
+            const fKey = FANTASY_SPRITE_KEYS[fIdx];
+            const fImg = fKey ? ga[fKey as keyof typeof ga] as HTMLImageElement : null;
+            if (fImg) {
+              const iw = fImg.naturalWidth;
+              const ih = fImg.naturalHeight;
+              const scale = Math.min(28 / iw, 36 / ih);
+              const dw = iw * scale;
+              const dh = ih * scale;
+              const dx = px + (TILE_SIZE - dw) / 2;
+              const dy = py + TILE_SIZE - dh - 2;
+              const hue = chosenCharRef.current.hueShift;
+              // Flip horizontally when facing left for directionality
+              if (p.facing === 'left') {
+                ctx.save();
+                ctx.translate(dx + dw, dy);
+                ctx.scale(-1, 1);
+                if (hue) ctx.filter = `hue-rotate(${hue}deg)`;
+                ctx.drawImage(fImg, 0, 0, dw, dh);
+                ctx.filter = 'none';
+                ctx.restore();
+              } else {
+                if (hue) ctx.filter = `hue-rotate(${hue}deg)`;
+                ctx.drawImage(fImg, dx, dy, dw, dh);
+                ctx.filter = 'none';
+              }
+            }
+          } else {
+            // GuttyKreum tilemap character
+            const charIdx = ci % 17;
+            const dirMap: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+            const dirRow = dirMap[p.facing] ?? 0;
+            const frame = p.moving ? p.animFrame % GK_COLS : 0;
+            const sx = frame * GK_FRAME;
+            const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+            // Sprite (use hue-shifted canvas if available)
+            const src = hueCanvasRef.current || ga.npcTilemap;
+            ctx.drawImage(src, sx, sy, GK_FRAME, GK_FRAME, px + 2, py - 4, 28, 32);
+          }
         }
       }});
 
@@ -8783,21 +8948,51 @@ export function WorldExplore({
         allDrawables.push({ y: rpTileY, fn: () => {
           const rpx = rp.x;
           const rpy = rp.y;
-          const charIdx = rp.charIndex % 17;
-          const dirRow = rp.dir; // 0=down,1=left,2=right,3=up
-          const frame = rp.frame % GK_COLS;
-          const sx = frame * GK_FRAME;
-          const sy = (charIdx * 4 + dirRow) * GK_FRAME;
           // Shadow
           ctx.fillStyle = 'rgba(0,0,0,0.15)';
           ctx.beginPath();
           ctx.ellipse(rpx + 16, rpy + TILE_SIZE - 2, 8, 3, 0, 0, Math.PI * 2);
           ctx.fill();
-          // Sprite (apply hue shift for remote players)
           const hasHue = rp.hueShift && rp.hueShift !== 0;
-          if (hasHue) ctx.filter = `hue-rotate(${rp.hueShift}deg)`;
-          ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, rpx + 2, rpy - 4, 28, 32);
-          if (hasHue) ctx.filter = 'none';
+          if (rp.charIndex >= 100) {
+            // Fantasy RPG sprite for remote player
+            const fIdx = rp.charIndex - 100;
+            const fKey = FANTASY_SPRITE_KEYS[fIdx];
+            const fImg = fKey ? ga[fKey as keyof typeof ga] as HTMLImageElement : null;
+            if (fImg) {
+              const iw = fImg.naturalWidth;
+              const ih = fImg.naturalHeight;
+              const scale = Math.min(28 / iw, 36 / ih);
+              const dw = iw * scale;
+              const dh = ih * scale;
+              const dx = rpx + (TILE_SIZE - dw) / 2;
+              const dy = rpy + TILE_SIZE - dh - 2;
+              const facingLeft = rp.dir === 1;
+              if (facingLeft) {
+                ctx.save();
+                ctx.translate(dx + dw, dy);
+                ctx.scale(-1, 1);
+                if (hasHue) ctx.filter = `hue-rotate(${rp.hueShift}deg)`;
+                ctx.drawImage(fImg, 0, 0, dw, dh);
+                ctx.filter = 'none';
+                ctx.restore();
+              } else {
+                if (hasHue) ctx.filter = `hue-rotate(${rp.hueShift}deg)`;
+                ctx.drawImage(fImg, dx, dy, dw, dh);
+                if (hasHue) ctx.filter = 'none';
+              }
+            }
+          } else {
+            // GuttyKreum tilemap character
+            const charIdx = rp.charIndex % 17;
+            const dirRow = rp.dir; // 0=down,1=left,2=right,3=up
+            const frame = rp.frame % GK_COLS;
+            const sx = frame * GK_FRAME;
+            const sy = (charIdx * 4 + dirRow) * GK_FRAME;
+            if (hasHue) ctx.filter = `hue-rotate(${rp.hueShift}deg)`;
+            ctx.drawImage(ga.npcTilemap, sx, sy, GK_FRAME, GK_FRAME, rpx + 2, rpy - 4, 28, 32);
+            if (hasHue) ctx.filter = 'none';
+          }
           // Name label
           ctx.font = '600 7px Inter, sans-serif';
           ctx.textAlign = 'center';
@@ -10086,6 +10281,12 @@ export function WorldExplore({
       {(needsCharPick || charPickerOpen) && ga && (
         <CharacterPicker
           npcTilemap={ga.npcTilemap}
+          fantasySprites={FANTASY_SELECTABLE.map(fs => ({
+            index: fs.index,
+            key: fs.key,
+            label: fs.label,
+            image: ga[fs.key as keyof typeof ga] as HTMLImageElement,
+          }))}
           currentCharIndex={chosenCharIndex}
           currentHueShift={chosenHueShift}
           currentName={chosenDisplayName}

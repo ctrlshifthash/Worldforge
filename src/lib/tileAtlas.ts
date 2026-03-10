@@ -623,6 +623,25 @@ export const HUE_PRESETS = [
   { label: 'Shadow',   value: 240 },
 ] as const;
 
+// ─── Fantasy RPG selectable characters (indices 100+) ───
+// These use static chibi sprites from the Fantasy RPG pack, not the GuttyKreum tilemap.
+export const FANTASY_SELECTABLE = [
+  { index: 100, key: 'fPaladinGuard', label: 'Paladin' },
+  { index: 101, key: 'fElderPriest',  label: 'Priest' },
+  { index: 102, key: 'fDwarfSmith',   label: 'Dwarf' },
+  { index: 103, key: 'fElfScout',     label: 'Elf Scout' },
+  { index: 104, key: 'fSkeletonMace', label: 'Skeleton' },
+  { index: 105, key: 'fSkeletonAxe',  label: 'Undead Axe' },
+  { index: 106, key: 'fSwordswoman',  label: 'Swordswoman' },
+  { index: 107, key: 'fFireWitch',    label: 'Fire Witch' },
+  { index: 108, key: 'fElfHerbalist', label: 'Herbalist' },
+] as const;
+
+export const FANTASY_SPRITE_KEYS = [
+  'fPaladinGuard', 'fElderPriest', 'fDwarfSmith', 'fElfScout',
+  'fSkeletonMace', 'fSkeletonAxe', 'fSwordswoman', 'fFireWitch', 'fElfHerbalist',
+] as const;
+
 // ─── Sheep spritesheets (256×896) — 4 cols × 28 rows of 64×32 frames ───
 export const SHEEP_FW = 64;
 export const SHEEP_FH = 32;

@@ -1,10 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { SELECTABLE_CHARACTERS, HUE_PRESETS, GK_FRAME, GK_COLS } from '@/lib/tileAtlas';
+import { SELECTABLE_CHARACTERS, FANTASY_SELECTABLE, HUE_PRESETS, GK_FRAME, GK_COLS } from '@/lib/tileAtlas';
+
+interface FantasySpriteEntry {
+  index: number;
+  key: string;
+  label: string;
+  image: HTMLImageElement;
+}
 
 interface CharacterPickerProps {
   npcTilemap: HTMLImageElement;
+  fantasySprites: FantasySpriteEntry[];
   currentCharIndex: number;
   currentHueShift: number;
   currentName: string;
@@ -14,6 +22,7 @@ interface CharacterPickerProps {
 
 export default function CharacterPicker({
   npcTilemap,
+  fantasySprites,
   currentCharIndex,
   currentHueShift,
   currentName,
@@ -24,11 +33,17 @@ export default function CharacterPicker({
   const [hueShift, setHueShift] = useState(currentHueShift);
   const [displayName, setDisplayName] = useState(currentName || '');
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const fantasyCanvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const frameRef = useRef(0);
 
   const setCanvasRef = useCallback((idx: number, el: HTMLCanvasElement | null) => {
     if (el) canvasRefs.current.set(idx, el);
     else canvasRefs.current.delete(idx);
+  }, []);
+
+  const setFantasyCanvasRef = useCallback((idx: number, el: HTMLCanvasElement | null) => {
+    if (el) fantasyCanvasRefs.current.set(idx, el);
+    else fantasyCanvasRefs.current.delete(idx);
   }, []);
 
   // Pre-render hue-shifted tilemap once (no per-frame filter)
@@ -43,7 +58,27 @@ export default function CharacterPicker({
     shiftedTilemapRef.current = c;
   }, [npcTilemap, hueShift]);
 
-  // Single shared animation loop for all previews
+  // Draw fantasy sprite previews when hue changes
+  useEffect(() => {
+    for (const fs of fantasySprites) {
+      const canvas = fantasyCanvasRefs.current.get(fs.index);
+      if (!canvas) continue;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) continue;
+      ctx.clearRect(0, 0, 48, 56);
+      if (hueShift !== 0) ctx.filter = `hue-rotate(${hueShift}deg)`;
+      const img = fs.image;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(40 / iw, 48 / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      ctx.drawImage(img, (48 - dw) / 2, (56 - dh) / 2 + 2, dw, dh);
+      ctx.filter = 'none';
+    }
+  }, [fantasySprites, hueShift]);
+
+  // Single shared animation loop for GuttyKreum previews
   useEffect(() => {
     let animId: number;
     let lastTime = 0;
@@ -72,6 +107,8 @@ export default function CharacterPicker({
     animId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animId);
   }, [npcTilemap, hueShift]);
+
+  const isFantasySelected = selectedIndex >= 100;
 
   return (
     <div
@@ -153,13 +190,23 @@ export default function CharacterPicker({
           </div>
         </div>
 
+        {/* Section label — Townsfolk */}
+        <div style={{
+          fontSize: 9,
+          color: '#888',
+          marginBottom: 6,
+          fontFamily: '"Press Start 2P", monospace',
+        }}>
+          Townsfolk
+        </div>
+
         {/* Character grid — 6 columns */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(6, 1fr)',
             gap: 6,
-            marginBottom: 18,
+            marginBottom: 14,
           }}
         >
           {SELECTABLE_CHARACTERS.map((ch) => (
@@ -206,6 +253,73 @@ export default function CharacterPicker({
             </div>
           ))}
         </div>
+
+        {/* Fantasy Heroes section */}
+        {fantasySprites.length > 0 && (
+          <>
+            <div style={{ height: 1, background: '#333', margin: '0 0 12px' }} />
+            <div style={{
+              fontSize: 9,
+              color: '#c89b3c',
+              marginBottom: 6,
+              fontFamily: '"Press Start 2P", monospace',
+            }}>
+              Fantasy Heroes
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: 6,
+                marginBottom: 14,
+              }}
+            >
+              {fantasySprites.map((fs) => (
+                <div
+                  key={fs.index}
+                  onClick={() => setSelectedIndex(fs.index)}
+                  style={{
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    padding: '6px 2px 4px',
+                    borderRadius: 8,
+                    border: selectedIndex === fs.index
+                      ? '2px solid #c89b3c'
+                      : '2px solid transparent',
+                    background: selectedIndex === fs.index
+                      ? 'rgba(200,155,60,0.15)'
+                      : 'rgba(255,255,255,0.04)',
+                    transition: 'all 0.12s',
+                  }}
+                >
+                  <canvas
+                    ref={(el) => setFantasyCanvasRef(fs.index, el)}
+                    width={48}
+                    height={56}
+                    style={{
+                      imageRendering: 'pixelated',
+                      display: 'block',
+                      margin: '0 auto',
+                      width: 48,
+                      height: 56,
+                    }}
+                  />
+                  <div style={{
+                    fontSize: 8,
+                    color: selectedIndex === fs.index ? '#c89b3c' : '#888',
+                    marginTop: 2,
+                    fontFamily: 'Inter, sans-serif',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {fs.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Divider */}
         <div style={{ height: 1, background: '#333', margin: '0 0 14px' }} />
@@ -293,14 +407,18 @@ export default function CharacterPicker({
             style={{
               padding: '8px 28px',
               fontSize: 10,
-              background: 'linear-gradient(180deg, #ffd700, #e6b800)',
+              background: isFantasySelected
+                ? 'linear-gradient(180deg, #c89b3c, #a07828)'
+                : 'linear-gradient(180deg, #ffd700, #e6b800)',
               color: '#1a1a2e',
               border: 'none',
               borderRadius: 6,
               cursor: 'pointer',
               fontWeight: 'bold',
               fontFamily: '"Press Start 2P", monospace',
-              boxShadow: '0 2px 8px rgba(255,215,0,0.25)',
+              boxShadow: isFantasySelected
+                ? '0 2px 8px rgba(200,155,60,0.3)'
+                : '0 2px 8px rgba(255,215,0,0.25)',
               transition: 'transform 0.1s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
