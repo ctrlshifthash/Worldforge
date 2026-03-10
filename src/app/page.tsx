@@ -93,10 +93,10 @@ export default async function LandingPage() {
           <div className="hero-world-overlay" />
         </div>
         <div className="hero-v2-glow" />
+        <CaBadge />
         <SocialLinks />
 
         <div className="hero-v2-content">
-          <CaBadge />
 
           <h1 className="hero-v2-title">
             Your World.<br /><em>Alive.</em>

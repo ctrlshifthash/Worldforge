@@ -6461,9 +6461,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 28px;
   cursor: pointer;
-  position: relative;
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
   min-width: 320px;
   transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
   text-shadow: 0 1px 6px rgba(0,0,0,0.8);
