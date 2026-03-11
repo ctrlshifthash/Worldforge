@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState } from 'react';
 
 export function LoadingScreen() {
@@ -17,7 +19,9 @@ export function LoadingScreen() {
   return (
     <div className={`loading-screen${fadeOut ? ' loading-screen--fade' : ''}`}>
       <div className="loading-screen-content">
-        <div className="loading-screen-logo">W</div>
+        <div className="loading-screen-logo">
+          <img src="/logo.png" alt="Worldforge" width={60} height={60} />
+        </div>
         <h1 className="loading-screen-title">Worldforge</h1>
         <p className="loading-screen-slogan">
           Your World.<br />
