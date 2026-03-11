@@ -4,7 +4,7 @@ import { PixelSkyBackground } from '@/components/PixelSkyBackground';
 import { LoadingScreen } from '@/components/LoadingScreen';
 
 export const metadata: Metadata = {
-  title: 'Worldforge — Collaborative Worldbuilding Platform',
+  title: 'Worldforge',
   description:
     'A premium collaborative worldbuilding platform for writers, game masters, studios, and creative teams.',
 };
