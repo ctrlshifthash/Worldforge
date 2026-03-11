@@ -1126,17 +1126,12 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--gold);
 }
 
-.navbar-brand-mark {
+.navbar-brand-logo {
   width: 28px;
   height: 28px;
-  border-radius: 0;
-  background: var(--gold);
-  display: grid;
-  place-items: center;
-  color: var(--void);
-  font-family: var(--font-pixel);
-  font-weight: 400;
-  font-size: 0.6rem;
+  border-radius: 6px;
+  object-fit: cover;
+  image-rendering: pixelated;
   box-shadow: 0 0 10px rgba(240,192,96,0.3);
 }
 
