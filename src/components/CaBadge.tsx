@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export function CaBadge() {
   const [copied, setCopied] = useState(false);
-  const ca = 'TBA';
+  const ca = 'rY383KGU9nzYtoBYNh7xW7VyNWrw6fKoejaqpeQqRPG';
 
   const handleClick = () => {
     navigator.clipboard.writeText(ca).then(() => {

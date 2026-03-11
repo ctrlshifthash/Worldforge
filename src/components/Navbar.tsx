@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getSession } from '@/lib/auth';
 
 const NAV_SOCIALS = [
-  { name: 'Pump.fun', href: 'https://pump.fun/coin/', img: '/socials/pumpfun.png' },
+  { name: 'Pump.fun', href: 'https://pump.fun/coin/rY383KGU9nzYtoBYNh7xW7VyNWrw6fKoejaqpeQqRPG', img: '/socials/pumpfun.png' },
   { name: 'X', href: 'https://x.com/PlayWorldforge', img: '/socials/x.png' },
   { name: 'GitHub', href: 'https://github.com/PlayWorldforge/Worldforge', img: '/socials/github.png' },
   { name: 'GitBook', href: 'https://worldforge.gitbook.io/worldforge', img: '/socials/gitbook.png' },

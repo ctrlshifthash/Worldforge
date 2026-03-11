@@ -5,7 +5,7 @@
 const SOCIALS = [
   {
     name: 'Pump.fun',
-    href: 'https://pump.fun/coin/',
+    href: 'https://pump.fun/coin/rY383KGU9nzYtoBYNh7xW7VyNWrw6fKoejaqpeQqRPG',
     img: '/socials/pumpfun.png',
     dark: false,
     scale: '100%',
