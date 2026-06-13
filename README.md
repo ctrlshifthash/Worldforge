@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/logo.png" alt="Worldcraft" width="150" />
-
 # Worldcraft
+
+<img src="public/banner.png" alt="Worldcraft" width="520" />
 
 ### Your World. Alive. **And It Pays You.**
 
@@ -26,7 +26,7 @@
   <img src="https://img.shields.io/badge/Solana-Mainnet-9945FF?style=for-the-badge&logo=solana&logoColor=white" alt="Solana Mainnet" />
   <img src="https://img.shields.io/badge/Auth-Privy-4C6FFF?style=for-the-badge" alt="Privy" />
   <img src="https://img.shields.io/badge/Play--to--Earn-SOL-14F195?style=for-the-badge" alt="Play to Earn" />
-  <img src="https://img.shields.io/badge/Built_with-Mythos-8A2BE2?style=for-the-badge&logo=anthropic&logoColor=white" alt="Built with Mythos" />
+  <img src="https://img.shields.io/badge/Built_with-Fable_5-8A2BE2?style=for-the-badge&logo=anthropic&logoColor=white" alt="Built with Fable 5" />
 </p>
 
 </div>
@@ -296,7 +296,7 @@ Build/run config is pinned in [`railway.json`](railway.json).
 
 ---
 
-**Built with [Mythos](https://www.anthropic.com/) · Powered by Solana**
+**Built with [Fable 5](https://www.anthropic.com/) · Powered by Solana**
 
 <sub>Rewards depend on the treasury and daily pool. Nothing here is financial advice.</sub>
 
