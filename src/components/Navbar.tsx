@@ -15,8 +15,8 @@ export async function Navbar() {
   return (
     <nav className="navbar">
       <Link href="/" className="navbar-brand">
-        <img src="/logo.png" alt="Worldforge" width={28} height={28} className="navbar-brand-logo" />
-        Worldforge
+        <img src="/logo.png" alt="Worldcraft" width={28} height={28} className="navbar-brand-logo" />
+        Worldcraft
       </Link>
 
       <div className="navbar-center">

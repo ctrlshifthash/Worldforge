@@ -41,7 +41,7 @@ export default function RegisterPage() {
       <div className="auth-card">
         <Link href="/" className="nav-logo" style={{ marginBottom: 32, display: 'inline-flex' }}>
           <span className="nav-logo-mark">W</span>
-          Worldforge
+          Worldcraft
         </Link>
 
         <h1>Create your account</h1>

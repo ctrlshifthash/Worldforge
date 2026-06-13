@@ -24,7 +24,7 @@ export default function HowItWorksPage() {
 
       {/* ─── Hero ─── */}
       <section className="hiw-hero tileset-bg">
-        <h1>How Worldforge Works</h1>
+        <h1>How Worldcraft Works</h1>
         <p className="hiw-hero-sub">
           A complete guide to every feature &mdash; from creating your first world to
           playing inside it. Worldbuilding, combat, NPCs, quests, building, character customization,
@@ -396,9 +396,9 @@ export default function HowItWorksPage() {
           <div className="hiw-section-number">07</div>
           <h2>Earn SOL for Quests</h2>
           <p>
-            Worldforge is play-to-earn. The quests you already complete &mdash; clearing orcs, finding Marina&apos;s
+            Worldcraft is play-to-earn. The quests you already complete &mdash; clearing orcs, finding Marina&apos;s
             necklace, gathering firewood &mdash; can pay out real <strong>SOL on Solana</strong> if you hold the
-            Worldforge token. Don&apos;t hold the token? You still earn in-game coins for the same quests. It&apos;s a
+            Worldcraft token. Don&apos;t hold the token? You still earn in-game coins for the same quests. It&apos;s a
             reward for playing, not an investment.
           </p>
 
@@ -452,7 +452,7 @@ export default function HowItWorksPage() {
           </p>
 
           <div className="hiw-callout">
-            <strong>Token status:</strong> the Worldforge token isn&apos;t launched yet &mdash; the Contract Address (CA)
+            <strong>Token status:</strong> the Worldcraft token isn&apos;t launched yet &mdash; the Contract Address (CA)
             is <strong>TBA</strong>. Until launch, everyone earns in-game coins; real SOL payouts begin once the token is
             live. Rewards depend on the treasury and the daily pool, and can change. This is a reward for playing, not a
             promise of profit &mdash; nothing here is financial advice.
@@ -635,9 +635,9 @@ export default function HowItWorksPage() {
       {/* ─── Footer ─── */}
       <footer className="landing-footer">
         <div className="container">
-          <div className="ornament" style={{ marginBottom: 24 }}>Worldforge</div>
+          <div className="ornament" style={{ marginBottom: 24 }}>Worldcraft</div>
           <p>Your World.<br /><em>Alive.</em></p>
-          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldforge 2026</p>
+          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldcraft 2026</p>
         </div>
       </footer>
     </div>

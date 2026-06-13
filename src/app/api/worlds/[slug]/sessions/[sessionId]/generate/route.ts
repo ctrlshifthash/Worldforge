@@ -128,7 +128,7 @@ ${charSession.scope === 'SAFE' ? 'Keep proposedChanges minimal — only facts or
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://worldforge.app',
-      'X-Title': 'Worldforge',
+      'X-Title': 'Worldcraft',
     },
     body: JSON.stringify({
       model: 'anthropic/claude-sonnet-4',

@@ -20,9 +20,9 @@ export function LoadingScreen() {
     <div className={`loading-screen${fadeOut ? ' loading-screen--fade' : ''}`}>
       <div className="loading-screen-content">
         <div className="loading-screen-logo">
-          <img src="/logo.png" alt="Worldforge" width={60} height={60} />
+          <img src="/logo.png" alt="Worldcraft" width={60} height={60} />
         </div>
-        <h1 className="loading-screen-title">Worldforge</h1>
+        <h1 className="loading-screen-title">Worldcraft</h1>
         <p className="loading-screen-slogan">
           Your World.<br />
           <em>Alive.</em>

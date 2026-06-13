@@ -30,7 +30,7 @@ export default function AboutPage() {
             starts with a <span className="about-glow-word">world</span>.
           </h1>
           <p className="about-opening-lead">
-            Worldforge lets you build one — then walk into it.
+            Worldcraft lets you build one — then walk into it.
           </p>
         </div>
         <div className="about-scroll-hint">
@@ -40,12 +40,12 @@ export default function AboutPage() {
 
       <div className="mountain-divider" />
 
-      {/* ─── What Is Worldforge ─── */}
+      {/* ─── What Is Worldcraft ─── */}
       <section className="about-statement">
         <div className="about-statement-inner">
-          <h2 className="about-statement-heading">So what is Worldforge?</h2>
+          <h2 className="about-statement-heading">So what is Worldcraft?</h2>
           <p className="about-big-text">
-            Worldforge is a platform where you create fictional worlds — think Middle-earth,
+            Worldcraft is a platform where you create fictional worlds — think Middle-earth,
             Westeros, or the Star Wars galaxy — except it&apos;s <em>your</em> universe, with <em>your</em> rules.
             And then you actually <em>play</em> inside it.
           </p>
@@ -150,7 +150,7 @@ export default function AboutPage() {
               <span className="about-demo-dot" />
               <span className="about-demo-dot" />
               <span className="about-demo-dot" />
-              <span className="about-demo-bar-title">worldforge generate</span>
+              <span className="about-demo-bar-title">worldcraft generate</span>
             </div>
             <div className="about-demo-body">
               <div className="about-demo-line about-demo-input">
@@ -344,10 +344,10 @@ export default function AboutPage() {
         <div className="about-statement-inner">
           <h2 className="about-statement-heading">Play to earn &mdash; quests pay real SOL</h2>
           <p className="about-big-text">
-            Worldforge is now a play-to-earn worldbuilding RPG. As you explore the Hub town,
+            Worldcraft is now a play-to-earn worldbuilding RPG. As you explore the Hub town,
             head through the Northern Pass into the Grassland, or visit the Seaside Village &mdash;
             fighting enemies, building, and completing quests for NPCs &mdash; those quests pay out.
-            Players who <strong>hold the Worldforge token</strong> earn real <strong>SOL</strong> on
+            Players who <strong>hold the Worldcraft token</strong> earn real <strong>SOL</strong> on
             Solana mainnet. Players who don&apos;t hold the token still earn in-game coins for the
             same quests.
           </p>
@@ -392,7 +392,7 @@ export default function AboutPage() {
             A global daily reward pool caps total payouts across all players.
           </p>
           <p className="about-big-text about-big-text-muted">
-            One important note: the Worldforge token isn&apos;t launched yet &mdash; the contract address
+            One important note: the Worldcraft token isn&apos;t launched yet &mdash; the contract address
             (CA) is currently <strong>TBA</strong>. Until launch, everyone earns in-game coins; real SOL
             payouts begin once the token is live. Rewards depend on the treasury and daily pool, and this
             is a reward for playing &mdash; not an investment, a promise of profit, or financial advice.
@@ -402,7 +402,7 @@ export default function AboutPage() {
 
       {/* ─── Who It's For — Horizontal Scroll ─── */}
       <section className="about-audience-section">
-        <h2 className="about-section-title">Who builds with Worldforge</h2>
+        <h2 className="about-section-title">Who builds with Worldcraft</h2>
         <div className="about-audience-scroll">
           <div className="about-audience-item">
             <div className="about-audience-big-icon">
@@ -442,8 +442,8 @@ export default function AboutPage() {
         <h2 className="about-section-title">Questions</h2>
         <div className="about-faq-list">
           <details className="about-faq-detail">
-            <summary>What exactly is Worldforge?</summary>
-            <p>Worldforge is a platform for creating fictional worlds. You know how Lord of the Rings has Middle-earth with all its characters, locations, history, and lore? Worldforge lets you build something like that — your own universe with its own people, places, factions, artifacts, species, history, and connections between everything. You can use AI to generate it all automatically, or build every detail by hand.</p>
+            <summary>What exactly is Worldcraft?</summary>
+            <p>Worldcraft is a platform for creating fictional worlds. You know how Lord of the Rings has Middle-earth with all its characters, locations, history, and lore? Worldcraft lets you build something like that — your own universe with its own people, places, factions, artifacts, species, history, and connections between everything. You can use AI to generate it all automatically, or build every detail by hand.</p>
           </details>
           <details className="about-faq-detail">
             <summary>What do you mean by &ldquo;entities&rdquo;?</summary>
@@ -475,7 +475,7 @@ export default function AboutPage() {
           </details>
           <details className="about-faq-detail">
             <summary>How does play-to-earn work?</summary>
-            <p>Completing quests for NPCs pays out rewards. If your wallet holds the Worldforge token, you earn real SOL on Solana mainnet; if you don&apos;t hold the token, you earn in-game coins for the same quests. Each payout is the quest&apos;s base SOL amount multiplied by your holder tier &mdash; Holder (1&times;), Bronze (1.25&times;), Silver (1.5&times;), Gold (2&times;), Diamond (3&times;) &mdash; which scales with the share of supply you hold. The multiplier caps above 3.5% of supply so whales don&apos;t dominate. Earnings accrue automatically, and you withdraw them with the Claim button on the Earnings dashboard. It&apos;s a reward for playing, not an investment or a promise of profit.</p>
+            <p>Completing quests for NPCs pays out rewards. If your wallet holds the Worldcraft token, you earn real SOL on Solana mainnet; if you don&apos;t hold the token, you earn in-game coins for the same quests. Each payout is the quest&apos;s base SOL amount multiplied by your holder tier &mdash; Holder (1&times;), Bronze (1.25&times;), Silver (1.5&times;), Gold (2&times;), Diamond (3&times;) &mdash; which scales with the share of supply you hold. The multiplier caps above 3.5% of supply so whales don&apos;t dominate. Earnings accrue automatically, and you withdraw them with the Claim button on the Earnings dashboard. It&apos;s a reward for playing, not an investment or a promise of profit.</p>
           </details>
           <details className="about-faq-detail">
             <summary>How do I connect a wallet and claim?</summary>
@@ -483,7 +483,7 @@ export default function AboutPage() {
           </details>
           <details className="about-faq-detail">
             <summary>Is the token live? What&apos;s the contract address?</summary>
-            <p>Not yet. The Worldforge token isn&apos;t launched, so the contract address (CA) is currently TBA. Until launch, everyone earns in-game coins for completing quests; real SOL payouts begin once the token is live. Rewards always depend on the treasury and daily reward pool &mdash; none of this is financial advice.</p>
+            <p>Not yet. The Worldcraft token isn&apos;t launched, so the contract address (CA) is currently TBA. Until launch, everyone earns in-game coins for completing quests; real SOL payouts begin once the token is live. Rewards always depend on the treasury and daily reward pool &mdash; none of this is financial advice.</p>
           </details>
           <details className="about-faq-detail">
             <summary>Do I need an account?</summary>
@@ -532,9 +532,9 @@ export default function AboutPage() {
       {/* ─── Footer ─── */}
       <footer className="landing-footer">
         <div className="container">
-          <div className="ornament" style={{ marginBottom: 24 }}>Worldforge</div>
+          <div className="ornament" style={{ marginBottom: 24 }}>Worldcraft</div>
           <p>Your World.<br /><em>Alive.</em></p>
-          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldforge 2026</p>
+          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldcraft 2026</p>
         </div>
       </footer>
     </div>

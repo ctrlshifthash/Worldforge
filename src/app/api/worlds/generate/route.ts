@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://worldforge.app',
-      'X-Title': 'Worldforge',
+      'X-Title': 'Worldcraft',
     },
     body: JSON.stringify({
       model: 'google/gemini-2.0-flash-001',

@@ -104,7 +104,7 @@ export default async function LandingPage() {
             Describe a world in one sentence and AI forges it in 30 seconds:
             characters, factions, history, a map you walk straight into. Then you
             actually play it &mdash; fight enemies, talk to NPCs, build, and finish
-            quests. Here&apos;s the turn: every quest pays. Hold the Worldforge token
+            quests. Here&apos;s the turn: every quest pays. Hold the Worldcraft token
             and your rewards land as <strong>real SOL</strong> in your wallet.
             Don&apos;t hold? You still earn in-game coins for everything you do.
           </p>
@@ -203,7 +203,7 @@ export default async function LandingPage() {
               Complete quests. Earn real <span className="gold">SOL</span>.
             </h2>
             <p>
-              Worldforge rewards you for playing. Hold the Worldforge token and the
+              Worldcraft rewards you for playing. Hold the Worldcraft token and the
               quests you finish pay out real SOL on Solana. Don&apos;t hold it? You still
               earn in-game coins for everything you do &mdash; nothing is locked behind the token.
             </p>
@@ -348,7 +348,7 @@ export default async function LandingPage() {
 
           {/* Honest disclaimer */}
           <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-dim)', maxWidth: 720, margin: '28px auto 0', lineHeight: 1.6 }}>
-            The Worldforge token isn&apos;t live yet &mdash; the contract address is TBA.
+            The Worldcraft token isn&apos;t live yet &mdash; the contract address is TBA.
             Until launch, everyone earns in-game coins; real SOL payouts begin once the
             token goes live on Solana mainnet. Each quest pays out once per account, a
             global daily pool caps total payouts, and you must hold the token at claim
@@ -387,7 +387,7 @@ export default async function LandingPage() {
                 <span className="ai-gen-terminal-dot" />
                 <span className="ai-gen-terminal-dot" />
                 <span className="ai-gen-terminal-dot" />
-                <span className="ai-gen-terminal-title">worldforge generate</span>
+                <span className="ai-gen-terminal-title">worldcraft generate</span>
               </div>
               <div className="ai-gen-terminal-body">
                 <div className="ai-gen-line" style={{ animationDelay: '0.2s' }}>
@@ -1087,9 +1087,9 @@ export default async function LandingPage() {
       {/* ─── Footer ─── */}
       <footer className="landing-footer">
         <div className="container">
-          <div className="ornament" style={{ marginBottom: 24 }}>Worldforge</div>
+          <div className="ornament" style={{ marginBottom: 24 }}>Worldcraft</div>
           <p>Your World.<br /><em>Alive.</em></p>
-          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldforge 2026</p>
+          <p style={{ fontSize: '0.75rem', opacity: 0.4, marginTop: 12 }}>&trade; Worldcraft 2026</p>
         </div>
       </footer>
     </div>

@@ -19,7 +19,7 @@ export function PublicNav() {
     <nav className="landing-nav">
       <Link href="/" className="nav-logo">
         <span className="nav-logo-mark">W</span>
-        Worldforge
+        Worldcraft
       </Link>
 
       <div className="nav-links">

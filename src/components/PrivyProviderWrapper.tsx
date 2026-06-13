@@ -23,7 +23,7 @@ export function PrivyProviderWrapper({ children }: { children: React.ReactNode }
           accentColor: '#e8c86a',
           walletChainType: 'solana-only',
           logo: '/logo.png',
-          landingHeader: 'Enter Worldforge',
+          landingHeader: 'Enter Worldcraft',
         },
         loginMethods: ['wallet', 'email'],
         embeddedWallets: {

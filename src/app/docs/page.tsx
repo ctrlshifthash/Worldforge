@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Docs — Worldforge',
+  title: 'Docs — Worldcraft',
   description:
-    'How Worldforge works: explore living worlds, fight, build, complete quests, and earn real SOL by holding the token.',
+    'How Worldcraft works: explore living worlds, fight, build, complete quests, and earn real SOL by holding the token.',
 };
 
 const section: React.CSSProperties = {
@@ -68,10 +68,10 @@ export default function DocsPage() {
       <Navbar />
       <main className="page-container">
         <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 0' }}>
-          <h1 style={{ fontSize: 40, marginBottom: 8, color: '#fff' }}>Worldforge Docs</h1>
+          <h1 style={{ fontSize: 40, marginBottom: 8, color: '#fff' }}>Worldcraft Docs</h1>
           <p style={{ ...p, fontSize: 18 }}>
-            Worldforge is a collaborative worldbuilding RPG. Explore hand-crafted zones, fight,
-            build, and complete quests for NPCs. If you hold the Worldforge token, your quests pay
+            Worldcraft is a collaborative worldbuilding RPG. Explore hand-crafted zones, fight,
+            build, and complete quests for NPCs. If you hold the Worldcraft token, your quests pay
             out in <strong>real SOL</strong> on Solana. If you don&apos;t, you still earn in-game
             coins. This page is the complete guide to how everything works.
           </p>
@@ -79,7 +79,7 @@ export default function DocsPage() {
           {/* ---------------- Table of contents ---------------- */}
           <section style={section}>
             <h2 style={h2}>On this page</h2>
-            <a href="#what" style={tocLink}>1. What is Worldforge?</a>
+            <a href="#what" style={tocLink}>1. What is Worldcraft?</a>
             <a href="#zones" style={tocLink}>2. Zones &amp; gameplay</a>
             <a href="#earn" style={tocLink}>3. Play-to-earn: how earning works</a>
             <a href="#tiers" style={tocLink}>4. Holder tiers &amp; multipliers</a>
@@ -90,18 +90,18 @@ export default function DocsPage() {
             <a href="#faq" style={tocLink}>9. FAQ</a>
           </section>
 
-          {/* ---------------- What is Worldforge ---------------- */}
+          {/* ---------------- What is Worldcraft ---------------- */}
           <section id="what" style={section}>
-            <h2 style={h2}>1. What is Worldforge?</h2>
+            <h2 style={h2}>1. What is Worldcraft?</h2>
             <p style={p}>
-              Worldforge is a canvas-based, explorable worldbuilding RPG. You walk a living world
+              Worldcraft is a canvas-based, explorable worldbuilding RPG. You walk a living world
               made of three hand-crafted zones, talk to NPCs, take on quests, fight enemies, and —
               if you own the world — build it up with structures and props. It plays in the browser:
               there is nothing to install.
             </p>
             <p style={p}>
               The twist is the reward layer. Completing quests grants rewards, and players who hold
-              the Worldforge token receive those rewards as <strong>real SOL</strong> instead of
+              the Worldcraft token receive those rewards as <strong>real SOL</strong> instead of
               in-game coins. The rest of this guide explains the worlds you explore and exactly how
               earning, holding, and claiming work.
             </p>
@@ -170,7 +170,7 @@ export default function DocsPage() {
             <h2 style={h2}>3. Play-to-earn: how earning works</h2>
             <p style={p}>
               Every quest has a <strong>base reward</strong>. What you receive for completing it
-              depends on whether you hold the Worldforge token:
+              depends on whether you hold the Worldcraft token:
             </p>
             <ul>
               <li style={li}>
@@ -333,7 +333,7 @@ export default function DocsPage() {
           <section id="fairplay" style={section}>
             <h2 style={h2}>7. Fair play &amp; anti-farming</h2>
             <p style={p}>
-              To keep rewards sustainable and fair, Worldforge applies anti-farming protections. The
+              To keep rewards sustainable and fair, Worldcraft applies anti-farming protections. The
               goal is simple — reward real players exploring the world, not bots or exploiters.
             </p>
             <ul>

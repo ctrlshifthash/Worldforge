@@ -5,7 +5,7 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { PrivyProviderWrapper } from '@/components/PrivyProviderWrapper';
 
 export const metadata: Metadata = {
-  title: 'Worldforge',
+  title: 'Worldcraft',
   description:
     'A premium collaborative worldbuilding platform for writers, game masters, studios, and creative teams.',
 };
