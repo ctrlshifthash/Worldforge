@@ -19,10 +19,13 @@ RUN npm ci --include=dev
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# NEXT_PUBLIC_* vars are inlined into the client bundle at build time.
-# Railway passes service variables as build args; declare the ones we need.
+# Build-time vars. Railway passes service variables as build args; declare the
+# ones the build needs. NEXT_PUBLIC_* is inlined into the client bundle, and
+# DATABASE_URL is required because the landing page is prerendered from the DB.
 ARG NEXT_PUBLIC_PRIVY_APP_ID
 ENV NEXT_PUBLIC_PRIVY_APP_ID=$NEXT_PUBLIC_PRIVY_APP_ID
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 RUN npm run build
 
 # ---- runner: run the production server ----
