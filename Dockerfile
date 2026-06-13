@@ -10,6 +10,8 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-c
 # ---- deps: install node_modules (honors .npmrc legacy-peer-deps) ----
 FROM base AS deps
 COPY package.json package-lock.json .npmrc ./
+# Schema is needed because postinstall runs `prisma generate`.
+COPY prisma ./prisma
 # --include=dev so the build keeps TypeScript/types even if NODE_ENV=production.
 RUN npm ci --include=dev
 
