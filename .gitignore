@@ -41,3 +41,6 @@ coverage
 
 # vercel
 .vercel
+
+# stray artifact
+*temp_old.txt
