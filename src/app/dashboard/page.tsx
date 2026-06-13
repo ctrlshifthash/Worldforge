@@ -22,6 +22,29 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <Link
+        href="/dashboard/earnings"
+        className="card"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 16,
+          marginBottom: 20,
+          textDecoration: 'none',
+          borderColor: 'var(--gold-dim)',
+          background: 'linear-gradient(90deg, rgba(232,200,106,0.10), rgba(232,200,106,0.02))',
+        }}
+      >
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--gold)' }}>
+            💰 Earnings &amp; Claims
+          </div>
+          <div className="text-small">Claim the real SOL you&apos;ve earned from quests — up to 4 times a day, 6 hours apart.</div>
+        </div>
+        <span className="btn btn-primary btn-sm">Open Earnings →</span>
+      </Link>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700 }}>{worlds.length}</div>

@@ -73,15 +73,44 @@ export default async function PlayPage({
   }
 
   return (
-    <WorldExplore
-      entities={mappedEntities}
-      slug={slug}
-      worldTitle={world.title}
-      eraLabel={selectedEra?.title}
-      fullscreen
-      isOwner={isOwner}
-      worldId={world.id}
-      playerName={playerName}
-    />
+    <>
+      <WorldExplore
+        entities={mappedEntities}
+        slug={slug}
+        worldTitle={world.title}
+        eraLabel={selectedEra?.title}
+        fullscreen
+        isOwner={isOwner}
+        worldId={world.id}
+        playerName={playerName}
+      />
+      {/* In-game shortcut to claim earned SOL (opens the Earnings dashboard) */}
+      <a
+        href="/dashboard/earnings"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Claim the SOL you've earned from quests"
+        style={{
+          position: 'fixed',
+          top: 12,
+          right: 12,
+          zIndex: 40,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '8px 14px',
+          borderRadius: 8,
+          fontSize: 13,
+          fontWeight: 700,
+          color: '#1a1a1a',
+          background: 'linear-gradient(180deg, #ffd700, #e6b800)',
+          border: '1px solid #b8901f',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+          textDecoration: 'none',
+        }}
+      >
+        💰 Claim SOL
+      </a>
+    </>
   );
 }
