@@ -60,7 +60,10 @@ export const PAYOUT = {
     cooldownHours: 6,
     /** Reject claims below this (dust) and clamp a single claim to the max. */
     minSol: 0.001,
-    maxSol: 0.5,
+    // Per-CLAIM ceiling — kept well under the global daily pool (0.5) so no
+    // single claim can drain the day's pool; still covers a full max-tier
+    // player's total earnings in one claim.
+    maxSol: 0.05,
   },
 
   pool: {
