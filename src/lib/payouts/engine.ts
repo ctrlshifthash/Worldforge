@@ -94,13 +94,45 @@ export async function recordQuestCompletion(params: {
   return { ok: true, rewardKind, earnedSol, earnedCoins, tier };
 }
 
+export interface NextTierInfo {
+  key: string;
+  label: string;
+  multiplier: number;
+  atTokens: number; // token balance needed to reach this tier
+  tokensNeeded: number; // how many more tokens from the current balance
+}
+
+/** Next tier above the wallet's current holdings, or null if already at the top. */
+function computeNextTier(balance: number): NextTierInfo | null {
+  const supply = PAYOUT.token.totalSupply || 1;
+  const pct = (balance / supply) * 100;
+  for (const t of PAYOUT.tiers) {
+    if (t.minPercent > pct) {
+      const atTokens = Math.ceil((t.minPercent / 100) * supply);
+      return {
+        key: t.key,
+        label: t.label,
+        multiplier: t.multiplier,
+        atTokens,
+        tokensNeeded: Math.max(0, atTokens - balance),
+      };
+    }
+  }
+  return null;
+}
+
 export interface EarningsSummary {
   claimableSol: number;
   lifetimeSol: number;
   unclaimedCoins: number;
   questsCompleted: number;
   tier: TierResult | null;
+  tokenBalance: number; // tokens the connected wallet holds
+  tokenSupply: number;
+  nextTier: NextTierInfo | null;
   walletAddress: string | null;
+  // NOTE: the global daily pool is intentionally NOT exposed here — it is
+  // enforced server-side at claim time but isn't shown to players.
   claim: {
     maxPerDay: number;
     usedToday: number;
@@ -109,11 +141,6 @@ export interface EarningsSummary {
     nextClaimAt: string | null; // ISO, null if claimable now
     minSol: number;
     maxSol: number;
-  };
-  pool: {
-    dailyCapSol: number;
-    spentTodaySol: number;
-    remainingSol: number;
   };
 }
 
@@ -149,13 +176,14 @@ export async function getEarningsSummary(userId: string): Promise<EarningsSummar
     if (next.getTime() > Date.now()) nextClaimAt = next.toISOString();
   }
 
-  const payoutDay = await prisma.payoutDay.findUnique({ where: { date: utcDay() } });
-  const spentTodaySol = payoutDay?.totalSol ?? 0;
-
-  // Current tier for display (live read; falls back to non-holder).
+  // Current holdings + tier (live on-chain read once a mint is configured).
+  let tokenBalance = 0;
   let tier: TierResult | null = null;
+  let nextTier: NextTierInfo | null = null;
   if (user?.walletAddress) {
-    tier = resolveTier(await getTokenBalance(user.walletAddress));
+    tokenBalance = await getTokenBalance(user.walletAddress);
+    tier = resolveTier(tokenBalance);
+    nextTier = computeNextTier(tokenBalance);
   }
 
   return {
@@ -164,6 +192,9 @@ export async function getEarningsSummary(userId: string): Promise<EarningsSummar
     unclaimedCoins,
     questsCompleted,
     tier,
+    tokenBalance,
+    tokenSupply: PAYOUT.token.totalSupply,
+    nextTier,
     walletAddress: user?.walletAddress ?? null,
     claim: {
       maxPerDay: PAYOUT.claim.maxPerDay,
@@ -173,11 +204,6 @@ export async function getEarningsSummary(userId: string): Promise<EarningsSummar
       nextClaimAt,
       minSol: PAYOUT.claim.minSol,
       maxSol: PAYOUT.claim.maxSol,
-    },
-    pool: {
-      dailyCapSol: PAYOUT.pool.dailyCapSol,
-      spentTodaySol,
-      remainingSol: Math.max(0, PAYOUT.pool.dailyCapSol - spentTodaySol),
     },
   };
 }

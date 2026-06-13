@@ -2,12 +2,23 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+interface NextTier {
+  key: string;
+  label: string;
+  multiplier: number;
+  atTokens: number;
+  tokensNeeded: number;
+}
+
 interface Summary {
   claimableSol: number;
   lifetimeSol: number;
   unclaimedCoins: number;
   questsCompleted: number;
   tier: { label: string; multiplier: number; ownershipPercent: number; qualifies: boolean; capped: boolean } | null;
+  tokenBalance: number;
+  tokenSupply: number;
+  nextTier: NextTier | null;
   walletAddress: string | null;
   claim: {
     maxPerDay: number;
@@ -18,7 +29,6 @@ interface Summary {
     minSol: number;
     maxSol: number;
   };
-  pool: { dailyCapSol: number; spentTodaySol: number; remainingSol: number };
 }
 
 const REASONS: Record<string, string> = {
@@ -28,16 +38,32 @@ const REASONS: Record<string, string> = {
   daily_claim_limit: "You've hit today's claim limit.",
   cooldown: 'Still cooling down between claims.',
   no_longer_holding: 'You must hold the token to claim SOL.',
-  pool_exhausted: "Today's reward pool is used up. Try again tomorrow.",
+  pool_exhausted: 'Payouts are paused for today. Try again tomorrow.',
   below_min_or_capped: 'Not enough claimable SOL right now.',
   payout_failed: 'The payout failed to send. Your earnings are safe — try again.',
 };
+
+function fmtTokens(n: number): string {
+  if (n >= 1e9) return `${(n / 1e9).toFixed(2).replace(/\.?0+$/, '')}B`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1).replace(/\.0$/, '')}K`;
+  return Math.round(n).toLocaleString();
+}
+
+function fmtDuration(ms: number): string {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${h}h ${String(m).padStart(2, '0')}m ${String(sec).padStart(2, '0')}s`;
+}
 
 export default function EarningsPage() {
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     const res = await fetch('/api/payouts/summary');
@@ -48,6 +74,21 @@ export default function EarningsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Tick every second so the cooldown counts down live.
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Refresh once the cooldown actually ends.
+  useEffect(() => {
+    if (!data?.claim.nextClaimAt) return;
+    const ms = new Date(data.claim.nextClaimAt).getTime() - Date.now();
+    if (ms <= 0) return;
+    const t = setTimeout(() => load(), ms + 500);
+    return () => clearTimeout(t);
+  }, [data?.claim.nextClaimAt, load]);
 
   const claim = useCallback(async () => {
     setClaiming(true);
@@ -66,13 +107,17 @@ export default function EarningsPage() {
   if (loading) return <p style={{ color: '#aaa' }}>Loading earnings…</p>;
   if (!data) return <p style={{ color: '#aaa' }}>Sign in to view earnings.</p>;
 
+  const nextMs = data.claim.nextClaimAt ? new Date(data.claim.nextClaimAt).getTime() : 0;
+  const remainingMs = Math.max(0, nextMs - now);
+  const onCooldown = remainingMs > 0;
+  const ownershipPct = data.tokenSupply ? (data.tokenBalance / data.tokenSupply) * 100 : 0;
+
   const canClaim =
+    !!data.walletAddress &&
+    (data.tier?.qualifies ?? false) &&
     data.claimableSol >= data.claim.minSol &&
     data.claim.remainingToday > 0 &&
-    !data.claim.nextClaimAt &&
-    data.pool.remainingSol >= data.claim.minSol &&
-    !!data.walletAddress &&
-    (data.tier?.qualifies ?? false);
+    !onCooldown;
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', color: '#e8e8e8' }}>
@@ -88,37 +133,60 @@ export default function EarningsPage() {
         <Card label="Quests completed" value={`${data.questsCompleted}`} />
       </div>
 
+      {/* Holdings & tier */}
       <div style={panel}>
-        <strong>Tier</strong>
-        {data.tier && data.tier.qualifies ? (
-          <p style={{ margin: '6px 0 0' }}>
-            {data.tier.label} — <b>{data.tier.multiplier}×</b> multiplier ·{' '}
-            {data.tier.ownershipPercent.toFixed(3)}% of supply
-            {data.tier.capped && <span style={{ color: '#e8c86a' }}> (multiplier capped)</span>}
+        <strong>Your holdings &amp; tier</strong>
+        {!data.walletAddress ? (
+          <p style={{ margin: '8px 0 0', color: '#c98' }}>
+            Link a Solana wallet (top-right) to see your tier and start earning SOL.
           </p>
         ) : (
-          <p style={{ margin: '6px 0 0', color: '#c98' }}>
-            Non-holder — earning in-game coins only. Hold the token to earn SOL.
-          </p>
+          <>
+            <p style={{ margin: '8px 0 4px' }}>
+              You hold <b style={{ color: '#e8c86a' }}>{fmtTokens(data.tokenBalance)}</b> tokens
+              {' '}<span style={{ color: '#888' }}>({ownershipPct.toFixed(3)}% of supply)</span>
+            </p>
+            {data.tier?.qualifies ? (
+              <p style={{ margin: '0 0 4px' }}>
+                Tier: <b>{data.tier.label}</b> — <b>{data.tier.multiplier}×</b> rewards
+                {data.tier.capped && <span style={{ color: '#e8c86a' }}> (multiplier maxed)</span>}
+              </p>
+            ) : (
+              <p style={{ margin: '0 0 4px', color: '#c98' }}>
+                Tier: Non-holder — quests pay in-game coins, not SOL.
+              </p>
+            )}
+            {data.nextTier ? (
+              <p style={{ margin: 0, color: '#bbb', fontSize: 14 }}>
+                Hold <b>{fmtTokens(data.nextTier.tokensNeeded)}</b> more
+                {' '}({fmtTokens(data.nextTier.atTokens)} total) to reach{' '}
+                <b>{data.nextTier.label}</b> at {data.nextTier.multiplier}×.
+              </p>
+            ) : (
+              <p style={{ margin: 0, color: '#7ad77a', fontSize: 14 }}>
+                You&apos;re at the top tier — maximum multiplier.
+              </p>
+            )}
+          </>
         )}
       </div>
 
+      {/* Claims */}
       <div style={panel}>
-        <strong>Daily reward pool</strong>
-        <p style={{ margin: '6px 0 0', color: '#bbb' }}>
-          {data.pool.remainingSol.toFixed(3)} / {data.pool.dailyCapSol} SOL remaining today
-        </p>
-      </div>
-
-      <div style={panel}>
-        <strong>Claim limits</strong>
-        <p style={{ margin: '6px 0 0', color: '#bbb' }}>
+        <strong>Claims</strong>
+        <p style={{ margin: '8px 0 4px', color: '#bbb' }}>
           {data.claim.remainingToday} of {data.claim.maxPerDay} claims left today · one every{' '}
-          {data.claim.cooldownHours}h
-          {data.claim.nextClaimAt && (
-            <> · next at {new Date(data.claim.nextClaimAt).toLocaleTimeString()}</>
-          )}
+          {data.claim.cooldownHours} hours
         </p>
+        {onCooldown ? (
+          <p style={{ margin: 0, color: '#e8c86a', fontVariantNumeric: 'tabular-nums' }}>
+            Next claim in <b>{fmtDuration(remainingMs)}</b>
+          </p>
+        ) : data.claim.remainingToday > 0 ? (
+          <p style={{ margin: 0, color: '#7ad77a' }}>You can claim now.</p>
+        ) : (
+          <p style={{ margin: 0, color: '#c98' }}>Daily limit reached — resets at 00:00 UTC.</p>
+        )}
       </div>
 
       <button
@@ -137,7 +205,11 @@ export default function EarningsPage() {
           color: canClaim && !claiming ? '#1a1a1a' : '#888',
         }}
       >
-        {claiming ? 'Claiming…' : `Claim ${data.claimableSol.toFixed(4)} SOL`}
+        {claiming
+          ? 'Claiming…'
+          : onCooldown
+            ? `Claim again in ${fmtDuration(remainingMs)}`
+            : `Claim ${data.claimableSol.toFixed(4)} SOL`}
       </button>
 
       {msg && <p style={{ marginTop: 12, color: '#bbb' }}>{msg}</p>}
