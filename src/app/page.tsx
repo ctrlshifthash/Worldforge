@@ -97,14 +97,16 @@ export default async function LandingPage() {
         <div className="hero-v2-content">
 
           <h1 className="hero-v2-title">
-            Your World.<br /><em>Alive.</em>
+            Your World.<br /><em>Alive.</em><br />And It Pays You.
           </h1>
 
           <p className="hero-v2-body">
-            Describe a world in a sentence. AI builds it in 30 seconds &mdash;
-            characters, factions, history, map, everything. Then you walk in.
-            Fight enemies. Talk to NPCs. Complete quests. Build structures.
-            Grow your world from a concept into a place.
+            Describe a world in one sentence and AI forges it in 30 seconds:
+            characters, factions, history, a map you walk straight into. Then you
+            actually play it &mdash; fight enemies, talk to NPCs, build, and finish
+            quests. Here&apos;s the turn: every quest pays. Hold the Worldforge token
+            and your rewards land as <strong>real SOL</strong> in your wallet.
+            Don&apos;t hold? You still earn in-game coins for everything you do.
           </p>
 
           <div className="hero-v2-cta">
@@ -157,6 +159,8 @@ export default async function LandingPage() {
           <span className="hero-v2-stat"><strong>25+</strong> NPCs with dialogue</span>
           <span className="hero-v2-stat-sep" />
           <span className="hero-v2-stat"><strong>8</strong> quests &amp; missions</span>
+          <span className="hero-v2-stat-sep" />
+          <span className="hero-v2-stat"><strong>real SOL</strong> earned for quests</span>
         </div>
 
         {/* Character sprite parade — real game assets */}
