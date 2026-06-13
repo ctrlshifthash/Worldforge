@@ -12,14 +12,14 @@ const SOCIALS = [
   },
   {
     name: 'X',
-    href: 'https://x.com/PlayWorldforge',
+    href: 'https://x.com/Playworldcraft',
     img: '/socials/x.png',
     dark: false,
     scale: '70%',
   },
   {
     name: 'GitHub',
-    href: 'https://github.com/PlayWorldforge/Worldforge',
+    href: 'https://github.com/playWorldcraft/Worldcraft',
     img: '/socials/github.png',
     dark: false,
     scale: '100%',
