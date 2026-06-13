@@ -4,6 +4,10 @@ import { Navbar } from '@/components/Navbar';
 import { WorldCardScene } from './WorldCardScene';
 import { OnlineCounts } from './OnlineCounts';
 
+// Render on-demand (request time), not at build — so the build never needs a
+// live DB connection and can't fail when the database is briefly unreachable.
+export const dynamic = 'force-dynamic';
+
 export default async function DiscoverPage() {
   const worlds = await prisma.world.findMany({
     where: { visibility: 'PUBLIC' },

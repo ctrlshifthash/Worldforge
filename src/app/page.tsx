@@ -5,6 +5,10 @@ import { DemoButton } from '@/components/DemoButton';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { CaBadge } from '@/components/CaBadge';
 
+// Render on-demand (request time), not at build — so the build never needs a
+// live DB connection and can't fail when the database is briefly unreachable.
+export const dynamic = 'force-dynamic';
+
 const FANTASY = '/tilesets/npcs/fantasy-pixel-rpg-sprite-pack/Individual_Sprites';
 const GL = '/tilesets/grassland-v2/ERW - Grass Land 2.0 v1.9/ERW - Grass Land 2.0 v1.9';
 const VIL = '/tilesets/summer_village_v1.0_plus/summer_village_v1.0_plus';
