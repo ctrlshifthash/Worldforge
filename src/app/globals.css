@@ -2973,7 +2973,6 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-pixel);
   font-size: 0.55rem;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   text-shadow: 0 0 15px rgba(232,176,96,0.2);
 }
 
