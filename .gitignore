@@ -5,6 +5,9 @@ node_modules
 .next
 dist
 
+# build artifacts
+*.tsbuildinfo
+
 # environment
 .env
 .env.local
