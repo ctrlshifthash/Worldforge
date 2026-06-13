@@ -6611,6 +6611,15 @@ export function WorldExplore({
     lastFrameRef.current = performance.now();
 
     const loop = (ts: number) => {
+      // Pause the world while the character picker is open. Otherwise the game
+      // keeps simulating and repainting (and pushing state) behind the modal,
+      // which starves/recomposites the small preview canvases and makes the
+      // character sprites flicker.
+      if (charPickerOpenRef.current || needsCharPickRef.current) {
+        lastFrameRef.current = ts;
+        animId = requestAnimationFrame(loop);
+        return;
+      }
       const dt = Math.min((ts - lastFrameRef.current) / 1000, 0.1);
       lastFrameRef.current = ts;
       timeRef.current += dt;

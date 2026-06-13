@@ -106,7 +106,10 @@ export default function CharacterPicker({
 
     animId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animId);
-  }, [npcTilemap, hueShift]);
+    // Intentionally NOT depending on hueShift: the loop reads the hue-shifted
+    // sheet live from shiftedTilemapRef, so restarting it on every color change
+    // (which also rebuilds the sheet) just makes the previews flash.
+  }, [npcTilemap]);
 
   const isFantasySelected = selectedIndex >= 100;
 
