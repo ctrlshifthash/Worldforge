@@ -12,7 +12,8 @@ export async function POST(request: Request) {
     }
 
     const user = await getUserByEmail(email);
-    if (!user) {
+    if (!user || !user.passwordHash) {
+      // No user, or a wallet-only (Privy) account with no password set.
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 

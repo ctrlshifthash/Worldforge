@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { PixelSkyBackground } from '@/components/PixelSkyBackground';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { PrivyProviderWrapper } from '@/components/PrivyProviderWrapper';
 
 export const metadata: Metadata = {
   title: 'Worldforge',
@@ -22,9 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <LoadingScreen />
-        <PixelSkyBackground />
-        {children}
+        <PrivyProviderWrapper>
+          <LoadingScreen />
+          <PixelSkyBackground />
+          {children}
+        </PrivyProviderWrapper>
       </body>
     </html>
   );

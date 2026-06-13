@@ -12,7 +12,9 @@ model User {
   email             String             @unique
   username          String             @unique
   name              String
-  passwordHash      String
+  passwordHash      String?            // optional: Privy is the new auth, legacy accounts keep this
+  privyId           String?            @unique // Privy DID — canonical identity once migrated
+  walletAddress     String?            @unique // linked Solana wallet (paid + checked for holdings)
   avatar            String?
   createdAt         DateTime           @default(now())
   worlds            World[]            @relation("WorldOwner")
@@ -20,6 +22,8 @@ model User {
   activity          ActivityLog[]
   characterSessions CharacterSession[]
   placedObjects     PlacedObject[]
+  questCompletions  QuestCompletion[]
+  claims            Claim[]
 }
 
 model World {
@@ -259,6 +263,52 @@ model Development {
   canonizedAt         DateTime?
   session             CharacterSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   era                 Era?              @relation(fields: [eraId], references: [id], onDelete: SetNull)
+}
+
+// ─── Play-to-Earn: quest earnings, claims, daily pool ───
+
+model QuestCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  worldId     String
+  questId     String   // canonical id from payout config (e.g. "barton_orcs")
+  rewardKind  String   // "SOL" | "COIN"
+  baseSol     Float    @default(0) // base reward before multiplier
+  multiplier  Float    @default(0) // tier multiplier applied at completion
+  earnedSol   Float    @default(0) // baseSol * multiplier (holders only)
+  earnedCoins Int      @default(0) // in-game coins (non-holders)
+  status      String   @default("EARNED") // EARNED | CLAIMED | VOID
+  completedAt DateTime @default(now())
+  claimId     String?  // set when rolled into a Claim
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  claim       Claim?   @relation(fields: [claimId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, worldId, questId]) // each quest pays once per account, ever
+  @@index([userId, status])
+}
+
+model Claim {
+  id            String            @id @default(cuid())
+  userId        String
+  walletAddress String
+  amountSol     Float
+  status        String            @default("PENDING") // PENDING | SENT | FAILED
+  txSignature   String?
+  error         String?
+  createdAt     DateTime          @default(now())
+  sentAt        DateTime?
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions   QuestCompletion[]
+
+  @@index([userId, createdAt])
+}
+
+model PayoutDay {
+  id         String   @id @default(cuid())
+  date       String   @unique // UTC "YYYY-MM-DD" — the global daily-cap ledger
+  totalSol   Float    @default(0)
+  claimCount Int      @default(0)
+  updatedAt  DateTime @updatedAt
 }
 
 enum Visibility {

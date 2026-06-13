@@ -4223,6 +4223,22 @@ const EFFECT_ICONS: Record<string, (color: string) => React.ReactNode> = {
 
 // ─── Component ───
 
+// Report a quest completion to the server so it can credit real (SOL) or
+// in-game (coin) earnings. Fire-and-forget: the server is authoritative and
+// enforces once-per-quest, so a dropped request just means no double-credit.
+async function reportQuestComplete(worldId: string | undefined, questId: string) {
+  if (!worldId) return;
+  try {
+    await fetch('/api/quests/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ worldId, questId }),
+    });
+  } catch {
+    /* ignore — earnings reconcile server-side, quest still completes locally */
+  }
+}
+
 export function WorldExplore({
   entities,
   slug,
@@ -4273,6 +4289,8 @@ export function WorldExplore({
   const hueCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const isOwnerRef = useRef(isOwner);
   isOwnerRef.current = isOwner;
+  const worldIdRef = useRef(worldId);
+  worldIdRef.current = worldId;
 
   // ── Multiplayer ──
   const mp = useMultiplayer(slug, chosenDisplayName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
@@ -5723,6 +5741,7 @@ export function WorldExplore({
                     // Complete the quest — give rewards
                     dialogText = resident.questDone!;
                     qf.add(`${qId}_done`);
+                    reportQuestComplete(worldIdRef.current, qId); // credit server-side earnings
                     const rw = resident.questReward;
                     if (rw?.gold) {
                       playerGoldRef.current = Math.min(playerGoldRef.current + rw.gold, resourceCapRef.current.gold);
@@ -6093,6 +6112,7 @@ export function WorldExplore({
                 };
               } else if (q.stage === 'found') {
                 q.stage = 'returned';
+                reportQuestComplete(worldIdRef.current, 'marina_necklace'); // credit server-side earnings
                 playerGoldRef.current += 30;
                 setPlayerGold(playerGoldRef.current);
                 glDialogRef.current = {

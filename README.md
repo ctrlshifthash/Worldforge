@@ -79,3 +79,31 @@ To reset and re-seed: `npm run db:reset`
 | `npm run db:push` | Push schema to database |
 | `npm run db:seed` | Seed with Everhold data |
 | `npm run db:reset` | Reset and re-seed database |
+
+## Play-to-Earn (Privy + Solana)
+
+Token holders earn **real SOL** for completing quests; non-holders earn in-game coins.
+Earnings accrue server-side and are withdrawn from `/dashboard/earnings`.
+
+- **Design & economics:** [docs/play-to-earn.md](docs/play-to-earn.md). In-app docs at `/docs`.
+- **Tune everything** (per-quest rewards, holder tiers/multipliers, claim limits, daily pool,
+  anti-farm rules) in [src/lib/payouts/config.ts](src/lib/payouts/config.ts).
+- **Auth:** Privy (wallet + email → Solana embedded wallet). The "Connect Wallet" button is in
+  the navbar; login bridges to the existing session via `/api/auth/privy`.
+- **Safety:** quests pay once per account, 4 claims/day ≥6h apart, a global daily SOL pool cap,
+  account-age + velocity anti-farm gates, and a live token-holding re-check at claim time.
+
+Leave `PAYOUTS_ENABLED=false` to run the payout engine in **stub mode** (no SOL moves);
+set `STUB_TOKEN_BALANCE` to simulate a holder locally.
+
+## Deploy to Railway
+
+1. Push this repo to GitHub.
+2. Railway → **New Project → Deploy from GitHub repo** → select this repo.
+3. Add the environment variables from [.env.example](.env.example) in the service **Variables**
+   tab (at minimum `DATABASE_URL`, `JWT_SECRET`, the Privy keys, and `HELIUS_RPC_URL`).
+4. Railway builds with Nixpacks (Node 20 — see [nixpacks.toml](nixpacks.toml)). The build command
+   `npm run build` runs `prisma generate` + `prisma db push`, so the schema syncs on each deploy.
+5. Railway provides `PORT`; `next start` binds to it automatically.
+
+Build/start commands are pinned in [railway.json](railway.json).
