@@ -298,11 +298,11 @@ export default async function LandingPage() {
             }}
           >
             {[
-              { name: 'Holder', mult: '1×', color: 'var(--text-soft)' },
-              { name: 'Bronze', mult: '1.25×', color: '#cd7f32' },
-              { name: 'Silver', mult: '1.5×', color: '#c0c0c0' },
-              { name: 'Gold', mult: '2×', color: 'var(--gold)' },
-              { name: 'Diamond', mult: '3×', color: '#7ad7e8' },
+              { name: 'Holder', mult: '1×', hold: '0.001–0.25%', color: 'var(--text-soft)' },
+              { name: 'Bronze', mult: '1.25×', hold: '0.25–0.5%', color: '#cd7f32' },
+              { name: 'Silver', mult: '1.5×', hold: '0.5–1%', color: '#c0c0c0' },
+              { name: 'Gold', mult: '2×', hold: '1–2%', color: 'var(--gold)' },
+              { name: 'Diamond', mult: '3×', hold: '2%+', color: '#7ad7e8' },
             ].map((tier) => (
               <div
                 key={tier.name}
@@ -311,7 +311,7 @@ export default async function LandingPage() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 2,
-                  minWidth: 96,
+                  minWidth: 104,
                   padding: '12px 16px',
                   border: `1px solid ${tier.color}`,
                   background: 'rgba(0,0,0,0.25)',
@@ -321,13 +321,15 @@ export default async function LandingPage() {
                   {tier.mult}
                 </span>
                 <span className="system-label" style={{ color: tier.color, marginBottom: 0 }}>{tier.name}</span>
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', marginTop: 2 }}>{tier.hold} of supply</span>
               </div>
             ))}
           </div>
           <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: 640, margin: '0 auto 36px', lineHeight: 1.5 }}>
-            Tiers scale with the percentage of token supply your wallet holds. The
-            multiplier caps once a wallet holds more than 3.5% of supply &mdash; an
-            anti-whale measure so rewards stay spread across the community.
+            Tiers scale with the percentage of token supply your wallet holds (total supply 1B,
+            so Bronze starts around 2.5M tokens and Diamond around 20M). The multiplier caps once a
+            wallet holds more than 3.5% of supply (35M) &mdash; an anti-whale measure so rewards stay
+            spread across the community.
           </p>
 
           {/* CTAs */}

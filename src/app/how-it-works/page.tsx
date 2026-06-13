@@ -414,14 +414,16 @@ export default function HowItWorksPage() {
           <h3>Holder tiers &amp; multipliers</h3>
           <p>
             Your reward is the quest&apos;s base SOL amount multiplied by your <strong>holder tier</strong>. Tiers scale
-            with the percentage of token supply your wallet holds:
+            with how much of the token supply your wallet holds (total supply is 1B), so each tier below shows
+            the share of supply and the matching token amount:
           </p>
           <ul className="hiw-list">
-            <li><strong>Holder</strong> &mdash; 1&times;</li>
-            <li><strong>Bronze</strong> &mdash; 1.25&times;</li>
-            <li><strong>Silver</strong> &mdash; 1.5&times;</li>
-            <li><strong>Gold</strong> &mdash; 2&times;</li>
-            <li><strong>Diamond</strong> &mdash; 3&times;</li>
+            <li><strong>Non-holder</strong> &mdash; in-game coins only (under 0.001% of supply / below 10K tokens)</li>
+            <li><strong>Holder</strong> &mdash; 1&times; &mdash; 0.001%&ndash;0.25% of supply (10K&ndash;2.5M tokens)</li>
+            <li><strong>Bronze</strong> &mdash; 1.25&times; &mdash; 0.25%&ndash;0.5% (2.5M&ndash;5M tokens)</li>
+            <li><strong>Silver</strong> &mdash; 1.5&times; &mdash; 0.5%&ndash;1% (5M&ndash;10M tokens)</li>
+            <li><strong>Gold</strong> &mdash; 2&times; &mdash; 1%&ndash;2% (10M&ndash;20M tokens)</li>
+            <li><strong>Diamond</strong> &mdash; 3&times; &mdash; 2% of supply and up (20M+ tokens)</li>
           </ul>
           <div className="hiw-callout">
             <strong>Anti-whale cap:</strong> the multiplier stops scaling once a wallet holds more than

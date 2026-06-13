@@ -358,23 +358,23 @@ export default function AboutPage() {
           <div className="about-entity-explain">
             <div className="about-entity-row">
               <span className="about-entity-dot" style={{ background: 'var(--color-character)' }} />
-              <div><strong>Holder</strong> &mdash; 1&times; rewards</div>
+              <div><strong>Holder</strong> &mdash; 1&times; rewards <span style={{ opacity: 0.6 }}>&middot; 0.001&ndash;0.25% of supply (10K&ndash;2.5M)</span></div>
             </div>
             <div className="about-entity-row">
               <span className="about-entity-dot" style={{ background: 'var(--color-artifact)' }} />
-              <div><strong>Bronze</strong> &mdash; 1.25&times; rewards</div>
+              <div><strong>Bronze</strong> &mdash; 1.25&times; rewards <span style={{ opacity: 0.6 }}>&middot; 0.25&ndash;0.5% (2.5M&ndash;5M)</span></div>
             </div>
             <div className="about-entity-row">
               <span className="about-entity-dot" style={{ background: 'var(--color-species)' }} />
-              <div><strong>Silver</strong> &mdash; 1.5&times; rewards</div>
+              <div><strong>Silver</strong> &mdash; 1.5&times; rewards <span style={{ opacity: 0.6 }}>&middot; 0.5&ndash;1% (5M&ndash;10M)</span></div>
             </div>
             <div className="about-entity-row">
               <span className="about-entity-dot" style={{ background: 'var(--color-event)' }} />
-              <div><strong>Gold</strong> &mdash; 2&times; rewards</div>
+              <div><strong>Gold</strong> &mdash; 2&times; rewards <span style={{ opacity: 0.6 }}>&middot; 1&ndash;2% (10M&ndash;20M)</span></div>
             </div>
             <div className="about-entity-row">
               <span className="about-entity-dot" style={{ background: 'var(--color-faction)' }} />
-              <div><strong>Diamond</strong> &mdash; 3&times; rewards</div>
+              <div><strong>Diamond</strong> &mdash; 3&times; rewards <span style={{ opacity: 0.6 }}>&middot; 2%+ of supply (20M+)</span></div>
             </div>
           </div>
           <p className="about-big-text" style={{ marginTop: 32 }}>

@@ -204,9 +204,10 @@ export default function DocsPage() {
           <section id="tiers" style={section}>
             <h2 style={h2}>4. Holder tiers &amp; multipliers</h2>
             <p style={p}>
-              Your tier is determined by the percentage of the total token supply your wallet holds.
-              The more you hold, the higher your multiplier — up to an anti-whale cap. We read your
-              balance from the wallet you connected (see{' '}
+              Your tier is set by <strong>how much of the total token supply your wallet holds</strong>.
+              The more you hold, the higher your multiplier — up to an anti-whale cap. The total supply
+              is <strong>1,000,000,000 (1B)</strong>, so the table shows both the share of supply and
+              the matching token amount. We read your balance from the wallet you connect (see{' '}
               <a href="#wallet" style={link}>Connecting a wallet</a>).
             </p>
             <div style={tableWrap}>
@@ -214,33 +215,45 @@ export default function DocsPage() {
                 <thead>
                   <tr>
                     <th style={th}>Tier</th>
+                    <th style={th}>Tokens held (of 1B supply)</th>
                     <th style={th}>Reward multiplier</th>
                     <th style={th}>What it means</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td style={td}><strong>Non-holder</strong></td>
+                    <td style={td}>under 0.001% <span style={{ color: '#8a8a93' }}>(&lt; 10K)</span></td>
+                    <td style={td}>—</td>
+                    <td style={td}>In-game coins only — no SOL.</td>
+                  </tr>
+                  <tr>
                     <td style={td}><strong>Holder</strong></td>
+                    <td style={td}>0.001% – 0.25% <span style={{ color: '#8a8a93' }}>(10K – 2.5M)</span></td>
                     <td style={td}>1×</td>
                     <td style={td}>You hold the token. Quests pay base SOL.</td>
                   </tr>
                   <tr>
                     <td style={td}><strong>Bronze</strong></td>
+                    <td style={td}>0.25% – 0.5% <span style={{ color: '#8a8a93' }}>(2.5M – 5M)</span></td>
                     <td style={td}>1.25×</td>
                     <td style={td}>+25% on every SOL payout.</td>
                   </tr>
                   <tr>
                     <td style={td}><strong>Silver</strong></td>
+                    <td style={td}>0.5% – 1% <span style={{ color: '#8a8a93' }}>(5M – 10M)</span></td>
                     <td style={td}>1.5×</td>
                     <td style={td}>+50% on every SOL payout.</td>
                   </tr>
                   <tr>
                     <td style={td}><strong>Gold</strong></td>
+                    <td style={td}>1% – 2% <span style={{ color: '#8a8a93' }}>(10M – 20M)</span></td>
                     <td style={td}>2×</td>
                     <td style={td}>Double SOL on every quest.</td>
                   </tr>
                   <tr>
                     <td style={td}><strong>Diamond</strong></td>
+                    <td style={td}>2% and up <span style={{ color: '#8a8a93' }}>(20M+)</span></td>
                     <td style={td}>3×</td>
                     <td style={td}>Triple SOL — the top tier.</td>
                   </tr>
@@ -248,7 +261,7 @@ export default function DocsPage() {
               </table>
             </div>
             <p style={p}>
-              The multiplier <strong>caps once a wallet holds more than 3.5% of supply</strong>.
+              The multiplier <strong>caps once a wallet holds more than 3.5% of supply (35M tokens)</strong>.
               Holding beyond that threshold does not increase your rate — this anti-whale rule keeps
               rewards spread across the community rather than concentrated in a few wallets.
             </p>
