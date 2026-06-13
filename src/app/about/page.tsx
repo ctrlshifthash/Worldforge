@@ -339,6 +339,67 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ─── Play To Earn ─── */}
+      <section className="about-statement" style={{ borderTop: '1px solid rgba(100,140,80,0.08)' }}>
+        <div className="about-statement-inner">
+          <h2 className="about-statement-heading">Play to earn &mdash; quests pay real SOL</h2>
+          <p className="about-big-text">
+            Worldforge is now a play-to-earn worldbuilding RPG. As you explore the Hub town,
+            head through the Northern Pass into the Grassland, or visit the Seaside Village &mdash;
+            fighting enemies, building, and completing quests for NPCs &mdash; those quests pay out.
+            Players who <strong>hold the Worldforge token</strong> earn real <strong>SOL</strong> on
+            Solana mainnet. Players who don&apos;t hold the token still earn in-game coins for the
+            same quests.
+          </p>
+          <p className="about-big-text">
+            Your payout is the quest&apos;s base SOL amount multiplied by your <strong>holder tier</strong>,
+            which scales with the share of supply your wallet holds:
+          </p>
+          <div className="about-entity-explain">
+            <div className="about-entity-row">
+              <span className="about-entity-dot" style={{ background: 'var(--color-character)' }} />
+              <div><strong>Holder</strong> &mdash; 1&times; rewards</div>
+            </div>
+            <div className="about-entity-row">
+              <span className="about-entity-dot" style={{ background: 'var(--color-artifact)' }} />
+              <div><strong>Bronze</strong> &mdash; 1.25&times; rewards</div>
+            </div>
+            <div className="about-entity-row">
+              <span className="about-entity-dot" style={{ background: 'var(--color-species)' }} />
+              <div><strong>Silver</strong> &mdash; 1.5&times; rewards</div>
+            </div>
+            <div className="about-entity-row">
+              <span className="about-entity-dot" style={{ background: 'var(--color-event)' }} />
+              <div><strong>Gold</strong> &mdash; 2&times; rewards</div>
+            </div>
+            <div className="about-entity-row">
+              <span className="about-entity-dot" style={{ background: 'var(--color-faction)' }} />
+              <div><strong>Diamond</strong> &mdash; 3&times; rewards</div>
+            </div>
+          </div>
+          <p className="about-big-text" style={{ marginTop: 32 }}>
+            The multiplier caps once a wallet holds more than 3.5% of supply, so whales don&apos;t run
+            away with the pool. Earnings accrue automatically server-side &mdash; you pull them out with
+            the <strong>Claim</strong> button on the Earnings dashboard. To get set up, click
+            <strong> Connect Wallet</strong> in the top nav: connect an existing Solana wallet like
+            Phantom, or just log in with email and a Solana wallet is created for you automatically.
+            That wallet receives your SOL and is what we check for your token holdings.
+          </p>
+          <p className="about-big-text about-big-text-muted">
+            Each quest pays out only once per account, and anti-farming protections apply (minimum
+            account age, minimum playtime, and bot/velocity checks). You can claim up to 4 times a day,
+            at least 6 hours apart, and you must still hold the token at claim time to receive SOL.
+            A global daily reward pool caps total payouts across all players.
+          </p>
+          <p className="about-big-text about-big-text-muted">
+            One important note: the Worldforge token isn&apos;t launched yet &mdash; the contract address
+            (CA) is currently <strong>TBA</strong>. Until launch, everyone earns in-game coins; real SOL
+            payouts begin once the token is live. Rewards depend on the treasury and daily pool, and this
+            is a reward for playing &mdash; not an investment, a promise of profit, or financial advice.
+          </p>
+        </div>
+      </section>
+
       {/* ─── Who It's For — Horizontal Scroll ─── */}
       <section className="about-audience-section">
         <h2 className="about-section-title">Who builds with Worldforge</h2>
@@ -411,6 +472,18 @@ export default function AboutPage() {
           <details className="about-faq-detail">
             <summary>Is it free?</summary>
             <p>Yes. Create an account, build as many worlds as you want, add unlimited entities, events, and relationships — all free. AI generation is also free to use.</p>
+          </details>
+          <details className="about-faq-detail">
+            <summary>How does play-to-earn work?</summary>
+            <p>Completing quests for NPCs pays out rewards. If your wallet holds the Worldforge token, you earn real SOL on Solana mainnet; if you don&apos;t hold the token, you earn in-game coins for the same quests. Each payout is the quest&apos;s base SOL amount multiplied by your holder tier &mdash; Holder (1&times;), Bronze (1.25&times;), Silver (1.5&times;), Gold (2&times;), Diamond (3&times;) &mdash; which scales with the share of supply you hold. The multiplier caps above 3.5% of supply so whales don&apos;t dominate. Earnings accrue automatically, and you withdraw them with the Claim button on the Earnings dashboard. It&apos;s a reward for playing, not an investment or a promise of profit.</p>
+          </details>
+          <details className="about-faq-detail">
+            <summary>How do I connect a wallet and claim?</summary>
+            <p>Click &ldquo;Connect Wallet&rdquo; in the top nav. You can connect an existing Solana wallet like Phantom, or log in with email and a Solana wallet is created for you automatically. That wallet receives your SOL and is what we check for your token holdings. To claim, open the Earnings dashboard and hit Claim. You can claim up to 4 times a day, at least 6 hours apart, you must still hold the token at claim time, and a global daily reward pool caps total payouts across all players. Each quest pays out only once per account, and anti-farming checks (minimum account age, minimum playtime, bot/velocity detection) apply.</p>
+          </details>
+          <details className="about-faq-detail">
+            <summary>Is the token live? What&apos;s the contract address?</summary>
+            <p>Not yet. The Worldforge token isn&apos;t launched, so the contract address (CA) is currently TBA. Until launch, everyone earns in-game coins for completing quests; real SOL payouts begin once the token is live. Rewards always depend on the treasury and daily reward pool &mdash; none of this is financial advice.</p>
           </details>
           <details className="about-faq-detail">
             <summary>Do I need an account?</summary>

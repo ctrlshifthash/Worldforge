@@ -188,6 +188,173 @@ export default async function LandingPage() {
       </section>
       <div className="section-divider" aria-hidden="true"><span /></div>
       {/* ═══════════════════════════════════════════════════════
+          PLAY TO EARN — Hold the token, complete quests, earn real SOL
+          Honest reward framing, NOT an investment pitch
+          ═══════════════════════════════════════════════════════ */}
+      <section className="reveal-section" style={{ padding: '110px 0', position: 'relative' }}>
+        <div className="container" style={{ maxWidth: 1100 }}>
+          <div className="systems-header" style={{ margin: '0 auto 48px' }}>
+            <div className="system-label" style={{ color: 'var(--gold)' }}>Play to Earn</div>
+            <h2>
+              Complete quests. Earn real <span className="gold">SOL</span>.
+            </h2>
+            <p>
+              Worldforge rewards you for playing. Hold the Worldforge token and the
+              quests you finish pay out real SOL on Solana. Don&apos;t hold it? You still
+              earn in-game coins for everything you do &mdash; nothing is locked behind the token.
+            </p>
+          </div>
+
+          {/* Core value props */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 16,
+              marginBottom: 40,
+            }}
+          >
+            <div
+              style={{
+                padding: '24px 20px',
+                border: '1px solid var(--gold-dim)',
+                background: 'var(--gold-wash)',
+                textAlign: 'center',
+              }}
+            >
+              <div className="system-label" style={{ color: 'var(--gold)' }}>Hold &amp; Earn</div>
+              <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 600, margin: '6px 0 8px', color: '#fff' }}>
+                Quests pay SOL to holders
+              </h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Token holders earn real SOL for completing quests. Non-holders earn
+                in-game coins for the same quests &mdash; play either way.
+              </p>
+            </div>
+
+            <div
+              style={{
+                padding: '24px 20px',
+                border: '1px solid var(--border-bright)',
+                background: 'var(--surface)',
+                textAlign: 'center',
+              }}
+            >
+              <div className="system-label" style={{ color: 'var(--gold)' }}>Tier Multipliers</div>
+              <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 600, margin: '6px 0 8px', color: '#fff' }}>
+                Up to 3&times; at Diamond
+              </h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Your reward is the quest&apos;s base SOL multiplied by your holder tier.
+                The bigger your share of supply, the bigger your multiplier.
+              </p>
+            </div>
+
+            <div
+              style={{
+                padding: '24px 20px',
+                border: '1px solid var(--border-bright)',
+                background: 'var(--surface)',
+                textAlign: 'center',
+              }}
+            >
+              <div className="system-label" style={{ color: 'var(--gold)' }}>Claim to Wallet</div>
+              <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 600, margin: '6px 0 8px', color: '#fff' }}>
+                One-click withdrawals
+              </h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Earnings accrue automatically. Hit Claim on your Earnings dashboard and
+                the SOL lands in your wallet &mdash; up to 4 claims a day, 6 hours apart.
+              </p>
+            </div>
+
+            <div
+              style={{
+                padding: '24px 20px',
+                border: '1px solid var(--border-bright)',
+                background: 'var(--surface)',
+                textAlign: 'center',
+              }}
+            >
+              <div className="system-label" style={{ color: 'var(--gold)' }}>Easy Onboarding</div>
+              <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 600, margin: '6px 0 8px', color: '#fff' }}>
+                Phantom or email login
+              </h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Connect an existing Solana wallet like Phantom, or log in with email and
+                get a Solana wallet created for you automatically.
+              </p>
+            </div>
+          </div>
+
+          {/* Holder tier ladder */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+              justifyContent: 'center',
+              marginBottom: 28,
+            }}
+          >
+            {[
+              { name: 'Holder', mult: '1×', color: 'var(--text-soft)' },
+              { name: 'Bronze', mult: '1.25×', color: '#cd7f32' },
+              { name: 'Silver', mult: '1.5×', color: '#c0c0c0' },
+              { name: 'Gold', mult: '2×', color: 'var(--gold)' },
+              { name: 'Diamond', mult: '3×', color: '#7ad7e8' },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  minWidth: 96,
+                  padding: '12px 16px',
+                  border: `1px solid ${tier.color}`,
+                  background: 'rgba(0,0,0,0.25)',
+                }}
+              >
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: tier.color }}>
+                  {tier.mult}
+                </span>
+                <span className="system-label" style={{ color: tier.color, marginBottom: 0 }}>{tier.name}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: 640, margin: '0 auto 36px', lineHeight: 1.5 }}>
+            Tiers scale with the percentage of token supply your wallet holds. The
+            multiplier caps once a wallet holds more than 3.5% of supply &mdash; an
+            anti-whale measure so rewards stay spread across the community.
+          </p>
+
+          {/* CTAs */}
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/play/everhold" className="btn btn-primary btn-lg">
+              Start Earning &mdash; Play Everhold
+            </Link>
+            <Link href="/docs" className="btn btn-secondary btn-lg">
+              How Rewards Work
+            </Link>
+          </div>
+
+          {/* Honest disclaimer */}
+          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-dim)', maxWidth: 720, margin: '28px auto 0', lineHeight: 1.6 }}>
+            The Worldforge token isn&apos;t live yet &mdash; the contract address is TBA.
+            Until launch, everyone earns in-game coins; real SOL payouts begin once the
+            token goes live on Solana mainnet. Each quest pays out once per account, a
+            global daily pool caps total payouts, and you must hold the token at claim
+            time to receive SOL. Anti-farming checks apply. Rewards are a thank-you for
+            playing, not an investment or a promise of profit, and depend on the
+            available treasury and daily pool. Not financial advice.
+          </p>
+        </div>
+      </section>
+
+      <div className="section-divider" aria-hidden="true"><span /></div>
+      {/* ═══════════════════════════════════════════════════════
           THE JOURNEY — Narrative walkthrough: Describe → Generate → Enter → Play
           Alternating panels, each visually unique
           ═══════════════════════════════════════════════════════ */}

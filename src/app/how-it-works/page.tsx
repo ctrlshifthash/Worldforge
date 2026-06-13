@@ -49,6 +49,7 @@ export default function HowItWorksPage() {
           <a href="#timeline" className="hiw-toc-link">Timeline &amp; Eras</a>
           <a href="#views" className="hiw-toc-link">Ways to See Your World</a>
           <a href="#gameplay" className="hiw-toc-link">Gameplay</a>
+          <a href="#earn-sol" className="hiw-toc-link">Earn SOL for Quests</a>
           <a href="#characters" className="hiw-toc-link">Characters</a>
           <a href="#building" className="hiw-toc-link">Building</a>
           <a href="#away-mode" className="hiw-toc-link">AI Storytelling</a>
@@ -390,9 +391,75 @@ export default function HowItWorksPage() {
           </p>
         </section>
 
+        {/* Earn SOL for Quests */}
+        <section id="earn-sol" className="hiw-section">
+          <div className="hiw-section-number">07</div>
+          <h2>Earn SOL for Quests</h2>
+          <p>
+            Worldforge is play-to-earn. The quests you already complete &mdash; clearing orcs, finding Marina&apos;s
+            necklace, gathering firewood &mdash; can pay out real <strong>SOL on Solana</strong> if you hold the
+            Worldforge token. Don&apos;t hold the token? You still earn in-game coins for the same quests. It&apos;s a
+            reward for playing, not an investment.
+          </p>
+
+          <h3>The earning loop</h3>
+          <ol className="hiw-list hiw-list-numbered">
+            <li><strong>Complete a quest</strong> in any zone. Each quest has a base SOL reward.</li>
+            <li><strong>Holders earn SOL</strong> &mdash; if your connected wallet holds the token, the reward is paid in
+              real SOL. <strong>Non-holders earn in-game coins</strong> only.</li>
+            <li><strong>Rewards accrue automatically</strong> server-side as you play.</li>
+            <li><strong>Claim from the Earnings dashboard</strong> with the Claim button whenever you&apos;re ready.</li>
+          </ol>
+
+          <h3>Holder tiers &amp; multipliers</h3>
+          <p>
+            Your reward is the quest&apos;s base SOL amount multiplied by your <strong>holder tier</strong>. Tiers scale
+            with the percentage of token supply your wallet holds:
+          </p>
+          <ul className="hiw-list">
+            <li><strong>Holder</strong> &mdash; 1&times;</li>
+            <li><strong>Bronze</strong> &mdash; 1.25&times;</li>
+            <li><strong>Silver</strong> &mdash; 1.5&times;</li>
+            <li><strong>Gold</strong> &mdash; 2&times;</li>
+            <li><strong>Diamond</strong> &mdash; 3&times;</li>
+          </ul>
+          <div className="hiw-callout">
+            <strong>Anti-whale cap:</strong> the multiplier stops scaling once a wallet holds more than
+            <strong> 3.5% of supply</strong>. Bigger bags don&apos;t keep climbing past the cap &mdash; this keeps
+            rewards fair across players.
+          </div>
+
+          <h3>Claiming your earnings</h3>
+          <p>
+            Open the <strong>Earnings dashboard</strong> and press <strong>Claim</strong> to withdraw your accrued SOL
+            to your wallet. A few rules keep things fair and the treasury healthy:
+          </p>
+          <ul className="hiw-list">
+            <li><strong>Up to 4 claims per day</strong>, with at least <strong>6 hours</strong> between claims.</li>
+            <li>A <strong>global daily reward pool</strong> caps total payouts across all players each day.</li>
+            <li>You must <strong>still hold the token at claim time</strong> to receive SOL.</li>
+            <li>Each quest pays out <strong>only once per account</strong>.</li>
+            <li><strong>Anti-farming protections</strong> apply: minimum account age, minimum playtime, and bot / velocity checks.</li>
+          </ul>
+
+          <h3>Connecting a wallet</h3>
+          <p>
+            Click <strong>&ldquo;Connect Wallet&rdquo;</strong> in the top navigation. You can connect an existing Solana
+            wallet (like Phantom), or log in with email &mdash; a Solana embedded wallet is created for you automatically
+            via Privy. That wallet receives your SOL and is checked for your token holdings.
+          </p>
+
+          <div className="hiw-callout">
+            <strong>Token status:</strong> the Worldforge token isn&apos;t launched yet &mdash; the Contract Address (CA)
+            is <strong>TBA</strong>. Until launch, everyone earns in-game coins; real SOL payouts begin once the token is
+            live. Rewards depend on the treasury and the daily pool, and can change. This is a reward for playing, not a
+            promise of profit &mdash; nothing here is financial advice.
+          </div>
+        </section>
+
         {/* Building */}
         <section id="building" className="hiw-section">
-          <div className="hiw-section-number">07</div>
+          <div className="hiw-section-number">08</div>
           <h2>Building System</h2>
           <p>
             World owners can place structures in their world. Press <strong>B</strong> to open the build menu.
@@ -458,7 +525,7 @@ export default function HowItWorksPage() {
 
         {/* Away Mode */}
         <section id="away-mode" className="hiw-section">
-          <div className="hiw-section-number">08</div>
+          <div className="hiw-section-number">09</div>
           <h2>AI Storytelling</h2>
           <p>
             This is where your world starts to feel <em>alive</em>. AI Storytelling lets the AI write what happens to one of your characters —
@@ -500,7 +567,7 @@ export default function HowItWorksPage() {
 
         {/* Developments */}
         <section id="developments" className="hiw-section">
-          <div className="hiw-section-number">09</div>
+          <div className="hiw-section-number">10</div>
           <h2>Story Review</h2>
           <p>
             The <strong>Story Queue</strong> page is where AI-generated stories land —
@@ -533,7 +600,7 @@ export default function HowItWorksPage() {
 
         {/* Sharing */}
         <section id="sharing" className="hiw-section">
-          <div className="hiw-section-number">10</div>
+          <div className="hiw-section-number">11</div>
           <h2>Sharing &amp; Visibility</h2>
           <p>
             Every world starts as <strong>Private</strong> — only you can see it. When you&apos;re ready to share:
