@@ -58,34 +58,77 @@ export interface SendResult {
   error?: string;
 }
 
+// Priority fee so payouts land during network congestion. microLamports per
+// compute unit; with the default CU limit this is a fraction of a cent.
+const PRIORITY_FEE_MICROLAMPORTS = 50_000;
+
 /**
  * Send SOL from the treasury wallet to a player wallet.
  * In stub mode returns a fake signature and moves nothing.
+ *
+ * On a confirmation error it still returns the signature (if obtained) so the
+ * caller can verify whether the transaction actually landed before rolling back.
  */
 export async function sendSol(toAddress: string, amountSol: number): Promise<SendResult> {
-  if (amountSol <= 0) return { ok: false, error: 'amount must be positive' };
+  if (!(amountSol > 0)) return { ok: false, error: 'amount must be positive' };
 
   if (!canSendPayouts()) {
     return { ok: true, signature: `STUB-${toAddress.slice(0, 6)}-${amountSol}` };
   }
 
+  let signature: string | undefined;
   try {
-    const { Connection, PublicKey, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } =
+    const { Connection, PublicKey, Keypair, Transaction, SystemProgram, ComputeBudgetProgram } =
       await import('@solana/web3.js');
     const bs58 = (await import('bs58')).default;
 
     const connection = new Connection(process.env.HELIUS_RPC_URL as string, 'confirmed');
     const treasury = Keypair.fromSecretKey(bs58.decode(process.env.TREASURY_SECRET_KEY as string));
     const to = new PublicKey(toAddress);
-
     const lamports = Math.round(amountSol * LAMPORTS_PER_SOL);
-    const tx = new Transaction().add(
-      SystemProgram.transfer({ fromPubkey: treasury.publicKey, toPubkey: to, lamports }),
-    );
 
-    const signature = await sendAndConfirmTransaction(connection, tx, [treasury]);
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+    const tx = new Transaction();
+    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: PRIORITY_FEE_MICROLAMPORTS }));
+    tx.add(SystemProgram.transfer({ fromPubkey: treasury.publicKey, toPubkey: to, lamports }));
+    tx.feePayer = treasury.publicKey;
+    tx.recentBlockhash = blockhash;
+    tx.sign(treasury);
+
+    signature = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 5 });
+    const conf = await connection.confirmTransaction(
+      { signature, blockhash, lastValidBlockHeight },
+      'confirmed',
+    );
+    if (conf.value.err) {
+      return { ok: false, signature, error: `tx failed: ${JSON.stringify(conf.value.err)}` };
+    }
     return { ok: true, signature };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return { ok: false, signature, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+/**
+ * Whether a transaction signature ultimately succeeded on-chain. Used to avoid
+ * double-paying when confirmation timed out but the transaction actually landed.
+ */
+export async function getSignatureSucceeded(signature: string): Promise<boolean> {
+  if (signature.startsWith('STUB-')) return true;
+  if (!process.env.HELIUS_RPC_URL) return false;
+  try {
+    const { Connection } = await import('@solana/web3.js');
+    const connection = new Connection(process.env.HELIUS_RPC_URL as string, 'confirmed');
+    for (let i = 0; i < 6; i++) {
+      const { value } = await connection.getSignatureStatus(signature, { searchTransactionHistory: true });
+      if (value) {
+        if (value.err) return false;
+        if (value.confirmationStatus === 'confirmed' || value.confirmationStatus === 'finalized') return true;
+      }
+      await new Promise((r) => setTimeout(r, 2500));
+    }
+    return false;
+  } catch {
+    return false;
   }
 }

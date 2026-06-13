@@ -8,7 +8,7 @@
  */
 import { prisma } from '@/lib/prisma';
 import { PAYOUT, resolveTier, type TierResult } from './config';
-import { getTokenBalance, sendSol } from './solana';
+import { getTokenBalance, sendSol, getSignatureSucceeded } from './solana';
 
 /** UTC day key, "YYYY-MM-DD". */
 function utcDay(d = new Date()): string {
@@ -261,90 +261,99 @@ export async function processClaim(userId: string): Promise<ClaimResult> {
     if (!tier.qualifies) return { ok: false, reason: 'no_longer_holding' };
   }
 
-  // Select EARNED SOL completions, oldest first, fitting the per-claim ceiling
-  // (min of per-claim max and remaining pool for the day).
-  const payoutDay = await prisma.payoutDay.findUnique({ where: { date: utcDay() } });
-  const poolRemaining = PAYOUT.pool.dailyCapSol - (payoutDay?.totalSol ?? 0);
-  const ceiling = Math.min(PAYOUT.claim.maxSol, poolRemaining);
-  if (ceiling < PAYOUT.claim.minSol) return { ok: false, reason: 'pool_exhausted' };
-
-  const earned = await prisma.questCompletion.findMany({
-    where: { userId, status: 'EARNED', rewardKind: 'SOL', earnedSol: { gt: 0 } },
-    orderBy: { completedAt: 'asc' },
-  });
-
-  const selected: typeof earned = [];
-  let amount = 0;
-  for (const c of earned) {
-    if (amount + c.earnedSol > ceiling) continue; // can't split a completion
-    selected.push(c);
-    amount += c.earnedSol;
-  }
-  // Round to lamport precision to avoid float drift.
-  amount = Math.round(amount * 1e9) / 1e9;
-
-  if (amount < PAYOUT.claim.minSol || selected.length === 0) {
-    return { ok: false, reason: 'below_min_or_capped' };
-  }
-
-  // Reserve the payout atomically: create Claim, mark completions CLAIMED, and
-  // increment the day's pool — re-checking the cap inside the transaction so
-  // concurrent claims can't overspend.
+  // Reserve the payout atomically. Inside ONE transaction we: read the day's
+  // pool, select EARNED SOL completions within the per-claim ceiling, mark them
+  // CLAIMED with a STATUS GUARD (so a concurrent claim can't grab the same
+  // rows), compute the real amount from the rows this claim actually took, and
+  // enforce the daily cap on the post-increment total (so concurrent claims
+  // can't overspend it). Any throw rolls the whole thing back.
   let claimId: string;
+  let amount: number;
   try {
     const today = utcDay();
     const result = await prisma.$transaction(async (tx) => {
-      const day = await tx.payoutDay.upsert({
+      const day0 = await tx.payoutDay.upsert({
         where: { date: today },
         create: { date: today, totalSol: 0, claimCount: 0 },
         update: {},
       });
-      if (day.totalSol + amount > PAYOUT.pool.dailyCapSol) {
-        throw new Error('pool_exhausted');
-      }
-      const claim = await tx.claim.create({
-        data: { userId, walletAddress: user.walletAddress as string, amountSol: amount, status: 'PENDING' },
+      const ceiling = Math.min(PAYOUT.claim.maxSol, PAYOUT.pool.dailyCapSol - day0.totalSol);
+      if (ceiling < PAYOUT.claim.minSol) throw new Error('pool_exhausted');
+
+      const earned = await tx.questCompletion.findMany({
+        where: { userId, status: 'EARNED', rewardKind: 'SOL', earnedSol: { gt: 0 } },
+        orderBy: { completedAt: 'asc' },
       });
+      const selectedIds: string[] = [];
+      let sum = 0;
+      for (const c of earned) {
+        if (sum + c.earnedSol > ceiling) continue; // can't split a completion
+        selectedIds.push(c.id);
+        sum += c.earnedSol;
+      }
+      if (selectedIds.length === 0) throw new Error('below_min_or_capped');
+
+      const claim = await tx.claim.create({
+        data: { userId, walletAddress: user.walletAddress as string, amountSol: 0, status: 'PENDING' },
+      });
+      // Status guard: only rows still EARNED get taken, so two concurrent claims
+      // can never pay out the same earnings.
       await tx.questCompletion.updateMany({
-        where: { id: { in: selected.map((c) => c.id) } },
+        where: { id: { in: selectedIds }, status: 'EARNED' },
         data: { status: 'CLAIMED', claimId: claim.id },
       });
-      await tx.payoutDay.update({
-        where: { date: today },
-        data: { totalSol: { increment: amount }, claimCount: { increment: 1 } },
+      // The true amount is the sum of rows THIS claim actually took.
+      const taken = await tx.questCompletion.findMany({
+        where: { claimId: claim.id },
+        select: { earnedSol: true },
       });
-      return claim.id;
+      const realAmount = Math.round(taken.reduce((s, r) => s + r.earnedSol, 0) * 1e9) / 1e9;
+      if (realAmount < PAYOUT.claim.minSol) throw new Error('below_min_or_capped');
+
+      await tx.claim.update({ where: { id: claim.id }, data: { amountSol: realAmount } });
+      const dayAfter = await tx.payoutDay.update({
+        where: { date: today },
+        data: { totalSol: { increment: realAmount }, claimCount: { increment: 1 } },
+      });
+      if (dayAfter.totalSol > PAYOUT.pool.dailyCapSol + 1e-9) throw new Error('pool_exhausted');
+
+      return { claimId: claim.id, amount: realAmount };
     });
-    claimId = result;
+    claimId = result.claimId;
+    amount = result.amount;
   } catch (err) {
-    const reason = err instanceof Error && err.message === 'pool_exhausted' ? 'pool_exhausted' : 'reserve_failed';
+    const msg = err instanceof Error ? err.message : '';
+    const reason = msg === 'pool_exhausted' || msg === 'below_min_or_capped' ? msg : 'reserve_failed';
     return { ok: false, reason };
   }
 
-  // Send the SOL. On failure, roll everything back so nothing is burned.
+  // Send the SOL.
   const send = await sendSol(user.walletAddress, amount);
-  if (!send.ok) {
-    await prisma.$transaction(async (tx) => {
-      await tx.questCompletion.updateMany({
-        where: { claimId },
-        data: { status: 'EARNED', claimId: null },
-      });
-      await tx.payoutDay.update({
-        where: { date: utcDay() },
-        data: { totalSol: { decrement: amount }, claimCount: { decrement: 1 } },
-      });
-      await tx.claim.update({
-        where: { id: claimId },
-        data: { status: 'FAILED', error: send.error ?? 'send_failed' },
-      });
+
+  // Success — or it failed to confirm but actually landed on-chain (the
+  // "did it land?" case). Verifying the signature avoids a double-pay on retry.
+  if (send.ok || (send.signature && (await getSignatureSucceeded(send.signature)))) {
+    await prisma.claim.update({
+      where: { id: claimId },
+      data: { status: 'SENT', txSignature: send.signature, sentAt: new Date() },
     });
-    return { ok: false, reason: 'payout_failed' };
+    return { ok: true, amountSol: amount, txSignature: send.signature };
   }
 
-  await prisma.claim.update({
-    where: { id: claimId },
-    data: { status: 'SENT', txSignature: send.signature, sentAt: new Date() },
+  // Truly failed — roll everything back so no earnings or pool are burned.
+  await prisma.$transaction(async (tx) => {
+    await tx.questCompletion.updateMany({
+      where: { claimId },
+      data: { status: 'EARNED', claimId: null },
+    });
+    await tx.payoutDay.update({
+      where: { date: utcDay() },
+      data: { totalSol: { decrement: amount }, claimCount: { decrement: 1 } },
+    });
+    await tx.claim.update({
+      where: { id: claimId },
+      data: { status: 'FAILED', error: send.error ?? 'send_failed' },
+    });
   });
-
-  return { ok: true, amountSol: amount, txSignature: send.signature };
+  return { ok: false, reason: 'payout_failed' };
 }

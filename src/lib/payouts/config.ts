@@ -65,7 +65,7 @@ export const PAYOUT = {
 
   pool: {
     /** Global ceiling on total SOL paid across ALL users per UTC day. */
-    dailyCapSol: Number(process.env.PAYOUT_DAILY_CAP_SOL ?? 5),
+    dailyCapSol: Number(process.env.PAYOUT_DAILY_CAP_SOL ?? 0.5),
   },
 
   antiFarm: {

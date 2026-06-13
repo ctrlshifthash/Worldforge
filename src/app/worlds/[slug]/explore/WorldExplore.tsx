@@ -4228,14 +4228,20 @@ const EFFECT_ICONS: Record<string, (color: string) => React.ReactNode> = {
 // enforces once-per-quest, so a dropped request just means no double-credit.
 async function reportQuestComplete(worldId: string | undefined, questId: string) {
   if (!worldId) return;
-  try {
-    await fetch('/api/quests/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ worldId, questId }),
-    });
-  } catch {
-    /* ignore — earnings reconcile server-side, quest still completes locally */
+  // Retry with backoff so a transient network blip doesn't cost a credit. The
+  // endpoint is idempotent (each quest pays once per account), so retrying is safe.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const res = await fetch('/api/quests/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ worldId, questId }),
+      });
+      if (res.ok) return; // server recorded it
+    } catch {
+      /* network error — retry */
+    }
+    await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
   }
 }
 
