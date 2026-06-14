@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
-import { getWorldBySlug, getWorldMap } from '@/lib/queries';
+import { getWorldBySlug, getWorldMap, getPlacedObjects } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
 import { MapEditor } from './MapEditor';
-import { DEFAULT_MAP_W, DEFAULT_MAP_H, makeBlankTiles } from '@/lib/tiles';
+import { DEFAULT_MAP_W, DEFAULT_MAP_H, makeBlankTiles, PLACEABLE_IDS } from '@/lib/tiles';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ export default async function EditorPage({ params }: { params: Promise<{ slug: s
   const isOwner = world.ownerId ? world.ownerId === session?.sub : true; // null-owner demo worlds: open
   if (!isOwner) notFound();
 
-  const map = await getWorldMap(world.id);
+  const [map, placed] = await Promise.all([getWorldMap(world.id), getPlacedObjects(world.id, 'custom')]);
   const initial = map
     ? {
         width: map.width,
@@ -28,5 +28,9 @@ export default async function EditorPage({ params }: { params: Promise<{ slug: s
       }
     : { width: DEFAULT_MAP_W, height: DEFAULT_MAP_H, tiles: makeBlankTiles(), spawnX: 30, spawnY: 22 };
 
-  return <MapEditor slug={slug} worldTitle={world.title} initial={initial} />;
+  const initialObjects = placed
+    .filter((o) => o.itemType !== '_fill' && PLACEABLE_IDS.has(o.itemType))
+    .map((o) => ({ tileX: o.tileX, tileY: o.tileY, itemType: o.itemType }));
+
+  return <MapEditor slug={slug} worldTitle={world.title} initial={initial} initialObjects={initialObjects} />;
 }

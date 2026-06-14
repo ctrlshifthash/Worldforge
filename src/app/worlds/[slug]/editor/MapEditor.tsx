@@ -2,28 +2,33 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { TILE_PALETTE, TILE_COLOR, WALKABLE_TILES, TILE } from '@/lib/tiles';
+import { TILE_PALETTE, TILE_COLOR, WALKABLE_TILES, TILE, PLACEABLE_OBJECTS, PLACEABLE_ICON } from '@/lib/tiles';
 
 const CELL = 14; // px per tile in the editor
 
-type Tool = 'paint' | 'fill' | 'spawn';
+type Tool = 'paint' | 'fill' | 'spawn' | 'object';
 
 export function MapEditor({
   slug,
   worldTitle,
   initial,
+  initialObjects = [],
 }: {
   slug: string;
   worldTitle: string;
   initial: { width: number; height: number; tiles: number[]; spawnX: number; spawnY: number };
+  initialObjects?: { tileX: number; tileY: number; itemType: string }[];
 }) {
   const { width, height } = initial;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tilesRef = useRef<number[]>(initial.tiles.slice());
   const spawnRef = useRef<{ x: number; y: number }>({ x: initial.spawnX, y: initial.spawnY });
+  // one object per tile, keyed "x,y" -> itemType
+  const objectsRef = useRef<Map<string, string>>(new Map(initialObjects.map((o) => [`${o.tileX},${o.tileY}`, o.itemType])));
   const paintingRef = useRef(false);
 
   const [tileId, setTileId] = useState<number>(TILE.GRASS);
+  const [objId, setObjId] = useState<string>(PLACEABLE_OBJECTS[0].id);
   const [tool, setTool] = useState<Tool>('paint');
   const [brush, setBrush] = useState(2);
   const [status, setStatus] = useState('');
@@ -31,6 +36,7 @@ export function MapEditor({
 
   // refs so the canvas handlers (bound once) read live values
   const tileIdRef = useRef(tileId); tileIdRef.current = tileId;
+  const objIdRef = useRef(objId); objIdRef.current = objId;
   const toolRef = useRef(tool); toolRef.current = tool;
   const brushRef = useRef(brush); brushRef.current = brush;
 
@@ -53,6 +59,14 @@ export function MapEditor({
     for (let x = 0; x <= width; x++) { ctx.moveTo(x * CELL + 0.5, 0); ctx.lineTo(x * CELL + 0.5, height * CELL); }
     for (let y = 0; y <= height; y++) { ctx.moveTo(0, y * CELL + 0.5); ctx.lineTo(width * CELL, y * CELL + 0.5); }
     ctx.stroke();
+    // placed objects (drawn as icons)
+    ctx.font = `${CELL * 0.85}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const [key, itemType] of objectsRef.current) {
+      const [ox, oy] = key.split(',').map(Number);
+      ctx.fillText(PLACEABLE_ICON[itemType] || '❓', ox * CELL + CELL / 2, oy * CELL + CELL / 2 + 1);
+    }
     // spawn marker
     const s = spawnRef.current;
     ctx.fillStyle = '#fff';
@@ -86,6 +100,15 @@ export function MapEditor({
       if (!WALKABLE_TILES.has(tiles[cy * width + cx])) { setStatus('Spawn must be on a walkable tile (grass/path/sand…).'); return; }
       spawnRef.current = { x: cx, y: cy };
       setStatus('');
+    } else if (t === 'object') {
+      const key = `${cx},${cy}`;
+      if (objectsRef.current.has(key)) {
+        objectsRef.current.delete(key); // click an existing object to remove it
+      } else {
+        if (!WALKABLE_TILES.has(tiles[cy * width + cx])) { setStatus('Objects can only go on walkable terrain.'); return; }
+        objectsRef.current.set(key, objIdRef.current);
+        setStatus('');
+      }
     } else if (t === 'fill') {
       floodFill(tiles, width, height, cx, cy, tiles[cy * width + cx], tileIdRef.current);
     } else {
@@ -109,7 +132,7 @@ export function MapEditor({
     applyAt(x, y);
   };
   const onMove = (e: React.PointerEvent) => {
-    if (!paintingRef.current || toolRef.current === 'fill' || toolRef.current === 'spawn') return;
+    if (!paintingRef.current || toolRef.current === 'fill' || toolRef.current === 'spawn' || toolRef.current === 'object') return;
     const { x, y } = cellAt(e);
     applyAt(x, y);
   };
@@ -118,7 +141,7 @@ export function MapEditor({
   async function save() {
     setStatus('Saving…');
     try {
-      const res = await fetch(`/api/worlds/${slug}/map`, {
+      const mapRes = await fetch(`/api/worlds/${slug}/map`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,8 +152,20 @@ export function MapEditor({
           spawnY: spawnRef.current.y,
         }),
       });
-      if (res.ok) { setStatus('Saved ✓'); setDirty(false); }
-      else { const d = await res.json().catch(() => ({})); setStatus(d.error || 'Save failed'); }
+      if (!mapRes.ok) { const d = await mapRes.json().catch(() => ({})); setStatus(d.error || 'Save failed'); return; }
+
+      const objects = [...objectsRef.current.entries()].map(([key, itemType]) => {
+        const [tileX, tileY] = key.split(',').map(Number);
+        return { tileX, tileY, itemType };
+      });
+      const objRes = await fetch(`/api/worlds/${slug}/objects`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ objects }),
+      });
+      if (!objRes.ok) { const d = await objRes.json().catch(() => ({})); setStatus(d.error || 'Map saved, objects failed'); return; }
+
+      setStatus('Saved ✓'); setDirty(false);
     } catch { setStatus('Save failed (network)'); }
   }
 
@@ -161,6 +196,7 @@ export function MapEditor({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
           <ToolBtn active={tool === 'paint'} onClick={() => setTool('paint')}>🖌 Paint</ToolBtn>
           <ToolBtn active={tool === 'fill'} onClick={() => setTool('fill')}>🪣 Fill</ToolBtn>
+          <ToolBtn active={tool === 'object'} onClick={() => setTool('object')}>🌳 Objects</ToolBtn>
           <ToolBtn active={tool === 'spawn'} onClick={() => setTool('spawn')}>⚑ Spawn</ToolBtn>
           <span style={{ width: 1, height: 20, background: '#2a2a32', margin: '0 4px' }} />
           <span style={{ fontSize: 11, color: '#7a7a83' }}>Brush</span>
@@ -171,25 +207,45 @@ export function MapEditor({
           <button onClick={fillAll} className="btn btn-ghost btn-sm" title="Fill the whole map with the selected tile">Fill all</button>
         </div>
 
-        {/* Palette */}
-        <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-          {TILE_PALETTE.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => { setTileId(t.id); if (tool === 'spawn') setTool('paint'); }}
-              title={t.label + (t.walkable ? '' : ' (blocks movement)')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 6, cursor: 'pointer',
-                border: tileId === t.id ? '2px solid #e8c86a' : '1px solid #2a2a32',
-                background: '#1a1a20', color: '#cfcfd6', fontSize: 11,
-              }}
-            >
-              <span style={{ width: 14, height: 14, borderRadius: 3, background: t.color, border: '1px solid rgba(0,0,0,0.4)' }} />
-              {t.label}
-              {!t.walkable && <span style={{ fontSize: 9, color: '#a05a5a' }}>⛔</span>}
-            </button>
-          ))}
-        </div>
+        {/* Palette — terrain when painting/filling, objects when in Objects mode */}
+        {tool === 'object' ? (
+          <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+            {PLACEABLE_OBJECTS.map((o) => (
+              <button
+                key={o.id}
+                onClick={() => setObjId(o.id)}
+                title={o.label}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '4px 8px', borderRadius: 6, cursor: 'pointer',
+                  border: objId === o.id ? '2px solid #7ec85a' : '1px solid #2a2a32',
+                  background: '#1a1a20', color: '#cfcfd6', fontSize: 11,
+                }}
+              >
+                <span style={{ fontSize: 14 }}>{o.icon}</span>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+            {TILE_PALETTE.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => { setTileId(t.id); if (tool === 'spawn') setTool('paint'); }}
+                title={t.label + (t.walkable ? '' : ' (blocks movement)')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 6, cursor: 'pointer',
+                  border: tileId === t.id ? '2px solid #e8c86a' : '1px solid #2a2a32',
+                  background: '#1a1a20', color: '#cfcfd6', fontSize: 11,
+                }}
+              >
+                <span style={{ width: 14, height: 14, borderRadius: 3, background: t.color, border: '1px solid rgba(0,0,0,0.4)' }} />
+                {t.label}
+                {!t.walkable && <span style={{ fontSize: 9, color: '#a05a5a' }}>⛔</span>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Canvas */}
@@ -205,9 +261,10 @@ export function MapEditor({
           style={{ border: '1px solid #2a2a32', borderRadius: 6, cursor: tool === 'spawn' ? 'crosshair' : 'cell', touchAction: 'none', imageRendering: 'pixelated' }}
         />
         <p style={{ fontSize: 12, color: '#7a7a83', marginTop: 10, maxWidth: 720 }}>
-          Pick a terrain from the palette and paint by clicking/dragging. <b>Fill</b> floods an area,
-          <b> Spawn</b> sets where players start (must be a walkable tile). Save, then <b>Play test</b> to
-          walk your world. Editor colors are simplified — in-game it renders with the real tilesets.
+          Pick a terrain and paint by clicking/dragging. <b>Fill</b> floods an area.
+          <b> Objects</b> places trees, buildings &amp; props (click to add, click again to remove) — they
+          render with the real tileset art in-game. <b>Spawn</b> sets where players start (walkable tile).
+          Save, then <b>Play test</b>. Editor terrain is shown in simplified colors; in-game it uses the real tilesets.
         </p>
       </div>
     </div>

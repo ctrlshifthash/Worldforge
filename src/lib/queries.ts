@@ -247,6 +247,24 @@ export async function getWorldMap(worldId: string) {
   return prisma.worldMap.findUnique({ where: { worldId } });
 }
 
+// Replace all of a world's objects in a given zone (used by the editor to save
+// the placed decorations/structures in one shot). Validated by the caller.
+export async function replaceZoneObjects(
+  worldId: string,
+  zone: string,
+  items: { tileX: number; tileY: number; itemType: string; rotation?: number }[],
+  placedBy: string,
+) {
+  await prisma.placedObject.deleteMany({ where: { worldId, zone } });
+  if (items.length) {
+    await prisma.placedObject.createMany({
+      data: items.map((i) => ({ worldId, zone, tileX: i.tileX, tileY: i.tileY, itemType: i.itemType, rotation: i.rotation ?? 0, placedBy })),
+      skipDuplicates: true,
+    });
+  }
+  return prisma.placedObject.findMany({ where: { worldId, zone } });
+}
+
 // Upsert a world's painted map. tilesJson is validated by the caller (API).
 export async function saveWorldMap(
   worldId: string,

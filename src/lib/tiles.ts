@@ -56,3 +56,38 @@ export const TILE_PALETTE: { id: number; label: string; color: string; walkable:
 export const TILE_COLOR: Record<number, string> = Object.fromEntries(
   TILE_PALETTE.map((t) => [t.id, t.color]),
 );
+
+// Objects placeable in the map editor. The `id` MUST match a BUILD_ITEMS id in
+// the engine so the placed object renders with its real tileset sprite in-game.
+// The editor shows the icon; the game draws the actual sprite.
+export const PLACEABLE_OBJECTS: { id: string; label: string; icon: string }[] = [
+  { id: 'oak_tree', label: 'Oak Tree', icon: '🌳' },
+  { id: 'pine_tree', label: 'Pine Tree', icon: '🌲' },
+  { id: 'dead_tree', label: 'Dead Tree', icon: '🥀' },
+  { id: 'bush', label: 'Bush', icon: '🌿' },
+  { id: 'wildflowers', label: 'Wildflowers', icon: '🌼' },
+  { id: 'sunflowers', label: 'Sunflowers', icon: '🌻' },
+  { id: 'mushrooms', label: 'Mushrooms', icon: '🍄' },
+  { id: 'rock', label: 'Boulder', icon: '🪨' },
+  { id: 'well', label: 'Water Well', icon: '⛲' },
+  { id: 'lamp_post', label: 'Lamp Post', icon: '🏮' },
+  { id: 'sign_post', label: 'Sign Post', icon: '🪧' },
+  { id: 'campfire', label: 'Campfire', icon: '🔥' },
+  { id: 'cabin', label: 'Cabin', icon: '🏠' },
+  { id: 'watchtower', label: 'Watchtower', icon: '🗼' },
+  { id: 'fence', label: 'Fence', icon: '🚧' },
+  { id: 'wall', label: 'Stone Wall', icon: '🧱' },
+  { id: 'bridge', label: 'Bridge', icon: '🌉' },
+  { id: 'barrel', label: 'Barrel', icon: '🛢️' },
+  { id: 'crate', label: 'Crate', icon: '📦' },
+  { id: 'market_stall', label: 'Market Stall', icon: '🏪' },
+  { id: 'garden', label: 'Garden', icon: '🌱' },
+  { id: 'altar', label: 'Stone Altar', icon: '⛩️' },
+  { id: 'war_banner', label: 'War Banner', icon: '🚩' },
+  { id: 'stone_gate', label: 'Stone Gate', icon: '🚪' },
+];
+
+export const PLACEABLE_IDS: ReadonlySet<string> = new Set(PLACEABLE_OBJECTS.map((o) => o.id));
+export const PLACEABLE_ICON: Record<string, string> = Object.fromEntries(
+  PLACEABLE_OBJECTS.map((o) => [o.id, o.icon]),
+);
