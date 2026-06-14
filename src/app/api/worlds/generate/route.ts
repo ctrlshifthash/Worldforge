@@ -7,6 +7,7 @@ import type { EntityType } from '@prisma/client';
 const VALID_TYPES: EntityType[] = ['CHARACTER', 'LOCATION', 'FACTION', 'ARTIFACT', 'SPECIES', 'EVENT'];
 
 export async function POST(request: Request) {
+ try {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -215,4 +216,11 @@ Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep
     events: eventsCreated,
     relations: relationsCreated,
   });
+ } catch (err) {
+   console.error('[worlds/generate] failed:', err);
+   return NextResponse.json(
+     { error: err instanceof Error ? err.message : 'World generation failed' },
+     { status: 500 },
+   );
+ }
 }
