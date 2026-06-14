@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth';
 import { ConnectWallet } from '@/components/ConnectWallet';
 
 const NAV_SOCIALS = [
-  { name: 'Pump.fun', href: 'https://pump.fun', img: '/socials/pumpfun.png' },
+  { name: 'Pump.fun', href: 'https://pump.fun/coin/8QZJYXVU2SUi3qesyGrHyTj21JSrs5xpLReTC1CLpump', img: '/socials/pumpfun.png' },
   { name: 'X', href: 'https://x.com/Playworldcraft', img: '/socials/x.png' },
   { name: 'GitHub', href: 'https://github.com/playWorldcraft/Worldcraft', img: '/socials/github.png' },
 ];
