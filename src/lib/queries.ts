@@ -226,6 +226,13 @@ export async function getEras(worldId: string) {
   });
 }
 
+export async function getWorldQuests(worldId: string) {
+  return prisma.worldQuest.findMany({
+    where: { worldId },
+    orderBy: { sortOrder: 'asc' },
+  });
+}
+
 export async function getEraBySlug(worldId: string, slug: string) {
   return prisma.era.findUnique({
     where: { worldId_slug: { worldId, slug } },

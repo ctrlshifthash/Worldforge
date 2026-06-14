@@ -13,13 +13,13 @@ const VALID_TYPES: EntityType[] = ['CHARACTER', 'LOCATION', 'FACTION', 'ARTIFACT
 // Holder perk: token holders get bigger, higher-quality world generation that
 // scales with their tier. Non-holders get the standard size on the fast model.
 function genPlan(tierKey: string, qualifies: boolean) {
-  if (!qualifies) return { model: 'google/gemini-2.5-flash', eras: 2, entities: 4, events: 3, relations: 3, maxTokens: 4000 };
+  if (!qualifies) return { model: 'google/gemini-2.5-flash', eras: 2, entities: 4, events: 3, relations: 3, quests: 3, maxTokens: 4500 };
   switch (tierKey) {
-    case 'diamond': return { model: 'anthropic/claude-sonnet-4', eras: 4, entities: 12, events: 8, relations: 9, maxTokens: 8000 };
-    case 'gold':    return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 10, events: 6, relations: 7, maxTokens: 7000 };
-    case 'silver':  return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 8,  events: 5, relations: 6, maxTokens: 6000 };
-    case 'bronze':  return { model: 'google/gemini-2.5-flash',   eras: 3, entities: 7,  events: 4, relations: 5, maxTokens: 5500 };
-    default:        return { model: 'google/gemini-2.5-flash',   eras: 2, entities: 6,  events: 4, relations: 4, maxTokens: 5000 }; // holder
+    case 'diamond': return { model: 'anthropic/claude-sonnet-4', eras: 4, entities: 12, events: 8, relations: 9, quests: 5, maxTokens: 9000 };
+    case 'gold':    return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 10, events: 6, relations: 7, quests: 4, maxTokens: 8000 };
+    case 'silver':  return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 8,  events: 5, relations: 6, quests: 4, maxTokens: 6800 };
+    case 'bronze':  return { model: 'google/gemini-2.5-flash',   eras: 3, entities: 7,  events: 4, relations: 5, quests: 3, maxTokens: 6000 };
+    default:        return { model: 'google/gemini-2.5-flash',   eras: 2, entities: 6,  events: 4, relations: 4, quests: 3, maxTokens: 5500 }; // holder
   }
 }
 
@@ -64,9 +64,9 @@ export async function POST(request: Request) {
           content: `Generate a fictional world based on: "${concept}"
 
 Return ONLY a JSON object (no markdown, no code fences):
-{"world":{"title":"2-4 word name","tagline":"One sentence","description":"2 sentences"},"eras":[{"title":"Era name","description":"Brief desc","startLabel":"Year 0","endLabel":"Year 50","color":"#hex"}],"entities":[{"type":"CHARACTER|LOCATION|FACTION|ARTIFACT|SPECIES","title":"Name","summary":"One line","content":"1 paragraph of lore","facts":[{"label":"Key","value":"Val"}],"tags":["tag1"]}],"events":[{"title":"Event","dateLabel":"Year X","era":"Era name (exact match)","summary":"What happened","impact":"Effect","involvedEntities":["Entity name (exact match)"]}],"relations":[{"fromTitle":"Entity (exact)","toTitle":"Entity (exact)","label":"relationship"}]}
+{"world":{"title":"2-4 word name","tagline":"One sentence","description":"2 sentences"},"eras":[{"title":"Era name","description":"Brief desc","startLabel":"Year 0","endLabel":"Year 50","color":"#hex"}],"entities":[{"type":"CHARACTER|LOCATION|FACTION|ARTIFACT|SPECIES","title":"Name","summary":"One line","content":"1 paragraph of lore","facts":[{"label":"Key","value":"Val"}],"tags":["tag1"]}],"events":[{"title":"Event","dateLabel":"Year X","era":"Era name (exact match)","summary":"What happened","impact":"Effect","involvedEntities":["Entity name (exact match)"]}],"relations":[{"fromTitle":"Entity (exact)","toTitle":"Entity (exact)","label":"relationship"}],"quests":[{"title":"Quest name (3-5 words)","objective":"Short action the player takes (e.g. 'Defeat the Iron Legion at Blackspire')","narrative":"1-2 sentences of lore framing why this matters in THIS world","kind":"defeat|recover|investigate|reach","targetName":"Exact name of an entity/location/faction above","rewardCoins":25}]}
 
-Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), ${plan.events} events, ${plan.relations} relations. Keep lore concise. All title references must match exactly.`,
+Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), ${plan.events} events, ${plan.relations} relations, ${plan.quests} quests. Each quest's targetName MUST exactly match one of the entities above, and quests should reflect this world's specific conflicts and lore. rewardCoins between 15 and 60. Keep lore concise. All title references must match exactly.`,
         },
       ],
     }),
@@ -232,7 +232,37 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
     }
   }
 
-  await logActivity(world.id, session.sub, 'generated', `world with ${erasCreated} eras, ${entitiesCreated} entities, ${eventsCreated} events, ${relationsCreated} relations using AI`);
+  // Create lore quests (tie each to a real entity where possible)
+  const entityTitleSet = new Set(Object.keys(entityMap).map((t) => t.toLowerCase()));
+  const validKinds = ['defeat', 'recover', 'investigate', 'reach'];
+  let questsCreated = 0;
+  const questList = Array.isArray(generated.quests) ? generated.quests : [];
+  for (let i = 0; i < questList.length; i++) {
+    const q = questList[i];
+    if (!q || !q.title) continue;
+    try {
+      // Prefer a target that matches a generated entity; otherwise keep the AI's.
+      const target = typeof q.targetName === 'string' ? q.targetName : '';
+      const matched = entityTitleSet.has(target.toLowerCase());
+      await prisma.worldQuest.create({
+        data: {
+          worldId: world.id,
+          sortOrder: i,
+          title: String(q.title).slice(0, 120),
+          objective: String(q.objective || '').slice(0, 300),
+          narrative: String(q.narrative || '').slice(0, 600),
+          kind: validKinds.includes(q.kind) ? q.kind : 'investigate',
+          targetName: matched ? target : (target || ''),
+          rewardCoins: Number.isFinite(q.rewardCoins) ? Math.max(15, Math.min(60, Math.round(q.rewardCoins))) : 25,
+        },
+      });
+      questsCreated++;
+    } catch {
+      // Skip malformed quest
+    }
+  }
+
+  await logActivity(world.id, session.sub, 'generated', `world with ${erasCreated} eras, ${entitiesCreated} entities, ${eventsCreated} events, ${relationsCreated} relations, ${questsCreated} quests using AI`);
 
   return NextResponse.json({
     world: { slug: world.slug, title: world.title },
@@ -240,6 +270,7 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
     entities: entitiesCreated,
     events: eventsCreated,
     relations: relationsCreated,
+    quests: questsCreated,
   });
  } catch (err) {
    console.error('[worlds/generate] failed:', err);

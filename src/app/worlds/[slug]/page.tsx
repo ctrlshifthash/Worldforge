@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments } from '@/lib/queries';
+import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments, getWorldQuests } from '@/lib/queries';
 import { ENTITY_COLORS, ENTITY_LABELS, timeAgo } from '@/lib/utils';
 import { GenerateWorld } from './GenerateWorld';
 
@@ -13,7 +13,7 @@ export default async function WorldOverviewPage({
   const world = await getWorldBySlug(slug);
   if (!world) notFound();
 
-  const [entities, activity, events, eras, sessions, pendingDevCount, recentCanon] = await Promise.all([
+  const [entities, activity, events, eras, sessions, pendingDevCount, recentCanon, quests] = await Promise.all([
     getEntities(world.id),
     getActivity(world.id, 8),
     getEvents(world.id),
@@ -21,7 +21,15 @@ export default async function WorldOverviewPage({
     getCharacterSessions(world.id),
     getPendingDevelopmentCount(world.id),
     getRecentWorldDevelopments(world.id, 5),
+    getWorldQuests(world.id),
   ]);
+
+  const QUEST_KIND_META: Record<string, { icon: string; color: string; label: string }> = {
+    defeat: { icon: '⚔️', color: '#E84393', label: 'Defeat' },
+    recover: { icon: '💎', color: '#F39C12', label: 'Recover' },
+    investigate: { icon: '🔍', color: '#0984E3', label: 'Investigate' },
+    reach: { icon: '🧭', color: '#36B37E', label: 'Reach' },
+  };
 
   const recentEntities = entities.slice(0, 6);
   const activeSessions = sessions.filter((s) => s.status === 'ACTIVE');
@@ -74,6 +82,48 @@ export default async function WorldOverviewPage({
               <p className="text-small">Add a description to tell visitors what your world is about.</p>
             </div>
             <Link href={`/worlds/${slug}/settings`} className="btn btn-secondary btn-sm">Edit Details</Link>
+          </div>
+        </div>
+      )}
+
+      {/* Lore Quests — generated from this world's own entities */}
+      {quests.length > 0 && (
+        <div className="card" style={{ marginBottom: 24 }}>
+          <div className="page-header-row" style={{ marginBottom: 4 }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>Quests</h3>
+            <Link href={`/worlds/${slug}/explore`} className="btn btn-ghost btn-sm">Play</Link>
+          </div>
+          <p className="text-small" style={{ marginBottom: 16 }}>
+            Objectives drawn from this world&apos;s own story — every world plays differently.
+          </p>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {quests.map((q) => {
+              const meta = QUEST_KIND_META[q.kind] || QUEST_KIND_META.investigate;
+              return (
+                <div
+                  key={q.id}
+                  style={{
+                    display: 'flex',
+                    gap: 12,
+                    padding: '12px 14px',
+                    border: '1px solid var(--border)',
+                    borderRadius: 10,
+                    background: 'var(--surface-2, #16161a)',
+                  }}
+                >
+                  <div style={{ fontSize: 20, lineHeight: 1.2 }}>{meta.icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 2 }}>
+                      <strong style={{ fontSize: '0.95rem' }}>{q.title}</strong>
+                      <span className="badge" style={{ borderColor: `${meta.color}40`, color: meta.color, fontSize: '0.65rem' }}>{meta.label}</span>
+                      <span style={{ marginLeft: 'auto', color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 600, whiteSpace: 'nowrap' }}>+{q.rewardCoins} coins</span>
+                    </div>
+                    <div className="text-small" style={{ marginBottom: q.narrative ? 4 : 0 }}>{q.objective}</div>
+                    {q.narrative && <div className="text-small" style={{ color: 'var(--text-dim, #888)', fontStyle: 'italic' }}>{q.narrative}</div>}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -48,6 +48,25 @@ model World {
   mapRegions        MapRegion[]
   characterSessions CharacterSession[]
   placedObjects     PlacedObject[]
+  quests            WorldQuest[]
+}
+
+// Lore-driven quests generated from a world's own entities, so each world has
+// its own objectives/story rather than the shared scripted missions.
+model WorldQuest {
+  id          String   @id @default(cuid())
+  worldId     String
+  sortOrder   Int      @default(0)
+  title       String
+  objective   String // short, action-oriented thing the player does
+  narrative   String // lore framing tying it to the world's story
+  kind        String // "defeat" | "recover" | "investigate" | "reach"
+  targetName  String // the entity / location / faction involved
+  rewardCoins Int      @default(0)
+  createdAt   DateTime @default(now())
+  world       World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  @@index([worldId])
 }
 
 model WorldMember {
