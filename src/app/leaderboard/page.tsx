@@ -93,7 +93,6 @@ export default async function LeaderboardPage() {
             <Stat icon="🧭" label="Worlds explored" value={`${stats.visits.toLocaleString()} visits`} />
             <Stat icon="⚔️" label="Quests completed" value={stats.quests.toLocaleString()} />
             <Stat icon="🧑‍🚀" label="Adventurers" value={stats.players.toLocaleString()} />
-            <Stat icon="💰" label="Daily reward pool" value={`${PAYOUT.pool.dailyCapSol} SOL`} highlight />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
