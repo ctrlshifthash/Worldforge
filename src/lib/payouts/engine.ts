@@ -121,6 +121,14 @@ function computeNextTier(balance: number): NextTierInfo | null {
   return null;
 }
 
+export interface ClaimSummary {
+  id: string;
+  amountSol: number;
+  status: string; // PENDING | SENT | FAILED
+  txSignature: string | null;
+  createdAt: string; // ISO
+}
+
 export interface EarningsSummary {
   claimableSol: number;
   lifetimeSol: number;
@@ -131,6 +139,7 @@ export interface EarningsSummary {
   tokenSupply: number;
   nextTier: NextTierInfo | null;
   walletAddress: string | null;
+  recentClaims: ClaimSummary[];
   // NOTE: the global daily pool is intentionally NOT exposed here — it is
   // enforced server-side at claim time but isn't shown to players.
   claim: {
@@ -186,6 +195,21 @@ export async function getEarningsSummary(userId: string): Promise<EarningsSummar
     nextTier = computeNextTier(tokenBalance);
   }
 
+  // Recent claim history (for transparency on the dashboard).
+  const claimRows = await prisma.claim.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: { id: true, amountSol: true, status: true, txSignature: true, createdAt: true },
+  });
+  const recentClaims = claimRows.map((c) => ({
+    id: c.id,
+    amountSol: c.amountSol,
+    status: c.status,
+    txSignature: c.txSignature,
+    createdAt: c.createdAt.toISOString(),
+  }));
+
   return {
     claimableSol,
     lifetimeSol,
@@ -196,6 +220,7 @@ export async function getEarningsSummary(userId: string): Promise<EarningsSummar
     tokenSupply: PAYOUT.token.totalSupply,
     nextTier,
     walletAddress: user?.walletAddress ?? null,
+    recentClaims,
     claim: {
       maxPerDay: PAYOUT.claim.maxPerDay,
       usedToday,

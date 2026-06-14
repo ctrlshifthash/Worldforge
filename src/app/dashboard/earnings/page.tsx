@@ -20,6 +20,7 @@ interface Summary {
   tokenSupply: number;
   nextTier: NextTier | null;
   walletAddress: string | null;
+  recentClaims: { id: string; amountSol: number; status: string; txSignature: string | null; createdAt: string }[];
   claim: {
     maxPerDay: number;
     usedToday: number;
@@ -213,6 +214,43 @@ export default function EarningsPage() {
       </button>
 
       {msg && <p style={{ marginTop: 12, color: '#bbb' }}>{msg}</p>}
+
+      {data.recentClaims.length > 0 && (
+        <div style={{ ...panel, marginTop: 16 }}>
+          <strong>Claim history</strong>
+          {data.recentClaims.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 10,
+                padding: '9px 0',
+                borderBottom: '1px solid #232329',
+                fontSize: 14,
+              }}
+            >
+              <span style={{ color: '#bbb' }}>
+                {new Date(c.createdAt).toLocaleDateString()} · <b style={{ color: '#e8e8e8' }}>{c.amountSol.toFixed(4)} SOL</b>
+                {' '}· <span style={{ color: c.status === 'SENT' ? '#7ad77a' : c.status === 'FAILED' ? '#e08a8a' : '#c9a86a' }}>{c.status}</span>
+              </span>
+              {c.txSignature && !c.txSignature.startsWith('STUB') ? (
+                <a
+                  href={`https://solscan.io/tx/${c.txSignature}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#e8c86a', whiteSpace: 'nowrap' }}
+                >
+                  view tx ↗
+                </a>
+              ) : (
+                <span style={{ color: '#666' }}>—</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -24,6 +24,9 @@ export default async function PlayPage({
     notFound();
   }
 
+  // Count a visit (best-effort, non-blocking) — powers the leaderboard.
+  prisma.world.update({ where: { id: world.id }, data: { visits: { increment: 1 } } }).catch(() => {});
+
   const [allEntities, eras] = await Promise.all([
     getEntities(world.id),
     getEras(world.id),

@@ -27,6 +27,7 @@ export async function Navbar() {
         <Link href="/docs" className="navbar-link">Docs</Link>
         <Link href="/play/everhold" className="navbar-link">Play</Link>
         <Link href="/discover" className="navbar-link">Discover</Link>
+        <Link href="/leaderboard" className="navbar-link">Leaderboard</Link>
         {session && <Link href="/dashboard" className="navbar-link">Dashboard</Link>}
         {session && <Link href="/dashboard/earnings" className="navbar-link">Earnings</Link>}
       </div>

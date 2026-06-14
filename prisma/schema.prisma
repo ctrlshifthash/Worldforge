@@ -35,6 +35,7 @@ model World {
   description       String
   visibility        Visibility         @default(PRIVATE)
   coverGradient     String
+  visits            Int                @default(0)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   owner             User?              @relation("WorldOwner", fields: [ownerId], references: [id])

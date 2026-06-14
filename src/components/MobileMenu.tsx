@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/docs', label: 'Docs' },
   { href: '/play/everhold', label: 'Play' },
   { href: '/discover', label: 'Discover' },
+  { href: '/leaderboard', label: 'Leaderboard' },
 ];
 
 /**
