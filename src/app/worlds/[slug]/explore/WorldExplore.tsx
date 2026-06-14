@@ -5829,6 +5829,9 @@ export function WorldExplore({
                 setPlayerGold(playerGoldRef.current);
                 damageNumbersRef.current.push({ x: pq.x * TILE_SIZE + 16, y: pq.y * TILE_SIZE - 28, text: `+${reward}`, color: '#e8c86a', timer: 1.8 });
               }
+              // Credit server-side earnings: SOL for qualifying holders (on worlds
+              // they don't own), in-game coins otherwise. Engine enforces all gates.
+              reportQuestComplete(worldIdRef.current, quest.id);
               zoneBannerRef.current = `✦ Quest Complete: ${quest.title}`;
               zoneBannerTimer.current = 3;
             }
@@ -11820,7 +11823,7 @@ export function WorldExplore({
               })}
             </div>
           )}
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>Travel to each target across the world and interact (E) to complete. Rewards are in-game coins.</p>
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>Travel to each target and interact (E) to complete. Token holders earn real SOL on worlds made by others; everyone earns in-game coins.</p>
         </div>
       )}
 
@@ -11898,7 +11901,7 @@ export function WorldExplore({
                 ))}
               </div>
               <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
-                To complete a quest, travel to its target (a named place or character in the world) and interact with <b>E</b>. You earn in-game coins, and progress is saved per world.
+                To complete a quest, travel to its target and interact with <b>E</b>. Token holders earn real SOL on worlds made by others; everyone else earns in-game coins. Progress is saved per world.
               </div>
             </div>
           )}

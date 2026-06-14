@@ -37,8 +37,18 @@ export async function recordQuestCompletion(params: {
 }): Promise<RecordResult> {
   const { userId, worldId, questId } = params;
 
-  const quest = PAYOUT.quests[questId];
-  if (!quest) return { ok: false, reason: 'unknown_quest' };
+  // Resolve the reward: a curated quest from config, or a per-world lore quest.
+  let reward: { baseSol: number; baseCoins: number };
+  let isLore = false;
+  const curated = PAYOUT.quests[questId];
+  if (curated) {
+    reward = { baseSol: curated.baseSol, baseCoins: curated.baseCoins };
+  } else {
+    const lq = await prisma.worldQuest.findFirst({ where: { id: questId, worldId }, select: { rewardCoins: true } });
+    if (!lq) return { ok: false, reason: 'unknown_quest' };
+    isLore = true;
+    reward = { baseSol: PAYOUT.loreQuest.baseSol, baseCoins: lq.rewardCoins };
+  }
 
   // Once-only: if already recorded, no-op (prevents grinding the same quest).
   const existing = await prisma.questCompletion.findUnique({
@@ -91,8 +101,13 @@ export async function recordQuestCompletion(params: {
   let qualifiesForSol = tier.qualifies;
   if (qualifiesForSol) {
     // (a) Fresh-world guard: quests "completed" seconds after a world is created are bot-like.
-    const world = await prisma.world.findUnique({ where: { id: worldId }, select: { createdAt: true } });
+    const world = await prisma.world.findUnique({ where: { id: worldId }, select: { createdAt: true, ownerId: true } });
     if (world && Date.now() - world.createdAt.getTime() < PAYOUT.antiFarm.minWorldAgeSecondsForSol * 1000) {
+      qualifiesForSol = false;
+    }
+    // (a2) Lore quests on your OWN world pay coins only — kills the vector where
+    // a holder mass-generates worlds and farms trivial self-made quests for SOL.
+    if (isLore && world && world.ownerId === userId) {
       qualifiesForSol = false;
     }
   }
@@ -108,8 +123,8 @@ export async function recordQuestCompletion(params: {
   }
 
   const rewardKind: 'SOL' | 'COIN' = qualifiesForSol ? 'SOL' : 'COIN';
-  const earnedSol = qualifiesForSol ? quest.baseSol * tier.multiplier : 0;
-  const earnedCoins = qualifiesForSol ? 0 : quest.baseCoins;
+  const earnedSol = qualifiesForSol ? reward.baseSol * tier.multiplier : 0;
+  const earnedCoins = qualifiesForSol ? 0 : reward.baseCoins;
 
   await prisma.questCompletion.create({
     data: {
@@ -117,7 +132,7 @@ export async function recordQuestCompletion(params: {
       worldId,
       questId,
       rewardKind,
-      baseSol: quest.baseSol,
+      baseSol: reward.baseSol,
       multiplier: tier.multiplier,
       earnedSol,
       earnedCoins,

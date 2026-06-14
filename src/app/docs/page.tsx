@@ -182,9 +182,11 @@ export default function DocsPage() {
               quests on its overview page before you play.
             </p>
             <p style={p}>
-              Lore-quest rewards are paid in <strong>in-game coins</strong>. The real-SOL payouts
-              come from the curated zone quests — keeping the on-chain economy separate and fair, so
-              generated quests can never be farmed for SOL.
+              Lore quests pay out like any other quest: <strong>token holders earn real SOL</strong>{' '}
+              (scaled by tier), and everyone else earns in-game coins. To keep it fair, lore quests
+              only pay SOL on <strong>worlds you didn&apos;t create</strong> — so you can&apos;t farm
+              your own generated worlds — and the global daily pool, per-claim caps, holder-gating,
+              and anti-farm spacing all still apply.
             </p>
           </section>
 

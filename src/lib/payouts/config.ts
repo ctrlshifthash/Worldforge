@@ -53,6 +53,15 @@ export const PAYOUT = {
     marina_necklace: { baseSol: 0.003, baseCoins: 30, label: "Marina's lost necklace" },
   } as Record<string, { baseSol: number; baseCoins: number; label: string }>,
 
+  /**
+   * Per-world AI "lore" quests. Easier than curated quests (travel + interact),
+   * so they pay a smaller base SOL. baseCoins comes from each quest's own
+   * rewardCoins. Only credited to holders, and only on worlds the player does
+   * NOT own (stops farming self-generated worlds). Still subject to every
+   * anti-farm gate, per-claim caps, and the global daily pool.
+   */
+  loreQuest: { baseSol: 0.0015 },
+
   claim: {
     /** Max claims per user per UTC day. */
     maxPerDay: 4,
