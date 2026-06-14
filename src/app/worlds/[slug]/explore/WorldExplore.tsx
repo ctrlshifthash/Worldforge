@@ -4307,6 +4307,30 @@ function deriveWorldMood(title: string, entities: WorldEntity[]): { color: strin
   return { color: `hsl(${hue}, 45%, 55%)`, alpha: 0.16 };
 }
 
+// Generic region labels, most-prominent first. Each gets renamed to one of the
+// world's Locations/Factions (in data order) so the place names you read as you
+// explore are the world's own lore. Geometry/gameplay are untouched — only the
+// displayed names change. Worlds with few Locations keep the generic names for
+// the leftover slots, so it never looks broken.
+const LORE_SLOTS = [
+  'Town Square', 'Ancient Ruins', 'Northern Highlands', 'Western Forest', 'Lakeshore', 'Docks', 'Farmstead', 'Harbor',
+  'Orc Stronghold', 'Vendor Camp', 'Dark Cave', 'Rocky Overlook', 'Frog Pond', 'Ruined Cart',
+  'Seaside Village',
+];
+
+function buildPlaceNameMap(entities: WorldEntity[]): Record<string, string> {
+  // Only real places make sense as region names: Locations first, then Factions.
+  const ranked = [
+    ...entities.filter((e) => e.type === 'LOCATION'),
+    ...entities.filter((e) => e.type === 'FACTION'),
+  ];
+  const map: Record<string, string> = {};
+  for (let i = 0; i < LORE_SLOTS.length && i < ranked.length; i++) {
+    map[LORE_SLOTS[i]] = ranked[i].title;
+  }
+  return map;
+}
+
 export function WorldExplore({
   entities,
   slug,
@@ -4426,6 +4450,8 @@ export function WorldExplore({
   const terrainRef = useRef<HTMLCanvasElement | null>(null);
   // Per-world terrain mood tint (read inside the render loop via .current).
   const worldMoodRef = useRef(deriveWorldMood(_worldTitle, entities));
+  // Per-world place names — generic regions renamed to the world's Locations.
+  const placeNamesRef = useRef(buildPlaceNameMap(entities));
   const decoRef = useRef<HTMLCanvasElement | null>(null);
   const zoomRef = useRef(1);
 
@@ -4827,9 +4853,10 @@ export function WorldExplore({
     setReady(true);
   }, [entities]);
 
-  // Keep the per-world mood tint in sync with props.
+  // Keep the per-world mood tint + place names in sync with props.
   useEffect(() => {
     worldMoodRef.current = deriveWorldMood(_worldTitle, entities);
+    placeNamesRef.current = buildPlaceNameMap(entities);
   }, [_worldTitle, entities]);
 
   // Pre-render when assets ready + restore zone if saved in non-hub zone
@@ -6751,7 +6778,7 @@ export function WorldExplore({
             zoneHRef.current = SV_H;
             p.x = 3; p.y = 12; p.facing = 'right'; p.moving = false;
             zoneRef.current = 'village';
-            zoneBannerRef.current = 'Seaside Village';
+            zoneBannerRef.current = placeNamesRef.current['Seaside Village'] || 'Seaside Village';
             zoneBannerTimer.current = 3;
           } else if (target === 'hub') {
             const prevZone = zoneRef.current;
@@ -7776,8 +7803,8 @@ export function WorldExplore({
       if (inHub) {
         const vis = visitedRef.current;
         if (merchantDist < MERCHANT_RANGE && !vis.has('merchant')) { vis.add('merchant'); discoveriesRef.current.add('hub_merchant'); zoneBannerRef.current = 'Discovered: Town Merchant'; zoneBannerTimer.current = 2; }
-        if (ellipseDist(ptx, pty, 22, 30, 5, 4) < 0.8 && !vis.has('forest')) { vis.add('forest'); discoveriesRef.current.add('hub_forest_area'); zoneBannerRef.current = 'Discovered: Western Forest'; zoneBannerTimer.current = 2; }
-        if (ellipseDist(ptx, pty, 42, 78, 10, 8) < 0.6 && !vis.has('ruins')) { vis.add('ruins'); discoveriesRef.current.add('hub_ruins'); zoneBannerRef.current = 'Discovered: Ancient Ruins'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 22, 30, 5, 4) < 0.8 && !vis.has('forest')) { vis.add('forest'); discoveriesRef.current.add('hub_forest_area'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Western Forest'] || 'Western Forest'}`; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 42, 78, 10, 8) < 0.6 && !vis.has('ruins')) { vis.add('ruins'); discoveriesRef.current.add('hub_ruins'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Ancient Ruins'] || 'Ancient Ruins'}`; zoneBannerTimer.current = 2; }
         if (ellipseDist(ptx, pty, 28, 62, 3, 2) < 1.0 && !vis.has('shrine')) { vis.add('shrine'); discoveriesRef.current.add('hub_shrine'); zoneBannerRef.current = 'Discovered: Lakeside Shrine'; zoneBannerTimer.current = 2; }
         if (ellipseDist(ptx, pty, 96, 42, 5, 4) < 1.0 && !vis.has('docks')) { vis.add('docks'); discoveriesRef.current.add('hub_docks'); zoneBannerRef.current = 'Discovered: The Docks'; zoneBannerTimer.current = 2; }
         if (ellipseDist(ptx, pty, 38, 59, 3, 2) < 1.0 && !vis.has('hermit')) { vis.add('hermit'); discoveriesRef.current.add('hub_hermit'); zoneBannerRef.current = 'Discovered: Hermit\'s Hut'; zoneBannerTimer.current = 2; }
@@ -7820,11 +7847,11 @@ export function WorldExplore({
         }
       } else {
         const glVis = glVisitedRef.current;
-        if (vendorDist < MERCHANT_RANGE && !glVis.has('vendor')) { glVis.add('vendor'); discoveriesRef.current.add('gl_vendor'); zoneBannerRef.current = 'Discovered: Vendor Camp'; zoneBannerTimer.current = 2; }
-        if (ellipseDist(ptx, pty, 60, 28, 4, 3) < 0.9 && !glVis.has('overlook')) { glVis.add('overlook'); discoveriesRef.current.add('gl_overlook'); zoneBannerRef.current = 'Discovered: Rocky Overlook'; zoneBannerTimer.current = 2; }
+        if (vendorDist < MERCHANT_RANGE && !glVis.has('vendor')) { glVis.add('vendor'); discoveriesRef.current.add('gl_vendor'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Vendor Camp'] || 'Vendor Camp'}`; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 60, 28, 4, 3) < 0.9 && !glVis.has('overlook')) { glVis.add('overlook'); discoveriesRef.current.add('gl_overlook'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Rocky Overlook'] || 'Rocky Overlook'}`; zoneBannerTimer.current = 2; }
         if (ellipseDist(ptx, pty, 20, 32, 4, 3) < 0.8 && !glVis.has('clearing')) { glVis.add('clearing'); discoveriesRef.current.add('gl_clearing'); zoneBannerRef.current = 'Discovered: Forest Clearing'; zoneBannerTimer.current = 2; }
-        if (ellipseDist(ptx, pty, 62, 22, 4, 3) < 0.9 && !glVis.has('cave')) { glVis.add('cave'); discoveriesRef.current.add('gl_cave'); zoneBannerRef.current = 'Discovered: Dark Cave'; zoneBannerTimer.current = 2; }
-        if (ellipseDist(ptx, pty, 40, 12, 9, 6) < 0.6 && !glVis.has('shrine')) { glVis.add('shrine'); discoveriesRef.current.add('gl_stronghold'); zoneBannerRef.current = 'Discovered: Orc Stronghold'; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 62, 22, 4, 3) < 0.9 && !glVis.has('cave')) { glVis.add('cave'); discoveriesRef.current.add('gl_cave'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Dark Cave'] || 'Dark Cave'}`; zoneBannerTimer.current = 2; }
+        if (ellipseDist(ptx, pty, 40, 12, 9, 6) < 0.6 && !glVis.has('shrine')) { glVis.add('shrine'); discoveriesRef.current.add('gl_stronghold'); zoneBannerRef.current = `Discovered: ${placeNamesRef.current['Orc Stronghold'] || 'Orc Stronghold'}`; zoneBannerTimer.current = 2; }
 
         const killed = orcsKilledRef.current;
         if (!glVis.has('vendor')) objectiveRef.current = 'Talk to the Vendor at the camp [E]';
@@ -9976,7 +10003,9 @@ export function WorldExplore({
       }
 
       // ── Top bar: location pill (left-aligned) ──
-      const zoneName = inHub ? getZoneName(Math.floor(p.x), Math.floor(p.y)) : inVillage ? 'Seaside Village' : getGrasslandZoneName(Math.floor(p.x), Math.floor(p.y));
+      const rawZoneName = inHub ? getZoneName(Math.floor(p.x), Math.floor(p.y)) : inVillage ? 'Seaside Village' : getGrasslandZoneName(Math.floor(p.x), Math.floor(p.y));
+      // Rename generic regions to the world's own Locations where one is mapped.
+      const zoneName = placeNamesRef.current[rawZoneName] || rawZoneName;
       const regionLabel = inHub ? 'Hub' : inVillage ? 'Village' : 'Grassland';
 
       // Location pill — top left
