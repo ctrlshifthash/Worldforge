@@ -17,41 +17,38 @@ async function main() {
   await prisma.world.deleteMany();
   await prisma.user.deleteMany();
 
+  const [demo, noor, eli] = await ensureDemoUsers();
+  await seedEverhold(demo, noor, eli);
+}
+
+// Upserts the three demo users (idempotent). Returns [demo, noor, eli].
+export async function ensureDemoUsers() {
   const passwordHash = await bcrypt.hash('worldforge', 12);
+  const demo = await prisma.user.upsert({
+    where: { email: 'demo@worldforge.app' },
+    update: {},
+    create: { email: 'demo@worldforge.app', username: 'demo', name: 'Demo User', passwordHash, avatar: 'DU' },
+  });
+  const noor = await prisma.user.upsert({
+    where: { email: 'noor@worldforge.app' },
+    update: {},
+    create: { email: 'noor@worldforge.app', username: 'noor', name: 'John', passwordHash, avatar: 'J' },
+  });
+  const eli = await prisma.user.upsert({
+    where: { email: 'eli@worldforge.app' },
+    update: {},
+    create: { email: 'eli@worldforge.app', username: 'eli', name: 'Rick', passwordHash, avatar: 'R' },
+  });
+  return [demo, noor, eli] as const;
+}
 
-  // ─── Users ───
-  const users = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: 'demo@worldforge.app',
-        username: 'demo',
-        name: 'Demo User',
-        passwordHash,
-        avatar: 'DU',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'noor@worldforge.app',
-        username: 'noor',
-        name: 'John',
-        passwordHash,
-        avatar: 'J',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'eli@worldforge.app',
-        username: 'eli',
-        name: 'Rick',
-        passwordHash,
-        avatar: 'R',
-      },
-    }),
-  ]);
-
-  const [demo, noor, eli] = users;
-
+// Creates the Everhold demo world + all its content. Assumes the demo users
+// already exist. Reused by the non-destructive restore (does NOT delete data).
+export async function seedEverhold(
+  demo: { id: string },
+  noor: { id: string },
+  eli: { id: string },
+) {
   // ─── Everhold World ───
   const everhold = await prisma.world.create({
     data: {
@@ -752,12 +749,30 @@ async function main() {
   console.log('  Password: worldforge');
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (error) => {
-    console.error(error);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+// Non-destructive restore: creates Everhold ONLY if it's missing. Never deletes
+// anything — safe to run against the live database.
+export async function restoreEverhold() {
+  const existing = await prisma.world.findUnique({ where: { slug: 'everhold' } });
+  if (existing) {
+    console.log('Everhold already exists — nothing to restore.');
+    return;
+  }
+  const [demo, noor, eli] = await ensureDemoUsers();
+  await seedEverhold(demo, noor, eli);
+  console.log('Everhold restored.');
+}
+
+// Only auto-run the DESTRUCTIVE full seed when this file is executed directly
+// (e.g. `tsx prisma/seed.ts`) — never when imported by another script.
+const entry = (process.argv[1] || '').replace(/\\/g, '/');
+if (/prisma\/seed\.ts$/.test(entry)) {
+  main()
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (error) => {
+      console.error(error);
+      await prisma.$disconnect();
+      process.exit(1);
+    });
+}
