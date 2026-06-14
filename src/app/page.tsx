@@ -67,15 +67,22 @@ const BUILD_ITEMS = [
 ];
 
 export default async function LandingPage() {
-  const worlds = await prisma.world.findMany({
-    where: { visibility: 'PUBLIC' },
-    include: {
-      owner: { select: { id: true, name: true, username: true, avatar: true } },
-      _count: { select: { entities: true, events: true, members: true } },
-    },
-    orderBy: { updatedAt: 'desc' },
-    take: 3,
-  });
+  const fetchWorlds = () =>
+    prisma.world.findMany({
+      where: { visibility: 'PUBLIC' },
+      include: {
+        owner: { select: { id: true, name: true, username: true, avatar: true } },
+        _count: { select: { entities: true, events: true, members: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 3,
+    });
+  let worlds: Awaited<ReturnType<typeof fetchWorlds>> = [];
+  try {
+    worlds = await fetchWorlds();
+  } catch {
+    /* DB unreachable — render the landing page without featured worlds, not a 500 */
+  }
 
   return (
     <div className="landing">

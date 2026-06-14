@@ -24,38 +24,46 @@ function displayName(u?: UserLite): string {
 const MEDAL = ['🥇', '🥈', '🥉'];
 
 export default async function LeaderboardPage() {
-  // Top earners — lifetime SOL earned (claimed + unclaimed)
-  const earners = await prisma.questCompletion.groupBy({
-    by: ['userId'],
-    where: { earnedSol: { gt: 0 } },
-    _sum: { earnedSol: true },
-    orderBy: { _sum: { earnedSol: 'desc' } },
-    take: 10,
-  });
+  // Typed fetch helpers so the page can fall back to empty boards if the DB is down.
+  const fetchEarners = () =>
+    prisma.questCompletion.groupBy({
+      by: ['userId'],
+      where: { earnedSol: { gt: 0 } },
+      _sum: { earnedSol: true },
+      orderBy: { _sum: { earnedSol: 'desc' } },
+      take: 10,
+    });
+  const fetchQuesters = () =>
+    prisma.questCompletion.groupBy({
+      by: ['userId'],
+      _count: { userId: true },
+      orderBy: { _count: { userId: 'desc' } },
+      take: 10,
+    });
+  const fetchWorlds = () =>
+    prisma.world.findMany({
+      where: { visibility: 'PUBLIC' },
+      orderBy: [{ visits: 'desc' }, { updatedAt: 'desc' }],
+      take: 10,
+      select: { slug: true, title: true, visits: true, _count: { select: { entities: true } } },
+    });
 
-  // Most quests cleared
-  const questers = await prisma.questCompletion.groupBy({
-    by: ['userId'],
-    _count: { userId: true },
-    orderBy: { _count: { userId: 'desc' } },
-    take: 10,
-  });
-
-  // Most-visited worlds
-  const worlds = await prisma.world.findMany({
-    where: { visibility: 'PUBLIC' },
-    orderBy: [{ visits: 'desc' }, { updatedAt: 'desc' }],
-    take: 10,
-    select: { slug: true, title: true, visits: true, _count: { select: { entities: true } } },
-  });
-
-  const ids = [...new Set([...earners.map((e) => e.userId), ...questers.map((q) => q.userId)])];
-  const users = ids.length
-    ? await prisma.user.findMany({
+  let earners: Awaited<ReturnType<typeof fetchEarners>> = [];
+  let questers: Awaited<ReturnType<typeof fetchQuesters>> = [];
+  let worlds: Awaited<ReturnType<typeof fetchWorlds>> = [];
+  let users: UserLite[] = [];
+  try {
+    [earners, questers, worlds] = await Promise.all([fetchEarners(), fetchQuesters(), fetchWorlds()]);
+    const ids = [...new Set([...earners.map((e) => e.userId), ...questers.map((q) => q.userId)])];
+    if (ids.length) {
+      users = await prisma.user.findMany({
         where: { id: { in: ids } },
         select: { id: true, name: true, username: true, walletAddress: true },
-      })
-    : [];
+      });
+    }
+  } catch {
+    /* DB unreachable — render empty boards instead of a 500 */
+  }
   const byId = new Map(users.map((u) => [u.id, u]));
 
   return (

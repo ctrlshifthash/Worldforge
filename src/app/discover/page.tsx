@@ -9,14 +9,21 @@ import { OnlineCounts } from './OnlineCounts';
 export const dynamic = 'force-dynamic';
 
 export default async function DiscoverPage() {
-  const worlds = await prisma.world.findMany({
-    where: { visibility: 'PUBLIC' },
-    include: {
-      owner: { select: { id: true, name: true, username: true, avatar: true } },
-      _count: { select: { entities: true, events: true, members: true } },
-    },
-    orderBy: { updatedAt: 'desc' },
-  });
+  const fetchWorlds = () =>
+    prisma.world.findMany({
+      where: { visibility: 'PUBLIC' },
+      include: {
+        owner: { select: { id: true, name: true, username: true, avatar: true } },
+        _count: { select: { entities: true, events: true, members: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  let worlds: Awaited<ReturnType<typeof fetchWorlds>> = [];
+  try {
+    worlds = await fetchWorlds();
+  } catch {
+    /* DB unreachable — show an empty directory rather than a 500 */
+  }
 
   const slugs = worlds.map(w => w.slug);
 
