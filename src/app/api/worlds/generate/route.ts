@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { getSession } from '@/lib/auth';
 import { createWorld, createEntity, createEvent, createRelation, createEra, createEventEntityLinks, logActivity } from '@/lib/queries';
 import { ENTITY_COLORS, slugify } from '@/lib/utils';
@@ -242,6 +243,7 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
   });
  } catch (err) {
    console.error('[worlds/generate] failed:', err);
+   Sentry.captureException(err, { tags: { route: 'worlds/generate' } });
    return NextResponse.json(
      { error: err instanceof Error ? err.message : 'World generation failed' },
      { status: 500 },
