@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments, ensureWorldQuests } from '@/lib/queries';
 import { ENTITY_COLORS, ENTITY_LABELS, timeAgo } from '@/lib/utils';
+import { getSession } from '@/lib/auth';
 import { GenerateWorld } from './GenerateWorld';
 
 export default async function WorldOverviewPage({
@@ -31,6 +32,10 @@ export default async function WorldOverviewPage({
     reach: { icon: '🧭', color: '#36B37E', label: 'Reach' },
   };
 
+  const session = await getSession();
+  const isOwner = world.ownerId ? world.ownerId === session?.sub : true;
+  const isCustom = world.kind === 'CUSTOM';
+
   const recentEntities = entities.slice(0, 6);
   const activeSessions = sessions.filter((s) => s.status === 'ACTIVE');
   const characterCount = entities.filter((e) => e.type === 'CHARACTER').length;
@@ -44,9 +49,18 @@ export default async function WorldOverviewPage({
         <div className="world-hero-bg" style={{ background: world.coverGradient }} />
         <div className="world-hero-overlay" />
         <div className="world-hero-content">
-          <p className="eyebrow">{world.visibility === 'PUBLIC' ? 'Public World' : 'Private World'}</p>
+          <p className="eyebrow">
+            {world.visibility === 'PUBLIC' ? 'Public World' : 'Private World'}
+            {' · '}
+            <span style={{ color: isCustom ? '#7ec85a' : '#80a0e0' }}>{isCustom ? '🎨 Custom World' : '🏰 Classic World'}</span>
+          </p>
           <h1>{world.title}</h1>
           <p className="world-hero-tagline">{world.tagline}</p>
+          {isCustom && isOwner && (
+            <div style={{ marginTop: 12 }}>
+              <Link href={`/worlds/${slug}/editor`} className="btn btn-primary btn-sm">🎨 Edit Map</Link>
+            </div>
+          )}
           <div className="world-stats">
             <div className="world-stat">
               <span className="world-stat-value">{world._count.entities}</span>

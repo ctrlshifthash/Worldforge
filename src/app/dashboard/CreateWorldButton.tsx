@@ -17,6 +17,8 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
 
     const form = new FormData(e.currentTarget);
     const useAI = form.get('useAI') === 'on';
+    const kind = form.get('kind') === 'CUSTOM' ? 'CUSTOM' : 'CLASSIC';
+    const dest = (slug: string) => (kind === 'CUSTOM' ? `/worlds/${slug}/editor` : `/worlds/${slug}`);
 
     if (useAI) {
       // One-shot AI generation — AI creates world name, description, AND all content
@@ -43,7 +45,7 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
       const res = await fetch('/api/worlds/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ concept, visibility }),
+        body: JSON.stringify({ concept, visibility, kind }),
       });
 
       clearInterval(stepTimer);
@@ -60,7 +62,7 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
       setOpen(false);
       setLoading(false);
       setStatus('');
-      router.push(`/worlds/${data.world.slug}`);
+      router.push(dest(data.world.slug));
       router.refresh();
     } else {
       // Manual creation — user provides all details
@@ -74,6 +76,7 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
           tagline: form.get('tagline'),
           description: form.get('description'),
           visibility: form.get('visibility'),
+          kind,
         }),
       });
 
@@ -89,7 +92,7 @@ export function CreateWorldButton({ isCard }: { isCard?: boolean }) {
       setOpen(false);
       setLoading(false);
       setStatus('');
-      router.push(`/worlds/${world.slug}`);
+      router.push(dest(world.slug));
       router.refresh();
     }
   }
@@ -122,6 +125,14 @@ function Modal({ onSubmit, loading, status, error, onClose }: {
   onClose: () => void;
 }) {
   const [useAI, setUseAI] = useState(true);
+  const [kind, setKind] = useState<'CLASSIC' | 'CUSTOM'>('CLASSIC');
+
+  const card = (active: boolean): React.CSSProperties => ({
+    display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start', textAlign: 'left',
+    padding: '12px 14px', borderRadius: 10, cursor: 'pointer',
+    border: active ? '2px solid #e8c86a' : '1px solid #2a2a32',
+    background: active ? 'rgba(232,200,106,0.08)' : '#16161a',
+  });
 
   return (
     <div className="modal-overlay" onClick={loading ? undefined : onClose}>
@@ -134,6 +145,24 @@ function Modal({ onSubmit, loading, status, error, onClose }: {
         {error && <div className="form-error" style={{ marginBottom: 16 }}>{error}</div>}
 
         <form className="form-stack" onSubmit={onSubmit}>
+          {/* World type chooser — Classic vs Custom */}
+          <input type="hidden" name="kind" value={kind} />
+          <div>
+            <label className="field-label" style={{ marginBottom: 8, display: 'block' }}>World type</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <button type="button" disabled={loading} onClick={() => setKind('CLASSIC')} style={card(kind === 'CLASSIC')}>
+                <span style={{ fontSize: 20 }}>🏰</span>
+                <strong style={{ fontSize: 13, color: '#fff' }}>Classic World</strong>
+                <span style={{ fontSize: 11, color: '#9a9aa3', lineHeight: 1.4 }}>The built-in game — town, grassland orcs, seaside village, quests &amp; combat.</span>
+              </button>
+              <button type="button" disabled={loading} onClick={() => setKind('CUSTOM')} style={card(kind === 'CUSTOM')}>
+                <span style={{ fontSize: 20 }}>🎨</span>
+                <strong style={{ fontSize: 13, color: '#fff' }}>Custom World</strong>
+                <span style={{ fontSize: 11, color: '#9a9aa3', lineHeight: 1.4 }}>Paint your own map tile by tile. Opens the map editor right after you create it.</span>
+              </button>
+            </div>
+          </div>
+
           {/* AI toggle at the top */}
           <div className="create-ai-toggle">
             <label className="create-ai-label">

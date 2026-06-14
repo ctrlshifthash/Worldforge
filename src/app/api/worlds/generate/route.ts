@@ -112,6 +112,7 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
     description: worldData.description || '',
     visibility: visibility as 'PUBLIC' | 'PRIVATE',
     ownerId: session.sub,
+    kind: body.kind === 'CUSTOM' ? 'CUSTOM' : 'CLASSIC',
   });
 
   // Create eras

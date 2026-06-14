@@ -82,6 +82,7 @@ export default function DocsPage() {
             <a href="#what" style={tocLink}>1. What is Worldcraft?</a>
             <a href="#zones" style={tocLink}>2. Zones &amp; gameplay</a>
             <a href="#lorequests" style={{ ...tocLink, paddingLeft: 18, fontSize: 14 }}>↳ Per-world lore quests</a>
+            <a href="#customworlds" style={{ ...tocLink, paddingLeft: 18, fontSize: 14 }}>↳ Classic vs Custom worlds</a>
             <a href="#earn" style={tocLink}>3. Play-to-earn: how earning works</a>
             <a href="#tiers" style={tocLink}>4. Holder tiers &amp; multipliers</a>
             <a href="#wallet" style={tocLink}>5. Connecting a wallet</a>
@@ -187,6 +188,26 @@ export default function DocsPage() {
               only pay SOL on <strong>worlds you didn&apos;t create</strong> — so you can&apos;t farm
               your own generated worlds — and the global daily pool, per-claim caps, holder-gating,
               and anti-farm spacing all still apply.
+            </p>
+
+            <h3 id="customworlds" style={h3}>Classic vs Custom worlds</h3>
+            <p style={p}>When you create a world, you choose its type:</p>
+            <ul>
+              <li style={li}>
+                <strong>Classic</strong> — plays the built-in game: the Hub town, the Grassland orc
+                mission, and the Seaside Village, each with their own NPCs, quests, and combat.
+              </li>
+              <li style={li}>
+                <strong>Custom</strong> — a blank canvas you paint yourself. After creating it you
+                open the <strong>Map Editor</strong> and place terrain tile by tile (grass, water,
+                sand, paths, forest, rock…), set the player spawn point, and save. Your world&apos;s
+                characters, locations, and quests are then placed onto your map to explore.
+              </li>
+            </ul>
+            <p style={p}>
+              Open the editor any time from your world page (<strong>Edit Map</strong>) — only the
+              owner can edit. A world&apos;s type is shown on its page so visitors know what to
+              expect, and both kinds support the same lore, quests, and play-to-earn rewards.
             </p>
           </section>
 
