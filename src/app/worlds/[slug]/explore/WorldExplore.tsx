@@ -4274,6 +4274,39 @@ async function reportQuestComplete(worldId: string | undefined, questId: string)
   await flushQuestQueue();
 }
 
+// ── Per-world atmosphere ──────────────────────────────────────────────────
+// Each world plays on the shared tilesets, but we tint the terrain to match the
+// world's lore so a frozen empire and a desert sultanate FEEL different. The
+// color is derived from keywords in the world's title + entities; worlds with no
+// obvious biome still get a stable, unique hue from their title. No new art.
+const WORLD_MOODS: { keys: string[]; color: string; alpha: number }[] = [
+  { keys: ['frost', 'ice', 'snow', 'winter', 'frozen', 'glacier', 'tundra', 'arctic', 'blizzard', 'frigid'], color: '#a8cdf0', alpha: 0.30 },
+  { keys: ['desert', 'sand', 'dune', 'scorch', 'arid', 'sultan', 'oasis', 'dust', 'mirage', 'wasteland'], color: '#e8c074', alpha: 0.26 },
+  { keys: ['volcan', 'lava', 'ash', 'ember', 'molten', 'inferno', 'magma', 'cinder', 'forge'], color: '#e0743c', alpha: 0.26 },
+  { keys: ['swamp', 'bog', 'marsh', 'mire', 'fen', 'rot', 'poison', 'plague', 'blight', 'murk'], color: '#86a04e', alpha: 0.26 },
+  { keys: ['ocean', 'sea', 'tide', 'coral', 'abyss', 'coast', 'lagoon', 'reef', 'marine', 'maritime'], color: '#48b0c4', alpha: 0.24 },
+  { keys: ['shadow', 'dark', 'night', 'void', 'death', 'grave', 'cursed', 'wraith', 'gloom', 'necro', 'undead'], color: '#8a78b0', alpha: 0.28 },
+  { keys: ['blood', 'crimson', 'ruin', 'carnage', 'wrath', 'siege', 'warlord'], color: '#c46a64', alpha: 0.24 },
+  { keys: ['radiant', 'holy', 'divine', 'celestial', 'dawn', 'heaven', 'sacred', 'gilded'], color: '#f0d27a', alpha: 0.22 },
+  { keys: ['jungle', 'forest', 'verdant', 'grove', 'emerald', 'bloom', 'overgrown', 'wild', 'thorn'], color: '#7ec85a', alpha: 0.20 },
+];
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function deriveWorldMood(title: string, entities: WorldEntity[]): { color: string; alpha: number } {
+  const hay = (title + ' ' + entities.map((e) => `${e.title} ${e.summary || ''} ${(e.tags || []).join(' ')}`).join(' ')).toLowerCase();
+  for (const m of WORLD_MOODS) {
+    if (m.keys.some((k) => hay.includes(k))) return { color: m.color, alpha: m.alpha };
+  }
+  // No biome keyword — give the world a stable unique hue from its title.
+  const hue = hashStr(title || 'world') % 360;
+  return { color: `hsl(${hue}, 45%, 55%)`, alpha: 0.16 };
+}
+
 export function WorldExplore({
   entities,
   slug,
@@ -4391,6 +4424,8 @@ export function WorldExplore({
   const timeRef = useRef(0);
   const lastFrameRef = useRef(0);
   const terrainRef = useRef<HTMLCanvasElement | null>(null);
+  // Per-world terrain mood tint (read inside the render loop via .current).
+  const worldMoodRef = useRef(deriveWorldMood(_worldTitle, entities));
   const decoRef = useRef<HTMLCanvasElement | null>(null);
   const zoomRef = useRef(1);
 
@@ -4791,6 +4826,11 @@ export function WorldExplore({
     placedRef.current = placeEntities(map, entities);
     setReady(true);
   }, [entities]);
+
+  // Keep the per-world mood tint in sync with props.
+  useEffect(() => {
+    worldMoodRef.current = deriveWorldMood(_worldTitle, entities);
+  }, [_worldTitle, entities]);
 
   // Pre-render when assets ready + restore zone if saved in non-hub zone
   useEffect(() => {
@@ -7838,7 +7878,20 @@ export function WorldExplore({
       ctx.scale(zoom, zoom);
       ctx.translate(-camX, -camY);
 
-      if (terrainRef.current) ctx.drawImage(terrainRef.current, 0, 0);
+      if (terrainRef.current) {
+        ctx.drawImage(terrainRef.current, 0, 0);
+        // Per-world lore tint — applied to terrain only (before deco/sprites),
+        // so the ground takes on the world's mood while NPCs stay readable.
+        const mood = worldMoodRef.current;
+        if (mood && mood.alpha > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'soft-light';
+          ctx.globalAlpha = mood.alpha;
+          ctx.fillStyle = mood.color;
+          ctx.fillRect(0, 0, terrainRef.current.width, terrainRef.current.height);
+          ctx.restore();
+        }
+      }
       if (decoRef.current) ctx.drawImage(decoRef.current, 0, 0);
 
       // Entities + player with Y-sort
