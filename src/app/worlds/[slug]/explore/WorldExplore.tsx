@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { ENTITY_COLORS } from '@/lib/utils';
 import { useGameAssets, GameAssets } from './useGameAssets';
+import { MobileControls } from './MobileControls';
 import { useMultiplayer } from '@/lib/useMultiplayer';
 import CharacterPicker from './CharacterPicker';
 import { createHueShiftedCanvas } from '@/lib/hueShiftCanvas';
@@ -10640,6 +10641,8 @@ export function WorldExplore({
           Exit
         </button>
       )}
+
+      {fullscreen && <MobileControls isOwner={isOwner} />}
 
       {/* Active buffs HUD */}
       {activeBuffs.length > 0 && (
