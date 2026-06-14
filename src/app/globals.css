@@ -7922,3 +7922,41 @@ h1, h2, h3, h4, h5, h6 {
   /* Keep the Exit button clear of the D-pad on touch devices */
   .explore-fullscreen .explore-back-btn { top: 14px; left: 14px; bottom: auto; }
 }
+
+/* ─── Mobile nav (hamburger menu) ─── */
+.nav-mobile { display: none; position: relative; align-items: center; }
+.nav-hamburger {
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  width: 40px; height: 40px; padding: 9px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 9px; cursor: pointer;
+}
+.nav-hamburger span {
+  display: block; height: 2px; width: 100%;
+  background: var(--text); border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-mobile-backdrop { position: fixed; inset: 0; z-index: 105; }
+.nav-mobile-menu {
+  position: absolute; top: calc(100% + 12px); right: 0; z-index: 110;
+  min-width: 210px; display: flex; flex-direction: column; gap: 2px;
+  background: #12121c; border: 1px solid var(--border);
+  border-radius: 14px; padding: 10px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+}
+.nav-mobile-link {
+  color: var(--text); text-decoration: none;
+  font-size: 0.95rem; font-weight: 600;
+  padding: 12px 14px; border-radius: 9px;
+}
+.nav-mobile-link:hover, .nav-mobile-link:active {
+  background: rgba(240,192,96,0.08); color: var(--gold);
+}
+.nav-mobile-sep { height: 1px; background: var(--border); margin: 6px 4px; }
+
+@media (max-width: 768px) {
+  .navbar-center { display: none; }
+  .navbar-brand-text { display: none; }
+  .nav-mobile { display: flex; }
+}

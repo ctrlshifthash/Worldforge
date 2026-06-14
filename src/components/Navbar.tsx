@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { getSession } from '@/lib/auth';
 import { ConnectWallet } from '@/components/ConnectWallet';
+import { MobileMenu } from '@/components/MobileMenu';
 
 const NAV_SOCIALS = [
   { name: 'Pump.fun', href: 'https://pump.fun/coin/8QZJYXVU2SUi3qesyGrHyTj21JSrs5xpLReTC1CLpump', img: '/socials/pumpfun.png' },
@@ -16,7 +17,7 @@ export async function Navbar() {
     <nav className="navbar">
       <Link href="/" className="navbar-brand">
         <img src="/logo.png" alt="Worldcraft" width={28} height={28} className="navbar-brand-logo" />
-        Worldcraft
+        <span className="navbar-brand-text">Worldcraft</span>
       </Link>
 
       <div className="navbar-center">
@@ -46,6 +47,7 @@ export async function Navbar() {
           </Link>
         )}
         <ConnectWallet />
+        <MobileMenu loggedIn={Boolean(session)} />
       </div>
     </nav>
   );
