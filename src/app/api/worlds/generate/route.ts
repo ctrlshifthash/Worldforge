@@ -241,9 +241,10 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
     const q = questList[i];
     if (!q || !q.title) continue;
     try {
-      // Prefer a target that matches a generated entity; otherwise keep the AI's.
+      // Only keep quests whose target is a real in-world entity, so every quest
+      // is actually completable in-game (travel to it + interact).
       const target = typeof q.targetName === 'string' ? q.targetName : '';
-      const matched = entityTitleSet.has(target.toLowerCase());
+      if (!entityTitleSet.has(target.toLowerCase())) continue;
       await prisma.worldQuest.create({
         data: {
           worldId: world.id,
@@ -252,7 +253,7 @@ Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), $
           objective: String(q.objective || '').slice(0, 300),
           narrative: String(q.narrative || '').slice(0, 600),
           kind: validKinds.includes(q.kind) ? q.kind : 'investigate',
-          targetName: matched ? target : (target || ''),
+          targetName: target,
           rewardCoins: Number.isFinite(q.rewardCoins) ? Math.max(15, Math.min(60, Math.round(q.rewardCoins))) : 25,
         },
       });

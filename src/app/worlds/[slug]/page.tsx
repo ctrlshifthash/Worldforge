@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments, getWorldQuests } from '@/lib/queries';
+import { getWorldBySlug, getEntities, getActivity, getEvents, getEras, getCharacterSessions, getPendingDevelopmentCount, getRecentWorldDevelopments, ensureWorldQuests } from '@/lib/queries';
 import { ENTITY_COLORS, ENTITY_LABELS, timeAgo } from '@/lib/utils';
 import { GenerateWorld } from './GenerateWorld';
 
@@ -21,7 +21,7 @@ export default async function WorldOverviewPage({
     getCharacterSessions(world.id),
     getPendingDevelopmentCount(world.id),
     getRecentWorldDevelopments(world.id, 5),
-    getWorldQuests(world.id),
+    ensureWorldQuests(world.id),
   ]);
 
   const QUEST_KIND_META: Record<string, { icon: string; color: string; label: string }> = {

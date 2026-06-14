@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getWorldBySlug, getEntities, getEras } from '@/lib/queries';
+import { getWorldBySlug, getEntities, getEras, ensureWorldQuests } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { WorldExplore } from '@/app/worlds/[slug]/explore/WorldExplore';
@@ -27,9 +27,10 @@ export default async function PlayPage({
   // Count a visit (best-effort, non-blocking) — powers the leaderboard.
   prisma.world.update({ where: { id: world.id }, data: { visits: { increment: 1 } } }).catch(() => {});
 
-  const [allEntities, eras] = await Promise.all([
+  const [allEntities, eras, quests] = await Promise.all([
     getEntities(world.id),
     getEras(world.id),
+    ensureWorldQuests(world.id),
   ]);
 
   // Filter entities by era lifecycle if an era is selected
@@ -86,6 +87,15 @@ export default async function PlayPage({
         isOwner={isOwner}
         worldId={world.id}
         playerName={playerName}
+        quests={quests.map((q) => ({
+          id: q.id,
+          title: q.title,
+          objective: q.objective,
+          narrative: q.narrative,
+          kind: q.kind,
+          targetName: q.targetName,
+          rewardCoins: q.rewardCoins,
+        }))}
       />
       {/* In-game shortcut to claim earned SOL (opens the Earnings dashboard) */}
       <a

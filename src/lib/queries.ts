@@ -233,6 +233,60 @@ export async function getWorldQuests(worldId: string) {
   });
 }
 
+type QuestSeed = { title: string; objective: string; narrative: string; kind: string; targetName: string; rewardCoins: number };
+
+function templateForEntity(type: string, title: string, summary: string): QuestSeed {
+  const s = summary || `${title} plays a key role in this world.`;
+  switch (type) {
+    case 'FACTION':
+      return { title: `Break ${title}`, objective: `Confront ${title} and challenge their hold on the land.`, narrative: s, kind: 'defeat', targetName: title, rewardCoins: 45 };
+    case 'ARTIFACT':
+      return { title: `Recover ${title}`, objective: `Track down ${title} and claim it.`, narrative: s, kind: 'recover', targetName: title, rewardCoins: 40 };
+    case 'LOCATION':
+      return { title: `Journey to ${title}`, objective: `Reach ${title} and uncover what it holds.`, narrative: s, kind: 'reach', targetName: title, rewardCoins: 25 };
+    case 'SPECIES':
+      return { title: `Study the ${title}`, objective: `Seek out the ${title} and learn their ways.`, narrative: s, kind: 'investigate', targetName: title, rewardCoins: 30 };
+    default: // CHARACTER and anything else
+      return { title: `Seek ${title}`, objective: `Find ${title} and learn their story.`, narrative: s, kind: 'investigate', targetName: title, rewardCoins: 30 };
+  }
+}
+
+// Build up to 3 varied quests from a world's existing entities (one of each
+// preferred type first, then fill). Deterministic — no AI cost.
+function buildTemplateQuests(entities: { type: string; title: string; summary: string }[]): QuestSeed[] {
+  const order = ['FACTION', 'ARTIFACT', 'LOCATION', 'CHARACTER', 'SPECIES'];
+  const picked: { type: string; title: string; summary: string }[] = [];
+  const used = new Set<string>();
+  for (const t of order) {
+    const e = entities.find((x) => x.type === t && !used.has(x.title));
+    if (e) { picked.push(e); used.add(e.title); }
+    if (picked.length >= 3) break;
+  }
+  if (picked.length < 3) {
+    for (const e of entities) {
+      if (used.has(e.title)) continue;
+      picked.push(e); used.add(e.title);
+      if (picked.length >= 3) break;
+    }
+  }
+  return picked.map((e) => templateForEntity(e.type, e.title, e.summary));
+}
+
+// Returns a world's quests, lazily backfilling lore-relevant ones from its
+// entities if it has none yet (covers worlds created before quests existed).
+export async function ensureWorldQuests(worldId: string) {
+  const existing = await prisma.worldQuest.findMany({ where: { worldId }, orderBy: { sortOrder: 'asc' } });
+  if (existing.length > 0) return existing;
+  const entities = await prisma.entity.findMany({ where: { worldId }, select: { type: true, title: true, summary: true } });
+  if (entities.length === 0) return existing;
+  const seeds = buildTemplateQuests(entities);
+  if (seeds.length === 0) return existing;
+  try {
+    await prisma.worldQuest.createMany({ data: seeds.map((q, i) => ({ worldId, sortOrder: i, ...q })) });
+  } catch { /* concurrent request already created them */ }
+  return prisma.worldQuest.findMany({ where: { worldId }, orderBy: { sortOrder: 'asc' } });
+}
+
 export async function getEraBySlug(worldId: string, slug: string) {
   return prisma.era.findUnique({
     where: { worldId_slug: { worldId, slug } },

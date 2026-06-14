@@ -4331,6 +4331,25 @@ function buildPlaceNameMap(entities: WorldEntity[]): Record<string, string> {
   return map;
 }
 
+// Lore quests generated per world (see WorldQuest model). Played by traveling to
+// the target entity and interacting; rewards in-game coins.
+interface LoreQuest {
+  id: string;
+  title: string;
+  objective: string;
+  narrative: string;
+  kind: string;
+  targetName: string;
+  rewardCoins: number;
+}
+
+const LORE_KIND_META: Record<string, { icon: string; color: string }> = {
+  defeat: { icon: '⚔️', color: '#E84393' },
+  recover: { icon: '💎', color: '#F39C12' },
+  investigate: { icon: '🔍', color: '#0984E3' },
+  reach: { icon: '🧭', color: '#36B37E' },
+};
+
 export function WorldExplore({
   entities,
   slug,
@@ -4340,6 +4359,7 @@ export function WorldExplore({
   isOwner = false,
   worldId,
   playerName = 'Adventurer',
+  quests = [],
 }: {
   entities: WorldEntity[];
   slug: string;
@@ -4349,6 +4369,7 @@ export function WorldExplore({
   isOwner?: boolean;
   worldId?: string;
   playerName?: string;
+  quests?: LoreQuest[];
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapRef = useRef<TileId[][] | null>(null);
@@ -4452,6 +4473,14 @@ export function WorldExplore({
   const worldMoodRef = useRef(deriveWorldMood(_worldTitle, entities));
   // Per-world place names — generic regions renamed to the world's Locations.
   const placeNamesRef = useRef(buildPlaceNameMap(entities));
+  // Lore quests for this world + which are done (persisted per world).
+  const loreQuestsRef = useRef<LoreQuest[]>(quests);
+  const loreDoneRef = useRef<Set<string>>(new Set());
+  const [questLogOpen, setQuestLogOpen] = useState(false);
+  const questLogOpenRef = useRef(false);
+  questLogOpenRef.current = questLogOpen;
+  const [loreVersion, setLoreVersion] = useState(0);
+  const LORE_SAVE_KEY = `worldcraft_lore_quests_${slug}`;
   const decoRef = useRef<HTMLCanvasElement | null>(null);
   const zoomRef = useRef(1);
 
@@ -4799,7 +4828,7 @@ export function WorldExplore({
   }, []);
 
   const maybeTriggerAmbientChatter = useCallback(() => {
-    if (inspectingRef.current || shopOpenRef.current || glShopOpenRef.current || svFoodShopOpenRef.current || svGenShopOpenRef.current || svWitchShopOpenRef.current || unifiedShopOpenRef.current || helpOpenRef.current || dialogChoicesRef.current.active || svDialogChoicesRef.current.active) {
+    if (inspectingRef.current || shopOpenRef.current || glShopOpenRef.current || svFoodShopOpenRef.current || svGenShopOpenRef.current || svWitchShopOpenRef.current || unifiedShopOpenRef.current || helpOpenRef.current || questLogOpenRef.current || dialogChoicesRef.current.active || svDialogChoicesRef.current.active) {
       return;
     }
 
@@ -4853,11 +4882,22 @@ export function WorldExplore({
     setReady(true);
   }, [entities]);
 
-  // Keep the per-world mood tint + place names in sync with props.
+  // Keep the per-world mood tint + place names + quests in sync with props.
   useEffect(() => {
     worldMoodRef.current = deriveWorldMood(_worldTitle, entities);
     placeNamesRef.current = buildPlaceNameMap(entities);
-  }, [_worldTitle, entities]);
+    loreQuestsRef.current = quests;
+  }, [_worldTitle, entities, quests]);
+
+  // Load completed lore quests for this world (persisted across sessions).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(LORE_SAVE_KEY);
+      if (raw) loreDoneRef.current = new Set(JSON.parse(raw) as string[]);
+    } catch { /* ignore */ }
+    setLoreVersion((v) => v + 1);
+  }, [LORE_SAVE_KEY]);
 
   // Pre-render when assets ready + restore zone if saved in non-hub zone
   useEffect(() => {
@@ -5771,6 +5811,33 @@ export function WorldExplore({
         }
         else if (nearbyEntity && !inspecting) {
           setInspecting(nearbyEntity);
+
+          // ── Lore quest completion: reaching a quest's target entity and
+          // interacting completes it (this world's own objectives). ──
+          {
+            const tName = nearbyEntity.title.toLowerCase();
+            const pq = playerRef.current;
+            let completedAny = false;
+            for (const quest of loreQuestsRef.current) {
+              if (loreDoneRef.current.has(quest.id)) continue;
+              if ((quest.targetName || '').toLowerCase() !== tName) continue;
+              loreDoneRef.current.add(quest.id);
+              completedAny = true;
+              const reward = Math.max(0, quest.rewardCoins || 0);
+              if (reward > 0) {
+                playerGoldRef.current = Math.min(playerGoldRef.current + reward, resourceCapRef.current.gold);
+                setPlayerGold(playerGoldRef.current);
+                damageNumbersRef.current.push({ x: pq.x * TILE_SIZE + 16, y: pq.y * TILE_SIZE - 28, text: `+${reward}`, color: '#e8c86a', timer: 1.8 });
+              }
+              zoneBannerRef.current = `✦ Quest Complete: ${quest.title}`;
+              zoneBannerTimer.current = 3;
+            }
+            if (completedAny) {
+              try { localStorage.setItem(LORE_SAVE_KEY, JSON.stringify([...loreDoneRef.current])); } catch { /* ignore */ }
+              setLoreVersion((v) => v + 1);
+            }
+          }
+
           // ── Rich entity interaction with named residents ──
           const eType = nearbyEntity.type;
           const eTitle = nearbyEntity.title;
@@ -6643,6 +6710,12 @@ export function WorldExplore({
       // M key toggles minimap
       if (k === 'm') { minimapOpenRef.current = !minimapOpenRef.current; return; }
 
+      // J key toggles the quest log (this world's lore quests)
+      if (k === 'j') {
+        setQuestLogOpen(o => { if (!o) { setUnifiedShopOpen(false); setBuildMenuOpen(false); setHelpOpen(false); } return !o; });
+        return;
+      }
+
       // P key toggles unified shop
       if (k === 'p' && !placementModeRef.current) {
         setUnifiedShopOpen(s => { if (!s) { setBuildMenuOpen(false); setHelpOpen(false); } return !s; });
@@ -6650,6 +6723,7 @@ export function WorldExplore({
       }
 
       if (k === 'escape') {
+        if (questLogOpenRef.current) { setQuestLogOpen(false); return; }
         if (helpOpenRef.current) { setHelpOpen(false); return; }
         if (unifiedShopOpenRef.current) { setUnifiedShopOpen(false); return; }
         if (tutorialStep > 0) { setTutorialStep(0); return; }
@@ -7312,7 +7386,7 @@ export function WorldExplore({
       if (hasSpeed) speed *= 1.4;
       if (staminaRef.current < 10) speed *= 0.6;
       let moving = false;
-      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current && !chatVisibleRef.current && !charPickerOpenRef.current && !needsCharPickRef.current) {
+      if (!inspectingRef.current && !shopOpenRef.current && !tradeOpenRef.current && !glShopOpenRef.current && !svFoodShopOpenRef.current && !svGenShopOpenRef.current && !svWitchShopOpenRef.current && !isFading && !placementModeRef.current && !buildMenuOpenRef.current && tutorialStepRef.current === 0 && !unifiedShopOpenRef.current && !helpOpenRef.current && !questLogOpenRef.current && !chatVisibleRef.current && !charPickerOpenRef.current && !needsCharPickRef.current) {
         let dx = 0, dy = 0;
         if (keys.has('w') || keys.has('arrowup')) { dy = -1; p.facing = 'up'; }
         if (keys.has('s') || keys.has('arrowdown')) { dy = 1; p.facing = 'down'; }
@@ -11458,17 +11532,27 @@ export function WorldExplore({
           Press <strong>E</strong> to talk to <strong>Town Merchant</strong>
         </div>
       )}
-      {nearbyEntity && !nearMerchant && !inspecting && !shopOpen && (
-        <div className="explore-interact-hint">
-          Press <strong>E</strong> to inspect <strong>{nearbyEntity.title}</strong>
-        </div>
-      )}
+      {nearbyEntity && !nearMerchant && !inspecting && !shopOpen && (() => {
+        const activeQuest = quests.find((q) => !loreDoneRef.current.has(q.id) && (q.targetName || '').toLowerCase() === nearbyEntity.title.toLowerCase());
+        return (
+          <div className="explore-interact-hint">
+            {activeQuest ? (
+              <>Press <strong>E</strong> — completes <strong>{activeQuest.title}</strong></>
+            ) : (
+              <>Press <strong>E</strong> to inspect <strong>{nearbyEntity.title}</strong></>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Top Action Bar ── */}
       <div style={{
         position: 'absolute', top: 12, right: 16, display: 'flex', gap: 4, zIndex: 20,
       }}>
         {([
+          ...(quests.length ? [{ label: `Quests ${loreDoneRef.current.size}/${quests.length}`, shortcut: 'J', active: questLogOpen, onClick: () => { setQuestLogOpen(o => !o); setUnifiedShopOpen(false); setBuildMenuOpen(false); setHelpOpen(false); },
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>,
+            color: '#7ec85a' }] : []),
           { label: 'Shop', shortcut: 'P', active: unifiedShopOpen, onClick: () => { setUnifiedShopOpen(s => !s); setBuildMenuOpen(false); setHelpOpen(false); },
             icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>,
             color: '#e8c86a' },
@@ -11701,6 +11785,45 @@ export function WorldExplore({
       })()}
 
       {/* Help panel */}
+      {questLogOpen && (
+        <div className="explore-panel" style={{ maxWidth: 420 }}>
+          <div className="explore-panel-header">
+            <div>
+              <div style={{ color: '#7ec85a', fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>This World</div>
+              <h3 className="explore-panel-title">Quests</h3>
+            </div>
+            <button className="explore-panel-close" onClick={() => setQuestLogOpen(false)}>ESC</button>
+          </div>
+          {quests.length === 0 ? (
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', padding: '8px 4px' }}>This world has no generated quests yet.</p>
+          ) : (
+            <div key={loreVersion} style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 380, overflowY: 'auto' }}>
+              {quests.map((q) => {
+                const done = loreDoneRef.current.has(q.id);
+                const meta = LORE_KIND_META[q.kind] || LORE_KIND_META.investigate;
+                return (
+                  <div key={q.id} style={{
+                    padding: '10px 12px', borderRadius: 8,
+                    border: `1px solid ${done ? 'rgba(126,200,90,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                    background: done ? 'rgba(126,200,90,0.08)' : 'rgba(255,255,255,0.03)',
+                    opacity: done ? 0.72 : 1,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <span style={{ fontSize: 14 }}>{done ? '✅' : meta.icon}</span>
+                      <strong style={{ fontSize: 12.5, color: '#fff', textDecoration: done ? 'line-through' : 'none' }}>{q.title}</strong>
+                      <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#e8c86a', whiteSpace: 'nowrap' }}>+{q.rewardCoins}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{q.objective}</div>
+                    <div style={{ fontSize: 10.5, color: meta.color }}>{done ? 'Completed' : `Find ${q.targetName} and press E`}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>Travel to each target across the world and interact (E) to complete. Rewards are in-game coins.</p>
+        </div>
+      )}
+
       {helpOpen && (() => {
         const curTier = playerTierRef.current;
         return (
@@ -11742,6 +11865,7 @@ export function WorldExplore({
                 { key: 'P', desc: 'Open shop' },
                 { key: 'R', desc: 'Rotate placement' },
                 { key: 'M', desc: 'Toggle minimap' },
+                { key: 'J', desc: 'Quest log' },
                 { key: '?', desc: 'This help panel' },
                 { key: 'ESC', desc: 'Close panels' },
               ].map(ctrl => (
