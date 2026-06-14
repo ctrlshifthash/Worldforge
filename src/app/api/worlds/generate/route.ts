@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       'X-Title': 'Worldcraft',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-001',
+      model: 'google/gemini-2.5-flash',
       max_tokens: 4000,
       messages: [
         {
