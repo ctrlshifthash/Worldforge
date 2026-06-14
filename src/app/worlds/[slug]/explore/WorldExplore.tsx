@@ -4428,7 +4428,7 @@ export function WorldExplore({
   const [unifiedShopOpen, setUnifiedShopOpen] = useState(false);
   const [shopTab, setShopTab] = useState<'consumables' | 'blueprints' | 'trading'>('consumables');
   const [helpOpen, setHelpOpen] = useState(false);
-  const [helpTab, setHelpTab] = useState<'controls' | 'progression' | 'economy' | 'combat'>('controls');
+  const [helpTab, setHelpTab] = useState<'controls' | 'quests' | 'progression' | 'economy' | 'combat'>('controls');
   const unifiedShopOpenRef = useRef(false);
   unifiedShopOpenRef.current = unifiedShopOpen;
   const helpOpenRef = useRef(false);
@@ -11838,8 +11838,8 @@ export function WorldExplore({
 
           {/* Tabs */}
           <div style={{ display: 'flex', gap: 0, marginBottom: 10, borderBottom: '1px solid rgba(128,160,224,0.12)' }}>
-            {(['controls', 'progression', 'economy', 'combat'] as const).map(id => {
-              const labels = { controls: 'Controls', progression: 'Tiers', economy: 'Economy', combat: 'Combat' };
+            {(['controls', 'quests', 'progression', 'economy', 'combat'] as const).map(id => {
+              const labels = { controls: 'Controls', quests: 'Quests', progression: 'Tiers', economy: 'Economy', combat: 'Combat' };
               const active = helpTab === id;
               return (
               <button key={id} onClick={() => setHelpTab(id)} style={{
@@ -11874,6 +11874,32 @@ export function WorldExplore({
                   <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>{ctrl.desc}</span>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Quests tab */}
+          {helpTab === 'quests' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5 }}>
+                Every world has its own quests, generated from its lore. Open the quest log with <b style={{ color: '#7ec85a' }}>J</b> (or the Quests button, top-right).
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {[
+                  { icon: '⚔️', t: 'Defeat', d: 'Confront a faction or foe' },
+                  { icon: '💎', t: 'Recover', d: 'Track down a lost artifact' },
+                  { icon: '🔍', t: 'Investigate', d: 'Seek out a character or species' },
+                  { icon: '🧭', t: 'Reach', d: 'Journey to a location' },
+                ].map(k => (
+                  <div key={k.t} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 4px' }}>
+                    <span style={{ fontSize: 13 }}>{k.icon}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', width: 74 }}>{k.t}</span>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{k.d}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>
+                To complete a quest, travel to its target (a named place or character in the world) and interact with <b>E</b>. You earn in-game coins, and progress is saved per world.
+              </div>
             </div>
           )}
 

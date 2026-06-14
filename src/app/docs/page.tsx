@@ -81,6 +81,7 @@ export default function DocsPage() {
             <h2 style={h2}>On this page</h2>
             <a href="#what" style={tocLink}>1. What is Worldcraft?</a>
             <a href="#zones" style={tocLink}>2. Zones &amp; gameplay</a>
+            <a href="#lorequests" style={{ ...tocLink, paddingLeft: 18, fontSize: 14 }}>↳ Per-world lore quests</a>
             <a href="#earn" style={tocLink}>3. Play-to-earn: how earning works</a>
             <a href="#tiers" style={tocLink}>4. Holder tiers &amp; multipliers</a>
             <a href="#wallet" style={tocLink}>5. Connecting a wallet</a>
@@ -162,6 +163,28 @@ export default function DocsPage() {
               and hand out quests. Most conversations offer choices (press the number keys to pick a
               response). Completing a quest is what triggers a reward — coins for everyone, and SOL
               for token holders. See the next section for the details.
+            </p>
+
+            <h3 id="lorequests" style={h3}>Per-world lore quests</h3>
+            <p style={p}>
+              On top of the hand-crafted zone missions, <strong>every world generates its own
+              quests from its own lore</strong> — so no two worlds play the same. When a world is
+              created with AI, it produces quests tied to that world&apos;s actual characters,
+              locations, factions, and artifacts. Worlds created earlier are backfilled
+              automatically the first time they&apos;re opened.
+            </p>
+            <p style={p}>
+              Open the quest log in-game with <strong>J</strong> (or the <strong>Quests</strong>{' '}
+              button, top-right). Each quest is one of four kinds — <strong>Defeat</strong> a
+              faction, <strong>Recover</strong> an artifact, <strong>Investigate</strong> a character
+              or species, or <strong>Reach</strong> a location. To complete one, travel to its target
+              in the world and interact with <strong>E</strong>. You can also preview a world&apos;s
+              quests on its overview page before you play.
+            </p>
+            <p style={p}>
+              Lore-quest rewards are paid in <strong>in-game coins</strong>. The real-SOL payouts
+              come from the curated zone quests — keeping the on-chain economy separate and fair, so
+              generated quests can never be farmed for SOL.
             </p>
           </section>
 
