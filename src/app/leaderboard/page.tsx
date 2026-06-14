@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { prisma } from '@/lib/prisma';
+import { PAYOUT } from '@/lib/payouts/config';
 
 // Live data — never prerender at build (and never needs the DB at build time).
 export const dynamic = 'force-dynamic';
@@ -47,13 +48,23 @@ export default async function LeaderboardPage() {
       take: 10,
       select: { slug: true, title: true, visits: true, _count: { select: { entities: true } } },
     });
+  const fetchStats = async () => {
+    const [worldCount, playerCount, questCount, visitAgg] = await Promise.all([
+      prisma.world.count(),
+      prisma.user.count(),
+      prisma.questCompletion.count(),
+      prisma.world.aggregate({ _sum: { visits: true } }),
+    ]);
+    return { worlds: worldCount, players: playerCount, quests: questCount, visits: visitAgg._sum.visits ?? 0 };
+  };
 
   let earners: Awaited<ReturnType<typeof fetchEarners>> = [];
   let questers: Awaited<ReturnType<typeof fetchQuesters>> = [];
   let worlds: Awaited<ReturnType<typeof fetchWorlds>> = [];
+  let stats = { worlds: 0, players: 0, quests: 0, visits: 0 };
   let users: UserLite[] = [];
   try {
-    [earners, questers, worlds] = await Promise.all([fetchEarners(), fetchQuesters(), fetchWorlds()]);
+    [earners, questers, worlds, stats] = await Promise.all([fetchEarners(), fetchQuesters(), fetchWorlds(), fetchStats()]);
     const ids = [...new Set([...earners.map((e) => e.userId), ...questers.map((q) => q.userId)])];
     if (ids.length) {
       users = await prisma.user.findMany({
@@ -72,14 +83,23 @@ export default async function LeaderboardPage() {
       <main className="page-container">
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
           <h1 style={{ fontSize: 36, margin: '0 0 6px', color: '#fff' }}>Leaderboard</h1>
-          <p style={{ color: '#9a9aa3', margin: '0 0 28px' }}>
+          <p style={{ color: '#9a9aa3', margin: '0 0 22px' }}>
             Top earners, the most relentless questers, and the worlds everyone&apos;s exploring.
           </p>
+
+          {/* Live platform stats — all real, straight from the database */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 26 }}>
+            <Stat icon="🌍" label="Worlds created" value={stats.worlds.toLocaleString()} />
+            <Stat icon="🧭" label="Worlds explored" value={`${stats.visits.toLocaleString()} visits`} />
+            <Stat icon="⚔️" label="Quests completed" value={stats.quests.toLocaleString()} />
+            <Stat icon="🧑‍🚀" label="Adventurers" value={stats.players.toLocaleString()} />
+            <Stat icon="💰" label="Daily reward pool" value={`${PAYOUT.pool.dailyCapSol} SOL`} highlight />
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
             {/* Top earners */}
             <Board title="💰 Top Earners" subtitle="Lifetime SOL earned (claimed + unclaimed)">
-              {earners.length === 0 && <Empty>No earnings yet — be the first.</Empty>}
+              {earners.length === 0 && <Empty>{`${PAYOUT.pool.dailyCapSol} SOL daily pool is live — be the first to claim it.`}</Empty>}
               {earners.map((e, i) => (
                 <Row key={e.userId} rank={i} name={displayName(byId.get(e.userId))} value={`${(e._sum.earnedSol ?? 0).toFixed(4)} SOL`} />
               ))}
@@ -87,7 +107,7 @@ export default async function LeaderboardPage() {
 
             {/* Most quests */}
             <Board title="⚔️ Most Quests Cleared" subtitle="Total quests completed">
-              {questers.length === 0 && <Empty>No quests completed yet.</Empty>}
+              {questers.length === 0 && <Empty>Quests are waiting — be the first to clear one.</Empty>}
               {questers.map((q, i) => (
                 <Row key={q.userId} rank={i} name={displayName(byId.get(q.userId))} value={`${q._count.userId}`} />
               ))}
@@ -155,5 +175,22 @@ function Row({ rank, name, value }: { rank: number; name: React.ReactNode; value
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <div style={{ color: '#666', fontSize: 14, padding: '8px 4px' }}>{children}</div>;
+  return <div style={{ color: '#888', fontSize: 14, padding: '8px 4px', lineHeight: 1.4 }}>{children}</div>;
+}
+
+function Stat({ icon, label, value, highlight }: { icon: string; label: string; value: string; highlight?: boolean }) {
+  return (
+    <div
+      style={{
+        background: highlight ? 'rgba(232,200,106,0.08)' : '#16161a',
+        border: `1px solid ${highlight ? 'rgba(232,200,106,0.35)' : '#2a2a30'}`,
+        borderRadius: 12,
+        padding: '12px 14px',
+      }}
+    >
+      <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: highlight ? '#e8c86a' : '#fff', lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#7a7a83', marginTop: 2 }}>{label}</div>
+    </div>
+  );
 }
