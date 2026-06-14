@@ -63,6 +63,19 @@ export async function recordQuestCompletion(params: {
     return { ok: false, reason: 'rate_limited_velocity' };
   }
 
+  // Spacing gate: real quests can't be finished back-to-back instantly.
+  const lastCompletion = await prisma.questCompletion.findFirst({
+    where: { userId },
+    orderBy: { completedAt: 'desc' },
+    select: { completedAt: true },
+  });
+  if (
+    lastCompletion &&
+    Date.now() - lastCompletion.completedAt.getTime() < PAYOUT.antiFarm.minSecondsBetweenCompletions * 1000
+  ) {
+    return { ok: false, reason: 'too_fast' };
+  }
+
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return { ok: false, reason: 'no_user' };
 
@@ -73,9 +86,30 @@ export async function recordQuestCompletion(params: {
     tier = resolveTier(balance);
   }
 
-  const rewardKind: 'SOL' | 'COIN' = tier.qualifies ? 'SOL' : 'COIN';
-  const earnedSol = tier.qualifies ? quest.baseSol * tier.multiplier : 0;
-  const earnedCoins = tier.qualifies ? 0 : quest.baseCoins;
+  // SOL-path anti-farm guards. If any trips, the quest still completes but pays
+  // in-game coins instead of SOL — no lost progress, and no minted/farmed SOL.
+  let qualifiesForSol = tier.qualifies;
+  if (qualifiesForSol) {
+    // (a) Fresh-world guard: quests "completed" seconds after a world is created are bot-like.
+    const world = await prisma.world.findUnique({ where: { id: worldId }, select: { createdAt: true } });
+    if (world && Date.now() - world.createdAt.getTime() < PAYOUT.antiFarm.minWorldAgeSecondsForSol * 1000) {
+      qualifiesForSol = false;
+    }
+  }
+  if (qualifiesForSol) {
+    // (b) Per-day SOL-quest cap: bounds farming even across many worlds/accounts.
+    const dayStart = new Date(`${utcDay()}T00:00:00.000Z`);
+    const solToday = await prisma.questCompletion.count({
+      where: { userId, rewardKind: 'SOL', completedAt: { gte: dayStart } },
+    });
+    if (solToday >= PAYOUT.antiFarm.maxSolQuestsPerDay) {
+      qualifiesForSol = false;
+    }
+  }
+
+  const rewardKind: 'SOL' | 'COIN' = qualifiesForSol ? 'SOL' : 'COIN';
+  const earnedSol = qualifiesForSol ? quest.baseSol * tier.multiplier : 0;
+  const earnedCoins = qualifiesForSol ? 0 : quest.baseCoins;
 
   await prisma.questCompletion.create({
     data: {

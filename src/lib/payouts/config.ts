@@ -82,6 +82,12 @@ export const PAYOUT = {
      */
     maxQuestsPerWindow: 5,
     velocityWindowSeconds: 60,
+    /** Min seconds between any two of a user's quest completions (anti-bot spacing). */
+    minSecondsBetweenCompletions: 12,
+    /** A SOL quest in a world younger than this earns coins instead — kills instant-mint on freshly-created worlds. */
+    minWorldAgeSecondsForSol: 60,
+    /** Max SOL-earning quest completions credited per user per UTC day — caps farming across worlds. */
+    maxSolQuestsPerDay: 12,
     /** Re-check token holding at claim time, not just at quest completion. */
     recheckHoldingOnClaim: true,
   },

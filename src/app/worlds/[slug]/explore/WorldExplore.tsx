@@ -4224,26 +4224,54 @@ const EFFECT_ICONS: Record<string, (color: string) => React.ReactNode> = {
 
 // ─── Component ───
 
-// Report a quest completion to the server so it can credit real (SOL) or
-// in-game (coin) earnings. Fire-and-forget: the server is authoritative and
-// enforces once-per-quest, so a dropped request just means no double-credit.
+// Reliable quest-completion reporting. Completions are queued in localStorage and
+// retried, so a dropped/offline request (or a closed tab) never costs a player
+// their earnings. The server is authoritative and idempotent (once per quest),
+// so re-sends are always safe.
+const QUEST_QUEUE_KEY = 'worldcraft_quest_queue';
+
+function loadQuestQueue(): { worldId: string; questId: string }[] {
+  try { return JSON.parse(localStorage.getItem(QUEST_QUEUE_KEY) || '[]'); } catch { return []; }
+}
+function saveQuestQueue(q: { worldId: string; questId: string }[]) {
+  try { localStorage.setItem(QUEST_QUEUE_KEY, JSON.stringify(q)); } catch { /* ignore */ }
+}
+
+async function postCompletion(worldId: string, questId: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/quests/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ worldId, questId }),
+    });
+    // 2xx = recorded; 400/401 = terminal (bad input / not logged in) — stop retrying.
+    // 5xx / network failure = keep queued and retry later.
+    return res.ok || res.status === 400 || res.status === 401;
+  } catch {
+    return false;
+  }
+}
+
+// Flush queued completions — called on game mount and after each new completion.
+export async function flushQuestQueue() {
+  const q = loadQuestQueue();
+  if (q.length === 0) return;
+  const remaining: { worldId: string; questId: string }[] = [];
+  for (const item of q) {
+    const ok = await postCompletion(item.worldId, item.questId);
+    if (!ok) remaining.push(item);
+  }
+  saveQuestQueue(remaining);
+}
+
 async function reportQuestComplete(worldId: string | undefined, questId: string) {
   if (!worldId) return;
-  // Retry with backoff so a transient network blip doesn't cost a credit. The
-  // endpoint is idempotent (each quest pays once per account), so retrying is safe.
-  for (let attempt = 0; attempt < 4; attempt++) {
-    try {
-      const res = await fetch('/api/quests/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ worldId, questId }),
-      });
-      if (res.ok) return; // server recorded it
-    } catch {
-      /* network error — retry */
-    }
-    await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+  const q = loadQuestQueue();
+  if (!q.some((i) => i.worldId === worldId && i.questId === questId)) {
+    q.push({ worldId, questId });
+    saveQuestQueue(q);
   }
+  await flushQuestQueue();
 }
 
 export function WorldExplore({
@@ -4298,6 +4326,9 @@ export function WorldExplore({
   isOwnerRef.current = isOwner;
   const worldIdRef = useRef(worldId);
   worldIdRef.current = worldId;
+
+  // Retry any quest completions that didn't reach the server last session.
+  useEffect(() => { void flushQuestQueue(); }, []);
 
   // ── Multiplayer ──
   const mp = useMultiplayer(slug, chosenDisplayName, chosenCharIndex >= 0 ? chosenCharIndex : 0, chosenHueShift);
