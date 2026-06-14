@@ -49,6 +49,29 @@ model World {
   characterSessions CharacterSession[]
   placedObjects     PlacedObject[]
   quests            WorldQuest[]
+  kind              WorldKind          @default(CLASSIC)
+  customMap         WorldMap?
+}
+
+// CLASSIC: plays the hand-built zones (hub, grassland orcs, seaside village).
+// CUSTOM: plays a map the owner paints themselves in the editor.
+enum WorldKind {
+  CLASSIC
+  CUSTOM
+}
+
+// An owner-painted terrain map for a CUSTOM world. tilesJson is a row-major
+// array of tile ids (matching the engine's tile types), length = width*height.
+model WorldMap {
+  id        String   @id @default(cuid())
+  worldId   String   @unique
+  width     Int      @default(60)
+  height    Int      @default(45)
+  tilesJson String // JSON int[] row-major, width*height entries
+  spawnX    Int      @default(30)
+  spawnY    Int      @default(22)
+  updatedAt DateTime @updatedAt
+  world     World    @relation(fields: [worldId], references: [id], onDelete: Cascade)
 }
 
 // Lore-driven quests generated from a world's own entities, so each world has

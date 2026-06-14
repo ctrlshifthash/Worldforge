@@ -1,6 +1,7 @@
 import { prisma } from './prisma';
-import type { EntityType, Visibility, SessionStatus, DevelopmentType, DevelopmentStatus } from '@prisma/client';
+import type { EntityType, Visibility, SessionStatus, DevelopmentType, DevelopmentStatus, WorldKind } from '@prisma/client';
 import { slugify } from './utils';
+import { makeBlankTiles, DEFAULT_MAP_W, DEFAULT_MAP_H } from './tiles';
 
 /* ──────────────────────── Worlds ──────────────────────── */
 
@@ -47,8 +48,10 @@ export async function createWorld(data: {
   visibility: Visibility;
   ownerId?: string | null;
   coverGradient?: string;
+  kind?: WorldKind;
 }) {
   const slug = slugify(data.title);
+  const kind: WorldKind = data.kind === 'CUSTOM' ? 'CUSTOM' : 'CLASSIC';
   const world = await prisma.world.create({
     data: {
       slug,
@@ -56,11 +59,16 @@ export async function createWorld(data: {
       tagline: data.tagline,
       description: data.description,
       visibility: data.visibility,
+      kind,
       coverGradient:
         data.coverGradient ||
         'radial-gradient(circle at 30% 20%, rgba(200,164,78,0.3), transparent 50%), linear-gradient(135deg, #0f1019 0%, #1a1520 50%, #1c1428 100%)',
       ownerId: data.ownerId ?? null,
       ...(data.ownerId ? { members: { create: { userId: data.ownerId, role: 'OWNER' } } } : {}),
+      // A CUSTOM world starts with a blank grass canvas for the owner to paint.
+      ...(kind === 'CUSTOM'
+        ? { customMap: { create: { width: DEFAULT_MAP_W, height: DEFAULT_MAP_H, tilesJson: JSON.stringify(makeBlankTiles()) } } }
+        : {}),
     },
   });
 
@@ -230,6 +238,24 @@ export async function getWorldQuests(worldId: string) {
   return prisma.worldQuest.findMany({
     where: { worldId },
     orderBy: { sortOrder: 'asc' },
+  });
+}
+
+/* ──────────────────────── Custom maps ──────────────────────── */
+
+export async function getWorldMap(worldId: string) {
+  return prisma.worldMap.findUnique({ where: { worldId } });
+}
+
+// Upsert a world's painted map. tilesJson is validated by the caller (API).
+export async function saveWorldMap(
+  worldId: string,
+  data: { width: number; height: number; tilesJson: string; spawnX: number; spawnY: number },
+) {
+  return prisma.worldMap.upsert({
+    where: { worldId },
+    create: { worldId, ...data },
+    update: data,
   });
 }
 

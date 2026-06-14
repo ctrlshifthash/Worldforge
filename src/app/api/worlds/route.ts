@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     visibility: body.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE',
     ownerId: session.sub,
     coverGradient: body.coverGradient,
+    kind: body.kind === 'CUSTOM' ? 'CUSTOM' : 'CLASSIC',
   });
 
   return NextResponse.json({ world }, { status: 201 });
