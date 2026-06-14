@@ -72,10 +72,10 @@ export const PAYOUT = {
   },
 
   antiFarm: {
-    /** Account must be at least this old before its first claim. */
-    minAccountAgeHours: 24,
+    /** Account must be at least this old before its first claim (0 = first claim works immediately). */
+    minAccountAgeHours: 0,
     /** Player must have completed at least this many quests before claiming. */
-    minQuestsBeforeClaim: 2,
+    minQuestsBeforeClaim: 1,
     /**
      * Reject if more than this many quest completions arrive within the window
      * (seconds) — implausibly fast = bot. e.g. 5 completions in 60s.
