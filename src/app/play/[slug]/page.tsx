@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getWorldBySlug, getEntities, getEras, ensureWorldQuests } from '@/lib/queries';
+import { getWorldBySlug, getEntities, getEras, ensureWorldQuests, getWorldMap } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { WorldExplore } from '@/app/worlds/[slug]/explore/WorldExplore';
@@ -27,11 +27,22 @@ export default async function PlayPage({
   // Count a visit (best-effort, non-blocking) — powers the leaderboard.
   prisma.world.update({ where: { id: world.id }, data: { visits: { increment: 1 } } }).catch(() => {});
 
-  const [allEntities, eras, quests] = await Promise.all([
+  const [allEntities, eras, quests, rawMap] = await Promise.all([
     getEntities(world.id),
     getEras(world.id),
     ensureWorldQuests(world.id),
+    world.kind === 'CUSTOM' ? getWorldMap(world.id) : Promise.resolve(null),
   ]);
+
+  const customMap = rawMap
+    ? {
+        width: rawMap.width,
+        height: rawMap.height,
+        tiles: JSON.parse(rawMap.tilesJson) as number[],
+        spawnX: rawMap.spawnX,
+        spawnY: rawMap.spawnY,
+      }
+    : null;
 
   // Filter entities by era lifecycle if an era is selected
   let entities = allEntities;
@@ -96,6 +107,8 @@ export default async function PlayPage({
           targetName: q.targetName,
           rewardCoins: q.rewardCoins,
         }))}
+        kind={world.kind}
+        customMap={customMap}
       />
       {/* In-game shortcut to claim earned SOL (opens the Earnings dashboard) */}
       <a

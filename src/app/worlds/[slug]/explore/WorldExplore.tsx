@@ -1266,15 +1266,15 @@ function tileHash(x: number, y: number): number {
 
 // ─── Pre-render terrain ───
 
-function prerenderTerrain(map: TileId[][], ga: GameAssets): HTMLCanvasElement {
+function prerenderTerrain(map: TileId[][], ga: GameAssets, w: number = W, h: number = H): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = W * TILE_SIZE;
-  canvas.height = H * TILE_SIZE;
+  canvas.width = w * TILE_SIZE;
+  canvas.height = h * TILE_SIZE;
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
 
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
       const tileId = map[y][x];
       const px = x * TILE_SIZE;
       const py = y * TILE_SIZE;
@@ -1338,10 +1338,10 @@ function prerenderTerrain(map: TileId[][], ga: GameAssets): HTMLCanvasElement {
 
 // ─── Pre-render decorations ───
 
-function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, placedEntities: PlacedEntity[], ga: GameAssets): HTMLCanvasElement {
+function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, placedEntities: PlacedEntity[], ga: GameAssets, w: number = W, h: number = H): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = W * TILE_SIZE;
-  canvas.height = H * TILE_SIZE;
+  canvas.width = w * TILE_SIZE;
+  canvas.height = h * TILE_SIZE;
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
 
@@ -1350,8 +1350,8 @@ function prerenderDecorations(map: TileId[][], entityPositions: Set<string>, pla
   // Helper: check if tile at (tx,ty) is cobblestone
   const isCobble = (tx: number, ty: number) => map[ty]?.[tx] === T.COBBLE;
 
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
       const tileId = map[y][x];
       const h = tileHash(x, y);
       const h2 = tileHash(x + 500, y + 500);
@@ -4331,6 +4331,25 @@ function buildPlaceNameMap(entities: WorldEntity[]): Record<string, string> {
   return map;
 }
 
+// Spread a custom world's entities across its walkable tiles (the hub's fixed
+// placement slots don't apply to a player-painted map). Deterministic.
+function placeEntitiesCustom(map: TileId[][], entities: WorldEntity[], w: number, h: number): PlacedEntity[] {
+  const walk: { x: number; y: number }[] = [];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (WALKABLE.has(map[y]?.[x])) walk.push({ x, y });
+  const placed: PlacedEntity[] = [];
+  if (walk.length === 0) return placed;
+  const n = entities.length;
+  const used = new Set<number>();
+  for (let i = 0; i < n; i++) {
+    let idx = Math.floor(((i + 0.5) / Math.max(n, 1)) * walk.length) % walk.length;
+    let guard = 0;
+    while (used.has(idx) && guard < walk.length) { idx = (idx + 1) % walk.length; guard++; }
+    used.add(idx);
+    placed.push({ entity: entities[i], tileX: walk[idx].x, tileY: walk[idx].y });
+  }
+  return placed;
+}
+
 // Lore quests generated per world (see WorldQuest model). Played by traveling to
 // the target entity and interacting; rewards in-game coins.
 interface LoreQuest {
@@ -4360,6 +4379,8 @@ export function WorldExplore({
   worldId,
   playerName = 'Adventurer',
   quests = [],
+  kind = 'CLASSIC',
+  customMap = null,
 }: {
   entities: WorldEntity[];
   slug: string;
@@ -4370,6 +4391,8 @@ export function WorldExplore({
   worldId?: string;
   playerName?: string;
   quests?: LoreQuest[];
+  kind?: 'CLASSIC' | 'CUSTOM';
+  customMap?: { width: number; height: number; tiles: number[]; spawnX: number; spawnY: number } | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapRef = useRef<TileId[][] | null>(null);
@@ -4485,7 +4508,7 @@ export function WorldExplore({
   const zoomRef = useRef(1);
 
   // ── Zone transition system ──
-  const zoneRef = useRef<'hub' | 'grassland' | 'village'>('hub');
+  const zoneRef = useRef<'hub' | 'grassland' | 'village' | 'custom'>('hub');
   const fadeRef = useRef(0);
   const fadeDirRef = useRef<'in' | 'out' | null>(null);
   const pendingZoneRef = useRef<'hub' | 'grassland' | 'village' | null>(null);
@@ -4876,6 +4899,25 @@ export function WorldExplore({
 
   // Build zone
   useEffect(() => {
+    // CUSTOM world: load the owner-painted map as a single playable zone.
+    if (kind === 'CUSTOM' && customMap) {
+      const cw = customMap.width, ch = customMap.height;
+      const map: TileId[][] = [];
+      for (let y = 0; y < ch; y++) {
+        const row: TileId[] = [];
+        for (let x = 0; x < cw; x++) row.push((customMap.tiles[y * cw + x] ?? T.GRASS) as TileId);
+        map.push(row);
+      }
+      mapRef.current = map;
+      zoneRef.current = 'custom';
+      zoneWRef.current = cw;
+      zoneHRef.current = ch;
+      playerRef.current.x = customMap.spawnX + 0.5;
+      playerRef.current.y = customMap.spawnY + 0.5;
+      placedRef.current = placeEntitiesCustom(map, entities, cw, ch);
+      setReady(true);
+      return;
+    }
     const map = buildWorldMap();
     mapRef.current = map;
     placedRef.current = placeEntities(map, entities);
@@ -4903,6 +4945,12 @@ export function WorldExplore({
   useEffect(() => {
     if (!ga || !mapRef.current) return;
     const entityPositions = new Set(placedRef.current.map(pe => `${pe.tileX},${pe.tileY}`));
+    // CUSTOM world: render the painted map at its own dimensions and stop.
+    if (kind === 'CUSTOM' && customMap) {
+      terrainRef.current = prerenderTerrain(mapRef.current, ga, customMap.width, customMap.height);
+      decoRef.current = prerenderDecorations(mapRef.current, entityPositions, placedRef.current, ga, customMap.width, customMap.height);
+      return;
+    }
     terrainRef.current = prerenderTerrain(mapRef.current, ga);
     decoRef.current = prerenderDecorations(mapRef.current, entityPositions, placedRef.current, ga);
     // If loaded into grassland or village, build that zone's map
@@ -6924,6 +6972,7 @@ export function WorldExplore({
       const curH = zoneHRef.current;
       const inHub = zoneRef.current === 'hub';
       const inVillage = zoneRef.current === 'village';
+      const inCustom = zoneRef.current === 'custom';
 
       // Tick buff timers
       const curBuffs = buffsRef.current;
@@ -7437,8 +7486,8 @@ export function WorldExplore({
       mp.sendMove(p.x * TILE_SIZE, p.y * TILE_SIZE, facingToDir[p.facing] ?? 0, p.animFrame, zoneRef.current);
       mp.interpolatePlayers(dt);
 
-      // Nearby entity (hub only)
-      if (inHub) {
+      // Nearby entity (hub + custom worlds — both place world entities)
+      if (inHub || inCustom) {
         let closest: WorldEntity | null = null;
         let closestD = INTERACT_RANGE + 1;
         for (const pe of placedRef.current) {
@@ -7452,9 +7501,9 @@ export function WorldExplore({
 
       // Merchant / Vendor proximity — suppress hint when dialogue choices are active
       const merchantDist = inHub ? Math.sqrt((p.x - MERCHANT_POS.x) ** 2 + (p.y - MERCHANT_POS.y) ** 2) : Infinity;
-      const vendorDist = !inHub ? Math.sqrt((p.x - GL_VENDOR_POS.x) ** 2 + (p.y - GL_VENDOR_POS.y) ** 2) : Infinity;
+      const vendorDist = (!inHub && !inCustom) ? Math.sqrt((p.x - GL_VENDOR_POS.x) ** 2 + (p.y - GL_VENDOR_POS.y) ** 2) : Infinity;
       const inRange = inHub ? merchantDist < MERCHANT_RANGE : vendorDist < MERCHANT_RANGE;
-      setNearMerchant(inRange && !dialogChoicesRef.current.active && !glDialogRef.current);
+      setNearMerchant(inRange && !inCustom && !dialogChoicesRef.current.active && !glDialogRef.current);
 
       // Gold Find: earn 1 gold per second while moving
       if (hasGoldFind && moving) {
@@ -8001,12 +8050,14 @@ export function WorldExplore({
       // Entities + player with Y-sort
       const allDrawables: { y: number; fn: () => void }[] = [];
 
-      if (inHub) {
+      if (inHub || inCustom) {
         for (const pe of placedRef.current) {
           const isNear = nearbyEntityRef.current?.id === pe.entity.id;
           const disc = discoveriesRef.current.has(`entity_${pe.entity.id}`);
           allDrawables.push({ y: pe.tileY, fn: () => drawEntitySprite(ctx, pe, ga, isNear, timeRef.current, disc) });
         }
+      }
+      if (inHub) {
         // Townsfolk rendering (GuttyKreum tilemap)
         const ppx = p.x, ppy = p.y;
         for (const folk of townsfolkRef.current) {
@@ -10080,10 +10131,10 @@ export function WorldExplore({
       }
 
       // ── Top bar: location pill (left-aligned) ──
-      const rawZoneName = inHub ? getZoneName(Math.floor(p.x), Math.floor(p.y)) : inVillage ? 'Seaside Village' : getGrasslandZoneName(Math.floor(p.x), Math.floor(p.y));
+      const rawZoneName = inCustom ? _worldTitle : inHub ? getZoneName(Math.floor(p.x), Math.floor(p.y)) : inVillage ? 'Seaside Village' : getGrasslandZoneName(Math.floor(p.x), Math.floor(p.y));
       // Rename generic regions to the world's own Locations where one is mapped.
       const zoneName = placeNamesRef.current[rawZoneName] || rawZoneName;
-      const regionLabel = inHub ? 'Hub' : inVillage ? 'Village' : 'Grassland';
+      const regionLabel = inCustom ? 'Custom World' : inHub ? 'Hub' : inVillage ? 'Village' : 'Grassland';
 
       // Location pill — top left
       ctx.font = '600 11px Inter, sans-serif';
@@ -10481,8 +10532,8 @@ export function WorldExplore({
           }
           ctx.globalAlpha = 1;
 
-          // Placed entities on minimap (hub only)
-          if (zoneRef.current === 'hub') {
+          // Placed entities on minimap (hub + custom worlds)
+          if (zoneRef.current === 'hub' || zoneRef.current === 'custom') {
             for (const pe of placedRef.current) {
               const eDisc = discoveriesRef.current.has(`entity_${pe.entity.id}`);
               const ex = mmX + pe.tileX * scaleX;
