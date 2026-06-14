@@ -2,9 +2,25 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { createWorld, createEntity, createEvent, createRelation, createEra, createEventEntityLinks, logActivity } from '@/lib/queries';
 import { ENTITY_COLORS, slugify } from '@/lib/utils';
+import { prisma } from '@/lib/prisma';
+import { getTokenBalance } from '@/lib/payouts/solana';
+import { resolveTier } from '@/lib/payouts/config';
 import type { EntityType } from '@prisma/client';
 
 const VALID_TYPES: EntityType[] = ['CHARACTER', 'LOCATION', 'FACTION', 'ARTIFACT', 'SPECIES', 'EVENT'];
+
+// Holder perk: token holders get bigger, higher-quality world generation that
+// scales with their tier. Non-holders get the standard size on the fast model.
+function genPlan(tierKey: string, qualifies: boolean) {
+  if (!qualifies) return { model: 'google/gemini-2.5-flash', eras: 2, entities: 4, events: 3, relations: 3, maxTokens: 4000 };
+  switch (tierKey) {
+    case 'diamond': return { model: 'anthropic/claude-sonnet-4', eras: 4, entities: 12, events: 8, relations: 9, maxTokens: 8000 };
+    case 'gold':    return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 10, events: 6, relations: 7, maxTokens: 7000 };
+    case 'silver':  return { model: 'anthropic/claude-sonnet-4', eras: 3, entities: 8,  events: 5, relations: 6, maxTokens: 6000 };
+    case 'bronze':  return { model: 'google/gemini-2.5-flash',   eras: 3, entities: 7,  events: 4, relations: 5, maxTokens: 5500 };
+    default:        return { model: 'google/gemini-2.5-flash',   eras: 2, entities: 6,  events: 4, relations: 4, maxTokens: 5000 }; // holder
+  }
+}
 
 export async function POST(request: Request) {
  try {
@@ -22,6 +38,14 @@ export async function POST(request: Request) {
   const concept = body.concept || 'A unique and interesting fantasy world';
   const visibility = body.visibility === 'PUBLIC' ? 'PUBLIC' : 'PRIVATE';
 
+  // Holder perk: generation size/quality scales with the user's token tier.
+  const genUser = await prisma.user.findUnique({ where: { id: session.sub }, select: { walletAddress: true } });
+  let genTier = resolveTier(0);
+  if (genUser?.walletAddress) {
+    try { genTier = resolveTier(await getTokenBalance(genUser.walletAddress)); } catch { /* RPC down -> standard */ }
+  }
+  const plan = genPlan(genTier.key, genTier.qualifies);
+
   const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -31,8 +55,8 @@ export async function POST(request: Request) {
       'X-Title': 'Worldcraft',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
-      max_tokens: 4000,
+      model: plan.model,
+      max_tokens: plan.maxTokens,
       messages: [
         {
           role: 'user',
@@ -41,7 +65,7 @@ export async function POST(request: Request) {
 Return ONLY a JSON object (no markdown, no code fences):
 {"world":{"title":"2-4 word name","tagline":"One sentence","description":"2 sentences"},"eras":[{"title":"Era name","description":"Brief desc","startLabel":"Year 0","endLabel":"Year 50","color":"#hex"}],"entities":[{"type":"CHARACTER|LOCATION|FACTION|ARTIFACT|SPECIES","title":"Name","summary":"One line","content":"1 paragraph of lore","facts":[{"label":"Key","value":"Val"}],"tags":["tag1"]}],"events":[{"title":"Event","dateLabel":"Year X","era":"Era name (exact match)","summary":"What happened","impact":"Effect","involvedEntities":["Entity name (exact match)"]}],"relations":[{"fromTitle":"Entity (exact)","toTitle":"Entity (exact)","label":"relationship"}]}
 
-Generate exactly: 2 eras, 4 entities (mix of types), 3 events, 3 relations. Keep lore concise. All title references must match exactly.`,
+Generate exactly: ${plan.eras} eras, ${plan.entities} entities (mix of types), ${plan.events} events, ${plan.relations} relations. Keep lore concise. All title references must match exactly.`,
         },
       ],
     }),
